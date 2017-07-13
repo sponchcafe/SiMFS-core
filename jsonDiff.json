@@ -1,0 +1,10 @@
+{
+  "particle": {
+    "coordinates": [ 0, 0, 0 ],
+    "timeIncrementInSeconds": 1e-07,
+    "cylinderRadius": 500,
+    "cylinderHalfHeight": 1000,
+    "diffCoeff_nm": 4.35e+08
+  },
+  "numOfSteps": 600000000
+}
