@@ -1,12 +1,20 @@
 #! /bin/bash
 
 export PARAMETERS=$1
-PATH=./bin:$PATH
 
-mkfifo ./tmp/coords1 ./tmp/coords2 ./tmp/exi ./tmp/det ./tmp/phot
+DIF=./bin/dif
+EXI=./bin/exiAlpha
+DET=./bin/detGauss
+PH2=./bin/ph2
 
-dif | tee ./tmp/coords1 > ./tmp/coords2 &
-exiAlpha < ./tmp/coords1 > ./tmp/exi &
-detGauss < ./tmp/coords2 > ./tmp/det &
-./bin/ph2 -p default.json -e ./tmp/exi -d ./tmp/det > photons.dat #"./photons_$(date +%F)_$(date +%T | sed 's/:/-/g').dat"
+echo "Logging parameters:"
+cat <($DIF -c) <($EXI -c) <($DET -c) <($PH2 -c)
+
+mkfifo ./tmp/coords1 ./tmp/coords2 ./tmp/exi ./tmp/det
+
+./bin/dif | tee ./tmp/coords1 > ./tmp/coords2 &
+$EXI < ./tmp/coords1 > ./tmp/exi &
+$DET < ./tmp/coords2 > ./tmp/det &
+$PH2 -e ./tmp/exi -d ./tmp/det | tee photons.dat |./bin/corr > $2
+
 rm ./tmp/*
