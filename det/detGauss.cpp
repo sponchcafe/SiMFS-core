@@ -1,5 +1,6 @@
 #include "sim_util.hpp"
 #include <cmath>
+
 const std::string helpmessage = 
 
 R"(
@@ -20,7 +21,6 @@ Usage: detGauss [options] < coordinates > efficiency
     -c --config : Generate a config .json file and print it to the standard output.
     -h --help : Show this help message.
 )";
-
 
 double offset_x;
 double offset_y;
@@ -54,6 +54,7 @@ int main(int argc, char *argv[]){
         std::string execname = argv[0];
         sim::log::warn("["+execname+"] WARNING: Amplitude not in range [0,1].\n");
     }
+    
         
     sim::io::coordinate c{0,0,0};
     while(sim::io::read_binary(std::cin, c)){
