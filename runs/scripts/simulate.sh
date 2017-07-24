@@ -12,7 +12,7 @@ echo "Logging parameters"
 cat <($DIF -c) <($EXI -c) <($DET -c) <($PH2 -c) | sed 's/}{/,/g' > ../logs/$1.log
 
 echo "Creating pipes."
-mkfifo ../tmp/coords1 ../tmp/coords2 ../tmp/exi ../tmp/det
+mkfifo ../tmp/coords1 ../tmp/coords2 ../tmp/exi ../tmp/det ../tmp/photons
 
 echo "Setting up diffusion."
 $DIF | tee ../tmp/coords1 > ../tmp/coords2 &
@@ -23,9 +23,14 @@ $EXI < ../tmp/coords1 > ../tmp/exi &
 echo "Setting up detection."
 $DET < ../tmp/coords2 > ../tmp/det &
 
-echo "Setting up photophysics and correlator. Starting run..."
-$PH2 -e ../tmp/exi -d ../tmp/det | $COR > ../data/$1.dat
+echo "Setting up photophysics."
+$PH2 -e ../tmp/exi -d ../tmp/det > ../tmp/photons &
+
+echo "Setting up correlator. Starting run..."
+$COR <../tmp/photons > ../data/$1.dat
 
 echo "Done. Cleaning up."
 
 rm ../tmp/*
+
+../../inspect/view_cor.py ../data/$1.dat
