@@ -51,15 +51,14 @@ namespace sim{
 
     namespace opt{
 
-        Parameters::Parameters(int argc, char* argv[]){
+        Parameters::Parameters(int argc, char* argv[], const std::string rootname) : rootname(rootname){
             ops = new GetOpt::GetOpt_pp(argc, argv, GetOpt::Include_Environment);
             filename = ops->getopt<std::string>('p', "PARAMETERS", "default.json");
             std::ifstream param_file(filename, std::ifstream::in);
-            execname = argv[0];
             
             if (param_file) {
                 param_file >> params;
-                params = params[execname];
+                params = params[rootname];
             }
         }
         
@@ -68,7 +67,7 @@ namespace sim{
                 *ops >> GetOpt::OptionPresent('c', "config", config);
                 if (config){
                     json config_param;
-                    config_param[execname] = params;
+                    config_param[rootname] = params;
                     std::cout << config_param.dump(4);
                     exit(EXIT_SUCCESS);
                 }

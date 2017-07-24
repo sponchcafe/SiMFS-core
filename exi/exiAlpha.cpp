@@ -33,7 +33,7 @@ const double excitation(sim::io::coordinate const &c){
 
 int main (int argc, char *argv[]){
 
-    sim::opt::Parameters p{argc, argv};
+    sim::opt::Parameters p{argc, argv, "exi"};
 	waist_xy = p.getOption('x', "waist-xy", 200e-9);
 	waist_z = p.getOption('z', "waist-z", 600e-9);
 	lambda = p.getOption('l', "lambda", 488e-9);

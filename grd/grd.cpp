@@ -23,7 +23,7 @@ int main (int argc, char *argv[]){
 
     int16_t x, y, z, X, Y, Z;
 
-    sim::opt::Parameters p{argc, argv};
+    sim::opt::Parameters p{argc, argv, "grd"};
 	x = p.getOption('x', "x-points", 100);
 	y = p.getOption('y', "y-points", 100);
 	z = p.getOption('z', "z-points", 100);

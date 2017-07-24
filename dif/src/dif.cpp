@@ -23,7 +23,7 @@ Usage: dif [options]
 
 int main (int argc, char *argv[]){
 
- 	sim::opt::Parameters p{argc, argv};
+ 	sim::opt::Parameters p{argc, argv, "dif"};
 	double increment = p.getOption('i', "increment", 1e-7);
 	long radius = (long) (1e+9*p.getOption('r', "radius", 500e-9));
 	long half_height = (long) (1e+9*p.getOption('l', "half-height", 1000e-9));

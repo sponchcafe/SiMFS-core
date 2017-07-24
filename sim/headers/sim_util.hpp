@@ -52,7 +52,7 @@ namespace sim{
 
             public:
 
-                Parameters(int argc, char* argv[]);
+                Parameters(int argc, char* argv[], const std::string rootname);
 
                 GetOpt::GetOpt_pp *ops;
                 json params;
@@ -70,7 +70,7 @@ namespace sim{
 
                 private:
                     std::string filename;
-                    std::string execname;
+                    std::string rootname;
 
         };
     };

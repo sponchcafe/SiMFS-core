@@ -43,7 +43,7 @@ int main (int argc, char *argv[]){
     json jstates = jablonsky["states"];
     json jconnections = jablonsky["connections"];
 
-    sim::opt::Parameters p{argc, argv};
+    sim::opt::Parameters p{argc, argv, "ph2"};
 	dwell_time = p.getOption('t', "dwell-time", 1e-7);
     exi_file = p.getOption('e', "excitation", exi_file);
 	det_file = p.getOption('d', "detection", det_file);
