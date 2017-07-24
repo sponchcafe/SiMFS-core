@@ -1,0 +1,76 @@
+{
+    "dif": {
+        "diff-coef": 100000000.0,
+        "half-height": 1e-06,
+        "increment": 1e-07,
+        "radius": 5e-07,
+        "seed": 0,
+        "steps": 10000000
+    }
+,
+    "exi": {
+        "lambda": 4.88e-07,
+        "power": 5e-05,
+        "waist-xy": 2e-07,
+        "waist-z": 6e-07
+    }
+,
+    "det": {
+        "amplitude": 1.0,
+        "offset-x": 0.0,
+        "offset-y": 0.0,
+        "offset-z": 0.0,
+        "waist-x": 1e-07,
+        "waist-y": 1e-07,
+        "waist-z": 1e-07
+    }
+,
+    "ph2": {
+        "connections": [
+            {
+                "emission": false,
+                "epsilon": 73000,
+                "from": "S0",
+                "rate": 0,
+                "to": "S1"
+            },
+            {
+                "emission": false,
+                "epsilon": 0,
+                "from": "S1",
+                "rate": 10000.0,
+                "to": "S0"
+            },
+            {
+                "emission": true,
+                "epsilon": 0,
+                "from": "S1",
+                "rate": 10000000000.0,
+                "to": "S0"
+            },
+            {
+                "emission": false,
+                "epsilon": 0,
+                "from": "S1",
+                "rate": 10000000.0,
+                "to": "T1"
+            },
+            {
+                "emission": false,
+                "epsilon": 0,
+                "from": "T1",
+                "rate": 10000000.0,
+                "to": "S0"
+            }
+        ],
+        "detection": "./detection",
+        "dwell-time": 1e-07,
+        "excitation": "./excitation",
+        "seed": 0,
+        "states": [
+            "S0",
+            "S1",
+            "T1"
+        ]
+    }
+}

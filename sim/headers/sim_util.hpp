@@ -62,7 +62,7 @@ namespace sim{
 
                 template <typename T> T getOption(const char shortopt, const std::string longopt, T default_value){
                     try{
-                        default_value = params[longopt];
+                        default_value = params.at(longopt);
                     } catch (std::exception &e){}
                     params[longopt] = ops->getopt<T>(shortopt, longopt, default_value);
                     return params[longopt];
