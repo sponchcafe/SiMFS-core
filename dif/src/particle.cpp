@@ -17,7 +17,8 @@ namespace diffusion {
 		double timeIncrementInSeconds,
 		long int cylinderRadius,
 		long int cylinderHalfHeight,
-		double diffCoeff_nm) {
+		double diffCoeff_nm,
+		unsigned int seed) {
 
 		this->coordinate = { coordinate.x, coordinate.y, coordinate.z };
 		this->timeIncrementInSeconds = timeIncrementInSeconds;
@@ -27,7 +28,7 @@ namespace diffusion {
 		this->standardDeviation = sqrt(2 * this->diffCoeff_nm*this->timeIncrementInSeconds);
 		this->radialPos = 0;
 
-		random_engine = std::mt19937{1};
+		random_engine = std::mt19937{seed};
 
 	}
 

@@ -37,6 +37,7 @@ json jablonsky =
 int main (int argc, char *argv[]){
 
     double dwell_time;
+    unsigned int seed;
     std::string exi_file = "./excitation";
     std::string det_file = "./detection";
     json jstates = jablonsky["states"];
@@ -46,8 +47,9 @@ int main (int argc, char *argv[]){
 	dwell_time = p.getOption('t', "dwell-time", 1e-7);
     exi_file = p.getOption('e', "excitation", exi_file);
 	det_file = p.getOption('d', "detection", det_file);
-	jstates = p.getOption('s', "states", jstates);
-	jconnections = p.getOption('l', "connections", jconnections);
+	jstates = p.getOption('v', "states", jstates);
+	jconnections = p.getOption('u', "connections", jconnections);
+    seed = p.getOption('s', "seed", 0);
    
     p.enableConfig();
     p.enableHelp(helpmessage);
@@ -55,7 +57,7 @@ int main (int argc, char *argv[]){
     std::vector<std::string> states = jstates;
     std::vector<json> connections = jconnections;
 
-    ph2::fluorophore f{0, dwell_time, std::cout};
+    ph2::fluorophore f{seed, dwell_time, std::cout};
     for (auto it = states.begin(); it < states.end(); ++it) f.add_state(*it);
     
     for (auto it = connections.begin(); it < connections.end(); ++it){

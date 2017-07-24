@@ -17,7 +17,8 @@ namespace diffusion {
 			double timeIncrementInSeconds,
 			long int cylinderRadius,
 			long int cylinderHalfHeight,
-			double diffCoeff_nm);
+			double diffCoeff_nm,
+			unsigned int seed);
 		//Dekonstruktor:
 		~particle();
 
