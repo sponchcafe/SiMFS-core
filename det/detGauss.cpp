@@ -39,7 +39,7 @@ double efficiency(sim::io::coordinate &c){
 
 int main(int argc, char *argv[]){
 
-    sim::opt::Parameters p{argc, argv, "exi"};
+    sim::opt::Parameters p{argc, argv, "det"};
     waist_x = p.getOption('u', "waist-x", 100e-9);
     waist_y = p.getOption('v', "waist-y", 100e-9);
     waist_z = p.getOption('w', "waist-z", 100e-9);
