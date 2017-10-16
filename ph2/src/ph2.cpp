@@ -43,14 +43,17 @@ int main (int argc, char *argv[]){
     json jstates = jablonsky["states"];
     json jconnections = jablonsky["connections"];
 
+    sim::opt::Parameters globals{argc, argv, "GLOBAL"};
+	dwell_time = globals.getOption('i', "increment", 1e-7);
+    
     sim::opt::Parameters p{argc, argv, "ph2"};
-	dwell_time = p.getOption('t', "dwell-time", 1e-7);
-    exi_file = p.getOption('e', "excitation", exi_file);
+	exi_file = p.getOption('e', "excitation", exi_file);
 	det_file = p.getOption('d', "detection", det_file);
 	jstates = p.getOption('v', "states", jstates);
 	jconnections = p.getOption('u', "connections", jconnections);
     seed = p.getOption('s', "seed", 0);
    
+    globals.enableConfig(false);
     p.enableConfig();
     p.enableHelp(helpmessage);
 

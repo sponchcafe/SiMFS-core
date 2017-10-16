@@ -8,8 +8,9 @@ The coordinates are part of a cylindrical space.
 
 Usage: dif [options]
 
-	-n --steps : Number of steps to simulate.
-	-i --increment : Time increment in seconds.
+	-t --experiment-time : [GLOBAL] Simulation time.
+	-i --increment : [GLOBAL] Time increment in seconds.
+
 	-r --radius : Radius of the cylinder.
 	-l --half-height : Half height of the cylinder.
 	-d --diff-coef : Diffusion coefficient.
@@ -23,13 +24,18 @@ Usage: dif [options]
 
 int main (int argc, char *argv[]){
 
+	sim::opt::Parameters globals{argc, argv, "GLOBAL"};
+	double increment = globals.getOption('i', "increment", 1e-7);
+	double ex_time = globals.getOption('t', "experiment-time", 1.0);
+	uint64_t steps = (uint64_t) ceil(ex_time/increment);
+	globals.enableConfig(false);
+
  	sim::opt::Parameters p{argc, argv, "dif"};
-	double increment = p.getOption('i', "increment", 1e-7);
 	long radius = (long) (1e+9*p.getOption('r', "radius", 500e-9));
 	long half_height = (long) (1e+9*p.getOption('l', "half-height", 1000e-9));
 	double diff_coef = p.getOption('d', "diff-coef", 1e+8);
-	uint64_t steps = p.getOption('n', "steps", 10000000);
 	unsigned int seed = p.getOption('s', "seed", 0);
+
 	p.enableConfig();
 	p.enableHelp(helpmessage);
 	

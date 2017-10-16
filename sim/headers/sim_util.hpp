@@ -37,13 +37,23 @@ namespace sim{
         typedef double timetag;
         typedef double flux;
         typedef double efficiency;
+        typedef int16_t photon_count;
 
-        std::ostream& write_binary(std::ostream& os, const coordinate& c);
-        std::istream& read_binary(std::istream &is, coordinate& c);
+        template <typename T> std::ostream& write_binary(std::ostream& os, const T& t){
+            const char *out_buffer = reinterpret_cast<const char *>(&t);
+            return os.write(out_buffer, sizeof(T));
+        }
 
-        std::ostream& write_binary(std::ostream& os, const double& x);
-        std::istream& read_binary(std::istream &is, double& x);
-
+        template <typename T> std::istream& read_binary(std::istream &is, T& t){
+            char *in_buffer = reinterpret_cast<char *>(&t);
+            is.read(in_buffer, sizeof(t));
+                if (!is){
+                    is.setstate(std::ios_base::failbit);
+                return is;
+            }
+            return is;
+        }
+        
     };
 
     namespace opt{
@@ -57,7 +67,7 @@ namespace sim{
                 GetOpt::GetOpt_pp *ops;
                 json params;
 
-                void enableConfig();
+                void enableConfig(bool terminate=true);
                 void enableHelp(std::string helpmessage);
 
                 template <typename T> T getOption(const char shortopt, const std::string longopt, T default_value){
