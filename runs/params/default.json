@@ -1,11 +1,19 @@
 {
+    "GLOBAL": {
+        "experiment-time": 60.0,
+        "increment": 1e-7 
+    }
+,
+    "bkg": {
+        "rate": 500000,
+        "seed": 0
+    }
+,
     "dif": {
         "diff-coef": 100000000.0,
         "half-height": 1e-06,
-        "increment": 1e-07,
         "radius": 5e-07,
-        "seed": 0,
-        "steps": 10000000
+        "seed": 0
     }
 ,
     "exi": {
@@ -20,9 +28,9 @@
         "offset-x": 0.0,
         "offset-y": 0.0,
         "offset-z": 0.0,
-        "waist-x": 1e-07,
-        "waist-y": 1e-07,
-        "waist-z": 1e-07
+        "waist-x": 4e-07,
+        "waist-y": 4e-07,
+        "waist-z": 12e-07
     }
 ,
     "ph2": {
@@ -64,7 +72,6 @@
             }
         ],
         "detection": "./detection",
-        "dwell-time": 1e-07,
         "excitation": "./excitation",
         "seed": 0,
         "states": [

@@ -6,7 +6,7 @@ BUILD_DIR = ./bin
 SIMH = ./sim/headers
 SIMC = ./sim/src
 
-all: dif exi grd ph2 det
+all: dif exi grd ph2 det mix sum bkg
 
 dif: $(BUILD_DIR)/dif.exe 
 exi: $(BUILD_DIR)/exiAlpha.exe
@@ -15,6 +15,8 @@ grd: $(BUILD_DIR)/grd.exe
 ph2: $(BUILD_DIR)/ph2.exe
 prg: $(BUILD_DIR)/prg.exe
 mix: $(BUILD_DIR)/mix.exe
+sum: $(BUILD_DIR)/sum.exe
+bkg: $(BUILD_DIR)/bkg.exe
 
 $(BUILD_DIR)/dif.exe : ./dif/headers/*.hpp ./dif/src/*.cpp $(SIMH)/*.hpp $(SIMC)/*.cpp
 	$(CPP_COMPILER) $(CPP_FLAGS) -I ./dif/headers/ -I $(SIMH) ./dif/src/*.cpp $(SIMC)/*.cpp -o $(BUILD_DIR)/dif.exe
@@ -36,3 +38,9 @@ $(BUILD_DIR)/prg.exe: ./inspect/progress.cpp $(SIMH)/*.hpp $(SIMC)/*.cpp
 
 $(BUILD_DIR)/mix.exe: ./mix/mix.cpp $(SIMH)/*.hpp $(SIMC)/*.cpp
 	$(CPP_COMPILER) $(CPP_FLAGS) -I $(SIMH) ./mix/mix.cpp $(SIMC)/*.cpp -o $(BUILD_DIR)/mix.exe
+
+$(BUILD_DIR)/sum.exe: ./sum/sum.cpp $(SIMH)/*.hpp $(SIMC)/*.cpp
+	$(CPP_COMPILER) $(CPP_FLAGS) -I $(SIMH) ./sum/sum.cpp $(SIMC)/*.cpp -o $(BUILD_DIR)/sum.exe
+
+$(BUILD_DIR)/bkg.exe: ./bkg/bkg.cpp $(SIMH)/*.hpp $(SIMC)/*.cpp
+	$(CPP_COMPILER) $(CPP_FLAGS) -I $(SIMH) ./bkg/bkg.cpp $(SIMC)/*.cpp -o $(BUILD_DIR)/bkg.exe
