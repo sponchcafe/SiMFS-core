@@ -11,7 +11,7 @@ namespace ph2{
         * is initialized with the seed. If `text` is true, the fluorophore's emitter is initialized to a new
         * ph2::text_stream_emitter, that writes to the specified output stream. Otherwise, a ph2::binary_stream_emitter
         * is used. */
-    fluorophore::fluorophore(unsigned seed, double dwell, std::ostream &out)
+    fluorophore::fluorophore(unsigned seed, double dwell, sim::io::Output<sim::io::timetag> &out)
         : global_clock(0), dwell_clock(0), dwell_time(dwell), output(out)
     {
         init_random(seed);
@@ -100,7 +100,7 @@ namespace ph2{
                 // emission? (5.)
 				if (path_to_next->emit && ( (double) random_engine() / (double) random_engine.max()) < detection_efficiency){
                     sim::io::timetag t = global_clock;
-                    sim::io::write_binary(output, t);
+                    output.put(t);
 				}
 
                 // go to next state (3a.)

@@ -9,25 +9,27 @@ The detection function is a 3D gauss with 1/e^2 waists u, v, w and offset x, y, 
 
 Usage: detGauss [options] < coordinates > efficiency
 
+    -i --input : Input file (coordinates), defaults to stdandard in.
+    -o --output : Output file (efficiency), defaults to standard out.
+
+    [detGauss]
     -u --waist-x : 1/e^2 waist in x-direction in meters.
     -v --waist-y : 1/e^2 waist in y-direction in meters.
     -w --waist-z : 1/e^2 waist in z-direction in meters.
+
     -x --offset-x : Offset in x-direction in meters.
     -y --offset-y : Offset in y-direction in meters.
     -z --offset-z : Offset in z-direction in meters.
-    -a --amplitude : Maximal amplitude of detection efficiency function [0,1].
 
-    -p --PARAMETERS : Specify a parameter json file. Defaults to PARAMETERS environment variable or 'defaults.json'.
-    -c --config : Generate a config .json file and print it to the standard output.
-    -h --help : Show this help message.
+    -a --amplitude : Maximal amplitude of detection efficiency function.
 )";
 
-double offset_x;
-double offset_y;
-double offset_z;
 double waist_x;
 double waist_y;
 double waist_z;
+double offset_x; 
+double offset_y;
+double offset_z;
 double amplitude;
 
 double efficiency(sim::io::coordinate &c){
@@ -40,6 +42,8 @@ double efficiency(sim::io::coordinate &c){
 int main(int argc, char *argv[]){
 
     sim::opt::Parameters p{argc, argv, "det"};
+    std::string in_filename = p.getOption('i', "input", sim::opt::empty);
+    std::string out_filename = p.getOption('o', "output", sim::opt::empty);
     waist_x = p.getOption('u', "waist-x", 100e-9);
     waist_y = p.getOption('v', "waist-y", 100e-9);
     waist_z = p.getOption('w', "waist-z", 100e-9);
@@ -50,15 +54,14 @@ int main(int argc, char *argv[]){
     p.enableConfig();
     p.enableHelp(helpmessage);
 
-    if (amplitude < 0 || amplitude > 1){
-        std::string execname = argv[0];
-        sim::log::warn("["+execname+"] WARNING: Amplitude not in range [0,1].\n");
-    }
-    
+    sim::io::Input<sim::io::coordinate> input(in_filename);
+    sim::io::Output<sim::io::efficiency> output(out_filename);
         
     sim::io::coordinate c{0,0,0};
-    while(sim::io::read_binary(std::cin, c)){
-        sim::io::write_binary(std::cout, efficiency(c));
+    sim::io::efficiency e{0.0};
+    while(input.get(c)){
+        e = efficiency(c);
+        output.put(e);
     }
   
     return 0;

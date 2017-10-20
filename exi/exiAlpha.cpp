@@ -7,14 +7,14 @@ TODO: Function description
 
 Usage: exiAlpha [options] < coordinates > flux
 
+    -i --input : Input file (coordinates), defaults to standard in.
+    -o --output : Output file (flux), defaults to standard out.
+
+    [exiAlpha]
     -x --waist-xy : 1/e^2 waist in xy-direction in nanometer.
     -y --waist-z : 1/e^2 waist in z-direction in nanometer.
     -l --lambda : Excitation wavelength in nanometer.
     -P --power : Excitation power in watt.
-
-    -p --PARAMETERS : Specify a parameter json file. Defaults to PARAMETERS environment variable or 'defaults.json'.
-    -c --config : Generate a config .json file and print it to the standard output.
-    -h --help : Show this help message.
 )";
 
 double waist_xy;
@@ -33,7 +33,9 @@ const double excitation(sim::io::coordinate const &c){
 
 int main (int argc, char *argv[]){
 
-    sim::opt::Parameters p{argc, argv, "exi"};
+    sim::opt::Parameters p{argc, argv, "exiAlpha"};
+    std::string in_filename = p.getOption('i', "input", sim::opt::empty);
+    std::string out_filename = p.getOption('o', "output", sim::opt::empty);
 	waist_xy = p.getOption('x', "waist-xy", 200e-9);
 	waist_z = p.getOption('z', "waist-z", 600e-9);
 	lambda = p.getOption('l', "lambda", 488e-9);
@@ -41,9 +43,14 @@ int main (int argc, char *argv[]){
     p.enableConfig();
     p.enableHelp(helpmessage);
 
+    sim::io::Input<sim::io::coordinate> input(in_filename);
+    sim::io::Output<sim::io::flux> output(out_filename);
+
     sim::io::coordinate c{0, 0, 0};
-    while(sim::io::read_binary(std::cin, c)){
-        sim::io::write_binary(std::cout, excitation(c));
+    sim::io::flux f{0.0};
+    while(input.get(c)){
+        f = excitation(c);
+        output.put(f);
     }
     
 }
