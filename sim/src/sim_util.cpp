@@ -19,7 +19,7 @@ namespace sim{
 
         Parameters::Parameters(int argc, char* argv[], const std::string rootname) : rootname(rootname){
             ops = new GetOpt::GetOpt_pp(argc, argv, GetOpt::Include_Environment);
-            filename = ops->getopt<std::string>('p', "PARAMETERS", "default.json");
+            filename = ops->getopt<std::string>('p', "PARAMETERS", "params.json");
             std::ifstream param_file(filename, std::ifstream::in);
             
             if (param_file) {
@@ -49,6 +49,7 @@ namespace sim{
                 *ops >> GetOpt::OptionPresent('h', "help", help);
                 if (help){
                     log::info(helpmessage);
+                    log::info(opt_helpmessage);
                     exit(EXIT_SUCCESS);
                 }
         }
