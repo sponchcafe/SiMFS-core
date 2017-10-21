@@ -39,9 +39,8 @@ int main(int argc, char *argv[]){
             output.put(count);
             count = 0;
             bin_end += width;
-        }else{
-            count++;
         }
+        count++;
     }
     output.put(count);
   
