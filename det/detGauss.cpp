@@ -41,7 +41,7 @@ double efficiency(sim::io::coordinate &c){
 
 int main(int argc, char *argv[]){
 
-    sim::opt::Parameters p{argc, argv, "det"};
+    sim::opt::Parameters p{argc, argv, "detGauss"};
     std::string in_filename = p.getOption('i', "input", sim::opt::empty);
     std::string out_filename = p.getOption('o', "output", sim::opt::empty);
     waist_x = p.getOption('u', "waist-x", 100e-9);

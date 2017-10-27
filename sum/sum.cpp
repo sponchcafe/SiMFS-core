@@ -28,7 +28,7 @@ int main(int argc, char *argv[]){
 
     // IO
     sim::io::Input<sim::io::timetag> input(in_filename);
-    sim::io::Output<sim::io::photon_count> output(out_filename);
+    sim::io::Output<sim::io::photon_count> output(out_filename, 32);
         
     sim::io::timetag t{0.0};
     sim::io::photon_count count = 0;

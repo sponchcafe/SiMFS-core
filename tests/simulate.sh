@@ -1,49 +1,58 @@
 #! /bin/bash
 
-export PARAMETERS=../params/$1.json
+export PARAMETERS=$1
 
-DIF=../../bin/dif.exe
-EXI=../../bin/exiAlpha.exe
-DET=../../bin/detGauss.exe
-PH2=../../bin/ph2.exe
-COR=../../bin/corr.exe
-SUM=../../bin/sum.exe
-BKG=../../bin/bkg.exe
-MIX=../../bin/mix.exe
+EXEC=../bin
+TMP=./tmp
 
-#echo "Logging parameters"
-#cat <($DIF -c) <($EXI -c) <($DET -c) <($PH2 -c) | sed 's/}{/,/g' > ../logs/$1.log
+DIF=$EXEC/dif.exe
+EXI=$EXEC/exiAlpha.exe
+DET=$EXEC/detGauss.exe
+PH2=$EXEC/ph2.exe
+SUM=$EXEC/sum.exe
+BKG=$EXEC/bkg.exe
+MIX=$EXEC/mix.exe
 
-echo "Creating pipes."
-mkfifo ../tmp/coords1 ../tmp/coords2 ../tmp/exi ../tmp/det ../tmp/photons ../tmp/background
+for i in `seq 1 3`; do
+(
+    echo "Creating pipes."
+    mkfifo $TMP/coords1_$i $TMP/coords2_$i $TMP/exi_$i $TMP/det_$i $TMP/photons_$i
+    touch $TMP/PIDs
+    
+    echo "Setting up diffusion."
+    $DIF -s $i | tee $TMP/coords1_$i > $TMP/coords2_$i &
+    echo $! >> $TMP/PIDS
 
-echo "Setting up diffusion."
-$DIF | tee ../tmp/coords1 > ../tmp/coords2 &
+    echo "Setting up excitation."
+    $EXI < $TMP/coords1_$i > $TMP/exi_$i &
+    echo $! >> $TMP/PIDS
 
-echo "Setting up excitation."
-$EXI < ../tmp/coords1 > ../tmp/exi &
+    echo "Setting up detection."
+    $DET < $TMP/coords2_$i > $TMP/det_$i &
+    echo $! >> $TMP/PIDS
 
-echo "Setting up detection."
-$DET < ../tmp/coords2 > ../tmp/det &
+    echo "Setting up photophysics."
+    $PH2 -s $i -e $TMP/exi_$i -d $TMP/det_$i > $TMP/photons_$i &
+    echo $! >> $TMP/PIDS
 
-echo "Setting up photophysics."
-$PH2 -e ../tmp/exi -d ../tmp/det | tee emission.dat > ../tmp/photons &
+)
+done
 
-echo "Setting up background"
-$BKG | tee background.dat > ../tmp/background &
+mkfifo $TMP/background $TMP/trace $TMP/binned
 
-$MIX ../tmp/photons ../tmp/background > photons.dat
+echo "Setting up background."
+$BKG > $TMP/background &
+echo $! >> $TMP/PIDS
 
+echo "Mixing."
+$MIX $TMP/photons_* $TMP/background | tee $2 | dd > $TMP/trace &
+echo $! >> $TMP/PIDS
 
+echo "Binning."
+$SUM < $TMP/trace | tee $3 > $TMP/binned &
+echo $! >> $TMP/PIDS
 
-
-
-#$SUM -w 1e-4  < ../tmp/photons > ttrace.dat
-
-#echo "Setting up correlator. Starting run..."
-#$COR <../tmp/photons > ../data/$1.dat
+python trace_view.py $TMP/binned
 
 echo "Done. Cleaning up."
-rm ../tmp/*
-
-#../../inspect/view_cor.py ../data/$1.dat
+rm $TMP/*

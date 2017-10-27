@@ -13,7 +13,6 @@ exi: $(BUILD_DIR)/exiAlpha.exe
 det: $(BUILD_DIR)/detGauss.exe
 grd: $(BUILD_DIR)/grd.exe
 ph2: $(BUILD_DIR)/ph2.exe
-prg: $(BUILD_DIR)/prg.exe
 mix: $(BUILD_DIR)/mix.exe
 sum: $(BUILD_DIR)/sum.exe
 bkg: $(BUILD_DIR)/bkg.exe
@@ -32,10 +31,7 @@ $(BUILD_DIR)/ph2.exe: ./ph2/headers/*.hpp ./ph2/src/*.cpp $(SIMH)/*.hpp $(SIMC)/
 
 $(BUILD_DIR)/detGauss.exe: ./det/detGauss.cpp $(SIMH)/*.hpp $(SIMC)/*.cpp
 	$(CPP_COMPILER) $(CPP_FLAGS) -I $(SIMH) ./det/detGauss.cpp $(SIMC)/*.cpp -o $(BUILD_DIR)/detGauss.exe
-
-$(BUILD_DIR)/prg.exe: ./inspect/progress.cpp $(SIMH)/*.hpp $(SIMC)/*.cpp
-	$(CPP_COMPILER) $(CPP_FLAGS) -I $(SIMH) ./inspect/progress.cpp $(SIMC)/*.cpp -o $(BUILD_DIR)/prg.exe
-
+	
 $(BUILD_DIR)/mix.exe: ./mix/mix.cpp $(SIMH)/*.hpp $(SIMC)/*.cpp
 	$(CPP_COMPILER) $(CPP_FLAGS) -I $(SIMH) ./mix/mix.cpp $(SIMC)/*.cpp -o $(BUILD_DIR)/mix.exe
 
