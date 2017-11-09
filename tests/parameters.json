@@ -1,13 +1,31 @@
 {
     "GLOBAL": {
         "experiment-time": 10,
-        "increment": 1e-07
+        "increment": 1e-7,
+        "molecules": 3
+    },
+
+    "SETUP": {
+        "delay": 0.003,
+        "execdir": "../bin/",
+        "tmpdir": "./tmp",
+        "server": {
+            "coordinates": [],
+            "excitation": [],
+            "detection": [],
+            "photons": [],
+            "timetrace": [],
+            "background": {},
+            "sumphotons": {"host": "localhost", "port": 54321},
+            "sumtrace": {},
+            "correlation": {}
+        }
     },
 
     "dif": {
         "diff-coef": 270000000,
         "half-height": 2e-06,
-        "output": ["o1", "o2"],
+        "output": "",
         "radius": 1e-06,
         "seed": 0
     },
@@ -71,8 +89,8 @@
                 "to": "S0"
             }
         ],
-        "detection": "./det",
-        "excitation": "./exi",
+        "detection": "",
+        "excitation": "",
         "output": "",
         "seed": 0,
         "states": [
@@ -86,11 +104,12 @@
         "input": "",
         "output": "",
         "width": 0.001
+        
     },
 
     "bkg": {
-        "out": "",
-        "rate": 10000.0,
+        "output": "",
+        "rate": 1000.0,
         "seed": 0
     }
 }

@@ -28,14 +28,14 @@ int main(int argc, char *argv[]){
 
     // IO
     sim::io::Input<sim::io::timetag> input(in_filename);
-    sim::io::Output<sim::io::photon_count> output(out_filename, 32);
+    sim::io::Output<sim::io::photon_count> output(out_filename);
         
     sim::io::timetag t{0.0};
     sim::io::photon_count count = 0;
     double bin_end = width;
 
     while(input.get(t)){
-        if(t>=bin_end){
+        while(t>=bin_end){
             output.put(count);
             count = 0;
             bin_end += width;

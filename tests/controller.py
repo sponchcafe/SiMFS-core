@@ -8,7 +8,8 @@ import uuid
 class Component():
 
     env = os.environ.copy()
-
+    running = []
+ 
     def __init__(self, executable, *args, stdin=sp.PIPE, stdout=sp.PIPE, **kwargs):
         self.executable = executable
         self.cmd_args = []
@@ -18,6 +19,7 @@ class Component():
         self.set_args(*args, **kwargs)
         self.env = self.__class__.env
         self.get_process()
+        self.__class__.running.append(self)
 
     @classmethod
     def add_path(cls, execpath): 
@@ -27,7 +29,29 @@ class Component():
     def add_paramfile(cls, paramfile):
         cls.env['PARAMETERS'] = paramfile
 
+    def get_log(self):
+        '''RETHINK THIS'''
+        log = []
+        for k in self.__dict__.keys():
+            if k == 'env':
+                log.append((k, '... PARAMETERS='+self.__dict__[k].get('PARAMETERS')))
+                continue
+            log.append((k, self.__dict__[k]))
+        return log
+
+    @staticmethod
+    def obj_to_dict(obj):
+        return obj.__dict__
+
     def set_args(self, *args, **kwargs):
+        self.parameters = self.__class__.env.get('PARAMETERS')
+        paramfile = json.load(open(self.parameters, 'r'))
+        try:
+            for k in paramfile[self.executable]:
+                setattr(self, k, paramfile[self.executable][k])
+        except KeyError:
+            pass
+            #print(f"Skipped {self.executable}")
         for k in kwargs:
             arg_dashed = k.replace('_', '-')
             if len(k) > 1:
@@ -40,7 +64,7 @@ class Component():
                 self.cmd_args.append(pre + arg_dashed)
                 self.cmd_args.append(str(kwargs[k]))
             setattr(self, k, kwargs[k])
-            
+           
         for a in args:
             self.cmd_args.append(str(a))
             self.operands.append(a)
@@ -53,10 +77,12 @@ class Component():
             self.process = sp.Popen(self.get_call(), stdin=self.stdin, stdout=self.stdout, env=self.__class__.env)
             self.stdin = self.process.stdin
             self.stdout = self.process.stdout
-        except FileNotFoundError:
+            self.pid = self.process.pid
+        except FileNotFoundError as e:
             self.process = None
             self.stdin = None
             self.stdout = None 
+            self.pid = None
         
     def communicate(self, **kwargs):
         return self.process.communicate(**kwargs)
@@ -141,19 +167,39 @@ if __name__ == '__main__':
 
     for s in (str(i) for i in range(N)):
         
-        dif = Component('dif', seed=s)
+        dif = Component('dif', seed=s, stdin=None)
         tee = Component('tee', NamedPipe(), stdin=dif.stdout)
         exi = Component('exiAlpha', output=NamedPipe(), stdin=tee.stdout)
         det = Component('detGauss', output=NamedPipe(), stdin=open(tee.operands[0], 'rb'))
         ph2 = Component('ph2', seed=s, excitation=exi.output, detection=det.output, output=NamedPipe())        
         photons.append(ph2.output)
 
-    bkg = Component('bkg')
-    mix = Component('mix', *(photons+[bkg.stdout]))
+    bkg = Component('bkg', output=NamedPipe())
+    mix = Component('mix', *(photons+[bkg.output]))
     trc = Component('bin', stdin=mix.stdout)
-    
-### end simulation
 
+    '''AND THIS
+    log = {}
+    for c in Component.running:
+        l = c.get_log()
+        d = {}
+        for (k, v) in l:
+            try: 
+                json.dumps({k:v})
+            except TypeError:
+                k = str(k)
+                v = str(v)
+            d.update({k:v})
+        try: 
+            log[c.executable].append(d)
+        except KeyError:
+            log[c.executable] = [d]
+    
+
+    json.dump(log, open('log.json', 'w'), indent=4, skipkeys=True)
+    '''
+    ### end simulation
+    print('done')
 
     def shutdown():
         NamedPipe.close_all()
