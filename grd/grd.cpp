@@ -6,9 +6,10 @@ Create a 3D evenly spaced grid of coordinates written in binary 16-bit integers 
 
 Usage: grd [options]
 
+    [grd]
+    
     -o --output : Output file (coordinates), defaults to standard out.
 
-    [grd]
     -x --x-points : Number of points in the x dimension.
     -y --y-points : Number of points in the y dimension.
     -z --z-points : Number of points in the z dimension.

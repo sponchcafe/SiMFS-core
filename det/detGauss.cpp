@@ -9,10 +9,11 @@ The detection function is a 3D gauss with 1/e^2 waists u, v, w and offset x, y, 
 
 Usage: detGauss [options] < coordinates > efficiency
 
+    [detGauss]
+    
     -i --input : Input file (coordinates), defaults to stdandard in.
     -o --output : Output file (efficiency), defaults to standard out.
 
-    [detGauss]
     -u --waist-x : 1/e^2 waist in x-direction in meters.
     -v --waist-y : 1/e^2 waist in y-direction in meters.
     -w --waist-z : 1/e^2 waist in z-direction in meters.

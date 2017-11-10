@@ -32,10 +32,9 @@ int main (int argc, char *argv[]){
     json jstates = jablonsky["states"];
     json jconnections = jablonsky["connections"];
 
-    sim::opt::Parameters globals{argc, argv, "GLOBAL"};
-	dwell_time = globals.getOption('i', "increment", 1e-7);
     
     sim::opt::Parameters p{argc, argv, "ph2"};
+    dwell_time = p.getOption('i', "increment", 1e-7);
     std::string exi_filename = p.getOption('e', "excitation", exi_default);
     std::string det_filename = p.getOption('d', "detection", det_default);
     std::string out_filename = p.getOption('o', "output", sim::opt::empty);
@@ -43,7 +42,6 @@ int main (int argc, char *argv[]){
 	jconnections = p.getOption('u', "connections", jconnections);
     seed = p.getOption('s', "seed", 0);
    
-    globals.enableConfig(false);
     p.enableConfig();
     p.enableHelp(helpmessage);
 

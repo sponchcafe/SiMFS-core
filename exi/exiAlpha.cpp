@@ -6,11 +6,12 @@ Calculate flux density at coordinates x, y, z read from standard in.
 TODO: Function description
 
 Usage: exiAlpha [options] < coordinates > flux
+    
+    [exiAlpha]
 
     -i --input : Input file (coordinates), defaults to standard in.
     -o --output : Output file (flux), defaults to standard out.
 
-    [exiAlpha]
     -x --waist-xy : 1/e^2 waist in xy-direction in nanometer.
     -y --waist-z : 1/e^2 waist in z-direction in nanometer.
     -l --lambda : Excitation wavelength in nanometer.

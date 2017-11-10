@@ -4,13 +4,14 @@
 const std::string helpmessage = 
 R"(
 Mix multiple photonstreams into one.
+Photons of each input stream are sorted online and pushe to the standard output.
 
 Usage: mix <file1 file2 ...>
-    Photons of each input stream are sorted online and pushe to the standard output.
 
+    [mix]
+    
     -o --output : Outputfile (timtags), defaults to standard out.
 
-    -h --help : Show this help message.
 )";
 
 typedef struct{

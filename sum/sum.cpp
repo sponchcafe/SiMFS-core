@@ -7,10 +7,11 @@ Count photon timetags in fixed size bins.
 
 Usage: sum [options] < timetags > binned_timetrace
 
+    [sum]
+    
     -i --input : Input file (timetags), defaults to standard in.
     -o --output : Output file (counts), defaults to standard out.
 
-    [sum]
     -w --width : Width of time bins in seconds.
 )";
 

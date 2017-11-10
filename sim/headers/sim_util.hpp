@@ -217,7 +217,7 @@ namespace sim{
                 GetOpt::GetOpt_pp *ops;
                 json params;
 
-                void enableConfig(bool terminate=true);
+                void enableConfig();
                 void enableHelp(std::string helpmessage);
 
                 template <typename T> T getOption(const char shortopt, const std::string longopt, T default_value){

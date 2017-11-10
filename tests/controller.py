@@ -1,140 +1,12 @@
-import subprocess as sp
-import os
+from cmdutils import NamedPipe, Component
 import argparse
 import sys
 import json
-import uuid
+import websockets, asyncio
 
-class Component():
-
-    env = os.environ.copy()
-    running = []
- 
-    def __init__(self, executable, *args, stdin=sp.PIPE, stdout=sp.PIPE, **kwargs):
-        self.executable = executable
-        self.cmd_args = []
-        self.operands = []
-        self.stdin = stdin
-        self.stdout = stdout
-        self.set_args(*args, **kwargs)
-        self.env = self.__class__.env
-        self.get_process()
-        self.__class__.running.append(self)
-
-    @classmethod
-    def add_path(cls, execpath): 
-        cls.env['PATH'] = cls.env['PATH'] + ':' + os.path.abspath(execpath)
-
-    @classmethod
-    def add_paramfile(cls, paramfile):
-        cls.env['PARAMETERS'] = paramfile
-
-    def get_log(self):
-        '''RETHINK THIS'''
-        log = []
-        for k in self.__dict__.keys():
-            if k == 'env':
-                log.append((k, '... PARAMETERS='+self.__dict__[k].get('PARAMETERS')))
-                continue
-            log.append((k, self.__dict__[k]))
-        return log
-
-    @staticmethod
-    def obj_to_dict(obj):
-        return obj.__dict__
-
-    def set_args(self, *args, **kwargs):
-        self.parameters = self.__class__.env.get('PARAMETERS')
-        paramfile = json.load(open(self.parameters, 'r'))
-        try:
-            for k in paramfile[self.executable]:
-                setattr(self, k, paramfile[self.executable][k])
-        except KeyError:
-            pass
-            #print(f"Skipped {self.executable}")
-        for k in kwargs:
-            arg_dashed = k.replace('_', '-')
-            if len(k) > 1:
-                pre = '--'
-            else:
-                pre = '-'
-            if type(kwargs[k]) == bool and kwargs[k]:
-                self.cmd_args.append(pre + arg_dashed)
-            if type(kwargs[k]) != bool:
-                self.cmd_args.append(pre + arg_dashed)
-                self.cmd_args.append(str(kwargs[k]))
-            setattr(self, k, kwargs[k])
-           
-        for a in args:
-            self.cmd_args.append(str(a))
-            self.operands.append(a)
-
-    def get_call(self):
-        return [self.executable] + self.cmd_args
-
-    def get_process(self):
-        try:
-            self.process = sp.Popen(self.get_call(), stdin=self.stdin, stdout=self.stdout, env=self.__class__.env)
-            self.stdin = self.process.stdin
-            self.stdout = self.process.stdout
-            self.pid = self.process.pid
-        except FileNotFoundError as e:
-            self.process = None
-            self.stdin = None
-            self.stdout = None 
-            self.pid = None
-        
-    def communicate(self, **kwargs):
-        return self.process.communicate(**kwargs)
-
-    def __str__(self):
-        return ' '.join(self.get_call())
-
-    def __repr__(self):
-        return '<ComponentRunner "' + str(self) + '">'
-         
-class NamedPipe(str):
-
-    tmpdir = ''
-    opened = []
-
-    def __new__(cls, path=None):
-        if not path:
-            path = uuid.uuid4().hex
-        path = os.path.abspath(os.path.join(cls.tmpdir, path))
-        obj = str.__new__(cls, path)
-        return obj
-
-    def __init__(self, path=None):
-        self.open()
-
-    def open(self):
-        try:
-            os.mkfifo(self)
-            NamedPipe.opened.append(self)
-        except FileExistsError:
-            print('Cannot create {}. File exists. Use overwrite option to force overwrite.'.format(self))
-  
-    def close(self):
-        try:
-            os.remove(self)
-        except FileNotFoundError:
-            print('File {} not found.'.format(self))
-
-    @classmethod 
-    def close_all(cls):
-        for p in cls.opened:
-            p.close()
-        cls.opened = []
-
-    @staticmethod
-    def set_tmpdir(tmpdir):
-        NamedPipe.tmpdir = tmpdir
-
-    @staticmethod
-    def get_opened():
-        return NamedPipe.opened
-    
+def shutdown():
+    NamedPipe.close_all()
+    sys.exit(0)
 
 
 if __name__ == '__main__':
@@ -153,9 +25,10 @@ if __name__ == '__main__':
     server = setup['server']
 
     # setup
+    NamedPipe.set_tmpdir('./tmp')
     Component.add_path('../bin')
     Component.add_paramfile(args.parameters)
-    NamedPipe.set_tmpdir('./tmp')
+    Component.debug = False
 
     N = params['GLOBAL']['molecules']
 
@@ -163,50 +36,24 @@ if __name__ == '__main__':
     fifos = []
 
 
-### core simulation
-
+    ### core simulation
     for s in (str(i) for i in range(N)):
         
-        dif = Component('dif', seed=s, stdin=None)
+        dif = Component('sim_dif', seed=s)
         tee = Component('tee', NamedPipe(), stdin=dif.stdout)
-        exi = Component('exiAlpha', output=NamedPipe(), stdin=tee.stdout)
-        det = Component('detGauss', output=NamedPipe(), stdin=open(tee.operands[0], 'rb'))
-        ph2 = Component('ph2', seed=s, excitation=exi.output, detection=det.output, output=NamedPipe())        
+        exi = Component('sim_exiAlpha', output=NamedPipe(), stdin=tee.stdout)
+        det = Component('sim_detGauss', output=NamedPipe(), input=tee.operands[0])
+        ph2 = Component('sim_ph2', seed=s, excitation=exi.output, detection=det.output, output=NamedPipe())        
         photons.append(ph2.output)
 
-    bkg = Component('bkg', output=NamedPipe())
-    mix = Component('mix', *(photons+[bkg.output]))
-    trc = Component('bin', stdin=mix.stdout)
+    bkg = Component('sim_bkg', output=NamedPipe())
+    mix = Component('sim_mix', *(photons+[bkg.output]))
+    trc = Component('sim_sum', stdin=mix.stdout)
 
-    '''AND THIS
-    log = {}
-    for c in Component.running:
-        l = c.get_log()
-        d = {}
-        for (k, v) in l:
-            try: 
-                json.dumps({k:v})
-            except TypeError:
-                k = str(k)
-                v = str(v)
-            d.update({k:v})
-        try: 
-            log[c.executable].append(d)
-        except KeyError:
-            log[c.executable] = [d]
-    
-
-    json.dump(log, open('log.json', 'w'), indent=4, skipkeys=True)
-    '''
     ### end simulation
     print('done')
 
-    def shutdown():
-        NamedPipe.close_all()
-        sys.exit(0)
-
     # Here we serve
-    import websockets, asyncio
     async def handover(websocket, path):
         while(True):
             d = trc.stdout.read(4)
