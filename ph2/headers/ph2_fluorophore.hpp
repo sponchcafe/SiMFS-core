@@ -19,7 +19,7 @@ namespace ph2{
                 * @param
                 * [in]
                 * - **seed:** seed for random number generation*/
-            fluorophore(unsigned seed, double dwell, std::ostream &out);
+            fluorophore(unsigned seed, double dwell, sim::io::Output<sim::io::timetag> &out);
 
             /** Add a named state to the fluorophore.
                 * @param
@@ -113,7 +113,8 @@ namespace ph2{
             /** Time to simulate until the next diffusion step. */
             double dwell_time;
 
-            std::ostream &output;
+            //std::ostream &output;
+            sim::io::Output<sim::io::timetag> &output;
 
 		    /** Get the address of a state by its name. */
 		    state* name_to_address(std::string n);

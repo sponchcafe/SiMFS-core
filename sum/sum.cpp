@@ -5,13 +5,14 @@ const std::string helpmessage =
 R"(
 Count photon timetags in fixed size bins.
 
-Usage: sum [options] < photons > binned_timetrace
+Usage: sum [options] < timetags > binned_timetrace
+
+    [sum]
+    
+    -i --input : Input file (timetags), defaults to standard in.
+    -o --output : Output file (counts), defaults to standard out.
 
     -w --width : Width of time bins in seconds.
-
-    -p --PARAMETERS : Specify a parameter json file. Defaults to PARAMETERS environment variable or 'defaults.json'.
-    -c --config : Generate a config .json file and print it to the standard output.
-    -h --help : Show this help message.
 )";
 
 double width = 1e-3;
@@ -19,30 +20,30 @@ double width = 1e-3;
 int main(int argc, char *argv[]){
 
     sim::opt::Parameters p{argc, argv, "sum"};
+    std::string in_filename = p.getOption('i', "input", sim::opt::empty);
+    std::string out_filename = p.getOption('o', "output", sim::opt::empty);
     width = p.getOption('w', "width", 1e-3);
    
     p.enableConfig();
     p.enableHelp(helpmessage);
 
-    if (width <= 0){
-        std::string execname = argv[0];
-        sim::log::warn("["+execname+"] WARNING: Non-positive bin-widths are not allowed.\n");
-    }
+    // IO
+    sim::io::Input<sim::io::timetag> input(in_filename);
+    sim::io::Output<sim::io::photon_count> output(out_filename);
         
     sim::io::timetag t{0.0};
     sim::io::photon_count count = 0;
     double bin_end = width;
 
-    while(sim::io::read_binary(std::cin, t)){
-        if(t>=bin_end){
-            sim::io::write_binary(std::cout, count);
+    while(input.get(t)){
+        while(t>=bin_end){
+            output.put(count);
             count = 0;
             bin_end += width;
-        }else{
-            count++;
         }
+        count++;
     }
-    sim::io::write_binary(std::cout, count);
+    output.put(count);
   
     return 0;
 

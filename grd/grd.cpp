@@ -6,6 +6,10 @@ Create a 3D evenly spaced grid of coordinates written in binary 16-bit integers 
 
 Usage: grd [options]
 
+    [grd]
+    
+    -o --output : Output file (coordinates), defaults to standard out.
+
     -x --x-points : Number of points in the x dimension.
     -y --y-points : Number of points in the y dimension.
     -z --z-points : Number of points in the z dimension.
@@ -13,10 +17,6 @@ Usage: grd [options]
     -X --x-limit : Maximal distance from origin in x in meters.
     -Y --y-limit : Maximal distance from origin in y in meters.
     -Z --z-limit : Maximal distance from origin in z in meters.
-
-    -p --PARAMETERS : Specify a parameter json file. Defaults to PARAMETERS environment variable or 'defaults.json'.
-    -c --config : Generate a config .json file and print it to the standard output.
-    -h --help : Show this help message.
 )";
 
 int main (int argc, char *argv[]){
@@ -24,6 +24,7 @@ int main (int argc, char *argv[]){
     int16_t x, y, z, X, Y, Z;
 
     sim::opt::Parameters p{argc, argv, "grd"};
+    std::string out_filename = p.getOption('o', "output", sim::opt::empty);
 	x = p.getOption('x', "x-points", 100);
 	y = p.getOption('y', "y-points", 100);
 	z = p.getOption('z', "z-points", 100);
@@ -33,6 +34,7 @@ int main (int argc, char *argv[]){
     p.enableConfig();
     p.enableHelp(helpmessage);
 
+    sim::io::Output<sim::io::coordinate> output(out_filename);
     sim::io::coordinate c{0, 0, 0};
 
     for (int k=0; k<x; k++){
@@ -41,7 +43,7 @@ int main (int argc, char *argv[]){
                 c.x = 2*X/x*k-X;
                 c.y = 2*Y/y*j-Y;
                 c.z = 2*Z/z*i-Z;
-                sim::io::write_binary(std::cout, c);
+                output.put(c);
             }
         }
     }

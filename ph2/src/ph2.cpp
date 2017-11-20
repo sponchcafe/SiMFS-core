@@ -4,21 +4,10 @@
 
 const std::string helpmessage = 
 R"(
-Create a 3D evenly spaced grid of coordinates written in binary 16-bit integers to the standard output.
+Info
 
-Usage: grd [options]
+Usage: ph2 [options]
 
-    -x --x-points : Number of points in the x dimension.
-    -y --y-points : Number of points in the y dimension.
-    -z --z-points : Number of points in the z dimension.
-
-    -X --x-limit : Maximal distance from origin in x in meters.
-    -Y --y-limit : Maximal distance from origin in y in meters.
-    -Z --z-limit : Maximal distance from origin in z in meters.
-
-    -p --PARAMETERS : Specify a parameter json file. Defaults to PARAMETERS environment variable or 'defaults.json'.
-    -c --config : Generate a config .json file and print it to the standard output.
-    -h --help : Show this help message.
 )";
 
 json jablonsky =
@@ -38,29 +27,33 @@ int main (int argc, char *argv[]){
 
     double dwell_time;
     unsigned int seed;
-    std::string exi_file = "./excitation";
-    std::string det_file = "./detection";
+    std::string exi_default = "./exi";
+    std::string det_default = "./det";
     json jstates = jablonsky["states"];
     json jconnections = jablonsky["connections"];
 
-    sim::opt::Parameters globals{argc, argv, "GLOBAL"};
-	dwell_time = globals.getOption('i', "increment", 1e-7);
     
     sim::opt::Parameters p{argc, argv, "ph2"};
-	exi_file = p.getOption('e', "excitation", exi_file);
-	det_file = p.getOption('d', "detection", det_file);
+    dwell_time = p.getOption('i', "increment", 1e-7);
+    std::string exi_filename = p.getOption('e', "excitation", exi_default);
+    std::string det_filename = p.getOption('d', "detection", det_default);
+    std::string out_filename = p.getOption('o', "output", sim::opt::empty);
 	jstates = p.getOption('v', "states", jstates);
 	jconnections = p.getOption('u', "connections", jconnections);
     seed = p.getOption('s', "seed", 0);
    
-    globals.enableConfig(false);
     p.enableConfig();
     p.enableHelp(helpmessage);
 
     std::vector<std::string> states = jstates;
     std::vector<json> connections = jconnections;
+    
+    // IO
+    sim::io::Input<sim::io::flux> exi(exi_filename);
+    sim::io::Input<sim::io::efficiency> det(det_filename);
+    sim::io::Output<sim::io::timetag> output(out_filename);
 
-    ph2::fluorophore f{seed, dwell_time, std::cout};
+    ph2::fluorophore f{seed, dwell_time, output};
     for (auto it = states.begin(); it < states.end(); ++it) f.add_state(*it);
     
     for (auto it = connections.begin(); it < connections.end(); ++it){
@@ -75,13 +68,10 @@ int main (int argc, char *argv[]){
     
     f.initialize(states[0]);
 
-    std::ifstream exi(exi_file, std::ifstream::in);
-    std::ifstream det(det_file, std::ifstream::in);
+    sim::io::flux flux = 0.0;
+    sim::io::efficiency eff = 0.0;
 
-    sim::io::flux flux;
-    sim::io::efficiency eff;
-
-    while(sim::io::read_binary(exi, flux) && sim::io::read_binary(det, eff)){
+    while(exi.get(flux) && det.get(eff)){
         f.update_environment(flux, eff);
         f.simulate();
     }

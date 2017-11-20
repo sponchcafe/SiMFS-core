@@ -6,15 +6,14 @@ R"(
 Generate a stream of background photons with a constant rate.
 
 Usage: grd [options]
+    
+    [bkg]
 
-    -t --time : [GLOBAL] Experiment time.
-
+    -o --output : Output file, defaults to standard out. 
+    
+    -t --time : Experiment time.
     -r --rate : Mean photon rate.
     -s --seed : Random seed.
-
-    -p --PARAMETERS : Specify a parameter json file. Defaults to PARAMETERS environment variable or 'defaults.json'.
-    -c --config : Generate a config .json file and print it to the standard output.
-    -h --help : Show this help message.
 )";
 
 /* Function copied from ph2 ... */
@@ -33,19 +32,14 @@ const double get_lifetime(double lambda)
 
 int main (int argc, char *argv[]){
 
-    double rate;
-    double ex_time;
-    unsigned seed;
-    
-
-    sim::opt::Parameters globals{argc, argv, "GLOBAL"};
-    ex_time = globals.getOption('t', "experiment-time", 1.0);
-
     sim::opt::Parameters p{argc, argv, "bkg"};
-    rate = p.getOption('r', "rate", 1000.0);
-    seed = p.getOption('s', "seed", 0);
+    double ex_time = p.getOption('t', "experiment-time", 1.0);
+    double rate = p.getOption('r', "rate", 1000.0);
+    unsigned seed = p.getOption('s', "seed", 0);
+    std::string outfile_name = p.getOption('o', "output", sim::opt::empty);
     
-    globals.enableConfig(false);
+    sim::io::Output<sim::io::timetag> output(outfile_name);
+
     p.enableConfig();
     p.enableHelp(helpmessage);
 
@@ -54,7 +48,7 @@ int main (int argc, char *argv[]){
     sim::io::timetag ttag = get_lifetime(rate);
 
     while(ttag < ex_time){
-        sim::io::write_binary(std::cout, ttag);
+        output.put(ttag);
         ttag += get_lifetime(rate);
     }
 

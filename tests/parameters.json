@@ -1,0 +1,119 @@
+{
+    "GLOBAL": {
+        "experiment-time": 1,
+        "increment": 1e-7,
+        "molecules": 1
+    },
+
+    "SETUP": {
+        "delay": 0.003,
+        "execdir": "../bin/",
+        "tmpdir": "./tmp",
+        "server": {
+            "coordinates": [],
+            "excitation": [],
+            "detection": [],
+            "photons": [],
+            "timetrace": [],
+            "background": {},
+            "sumphotons": {"host": "localhost", "port": 54321},
+            "sumtrace": {},
+            "correlation": {}
+        }
+    },
+
+    "dif": {
+        "experiment-time": 1,
+        "increment": 1e-7,
+        "diff-coef": 270000000,
+        "half-height": 2e-06,
+        "output": "",
+        "radius": 1e-06,
+        "seed": 0
+    },
+
+    "exiAlpha": {
+        "input": "",
+        "lambda": 4.88e-07,
+        "output": "",
+        "power": 2e-06,
+        "waist-xy": 2e-07,
+        "waist-z": 6e-07
+    },
+
+    "detGauss": {
+        "amplitude": 1.0,
+        "input": "",
+        "offset-x": 0.0,
+        "offset-y": 0.0,
+        "offset-z": 0.0,
+        "output": "",
+        "waist-x": 3e-07,
+        "waist-y": 7e-07,
+        "waist-z": 7e-07
+    },
+
+    "ph2": {
+        "connections": [
+            {
+                "emission": false,
+                "epsilon": 73000,
+                "from": "S0",
+                "rate": 0,
+                "to": "S1"
+            },
+            {
+                "emission": false,
+                "epsilon": 0,
+                "from": "S1",
+                "rate": 1e+4,
+                "to": "S0"
+            },
+            {
+                "emission": true,
+                "epsilon": 0,
+                "from": "S1",
+                "rate": 1e+8,
+                "to": "S0"
+            },
+            {
+                "emission": false,
+                "epsilon": 0,
+                "from": "S1",
+                "rate": 1e+6,
+                "to": "T1"
+            },
+            {
+                "emission": false,
+                "epsilon": 0,
+                "from": "T1",
+                "rate": 1e+6,
+                "to": "S0"
+            }
+        ],
+        "detection": "",
+        "excitation": "",
+        "increment": 1e-7,
+        "output": "",
+        "seed": 0,
+        "states": [
+            "S0",
+            "S1",
+            "T1"
+        ]
+    },
+
+    "sum": {
+        "input": "",
+        "output": "",
+        "width": 0.001
+        
+    },
+
+    "bkg": {
+        "experiment-time": 1,
+        "output": "",
+        "rate": 10000.0,
+        "seed": 0
+    }
+}

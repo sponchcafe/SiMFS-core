@@ -4,15 +4,20 @@
 const std::string helpmessage = 
 R"(
 Mix multiple photonstreams into one.
+Photons of each input stream are sorted online and pushe to the standard output.
 
 Usage: mix <file1 file2 ...>
-    Photons of each input stream are sorted online and pushe to the standard output.
-    -h --help : Show this help message.
+
+    [mix]
+    
+    -o --output : Outputfile (timtags), defaults to standard out.
+
 )";
 
 typedef struct{
-    std::string name;
-    std::ifstream stream;
+    //std::string name;
+    //std::ifstream stream;
+    sim::io::Input<sim::io::timetag> *in;
     sim::io::timetag tag;
 } input;
 
@@ -43,20 +48,25 @@ void bubble_up(std::vector<input> &iv){
 
 int main (int argc, char *argv[]){
 
-    sim::opt::Parameters p{argc, argv, ""};
+    sim::opt::Parameters p{argc, argv, "mix"};
+    std::string out_filename = p.getOption('o', "output", sim::opt::empty);
     std::vector<input> inputs;
     std::vector<std::string> names;
 
     *(p.ops) >> GetOpt::GlobalOption(names);
-
+    
+    p.enableConfig();
     p.enableHelp(helpmessage);
+
+    sim::io::Output<sim::io::timetag> output(out_filename);
 
     for (auto it = names.begin(); it != names.end(); ++it){
         inputs.push_back(input{});
         auto last = inputs.end()-1;
-        last->name = *it;
-        last->stream = std::ifstream(*it);
-        sim::io::read_binary(last->stream,last->tag);
+        //last->name = *it;
+        //last->stream = std::ifstream(*it);
+        last->in = new sim::io::Input<sim::io::timetag>(*it);
+        last->in->get(last->tag);
     }
 
     // sort the inputs according to the current timetag
@@ -69,17 +79,24 @@ int main (int argc, char *argv[]){
 
         while(first->tag <= second->tag){
 
-            sim::io::write_binary(std::cout, first->tag);
+            //sim::io::write_binary(std::cout, first->tag);
+            output.put(first->tag);
 
-            if(!sim::io::read_binary(first->stream, first->tag)){
+            //if(!sim::io::read_binary(first->stream, first->tag)){
+            if(!first->in->get(first->tag)){
                 swap(inputs, 0, inputs.size()-1);
 
                 inputs.pop_back();
                 if (inputs.size() <= 1) {
                     // final pass through of the last stream
                     do{
-                        sim::io::write_binary(std::cout, first->tag);
-                    }while(sim::io::read_binary(first->stream, first->tag));
+                        //sim::io::write_binary(std::cout, first->tag);
+                        output.put(first->tag);
+                    //}while(sim::io::read_binary(first->stream, first->tag));
+                    }while(first->in->get(first->tag));
+                    for (auto it=inputs.begin(); it!=inputs.end(); ++it){
+                        delete(it->in);
+                    }
                     exit(EXIT_SUCCESS);
                 }
             }

@@ -7,6 +7,10 @@ Create a random diffusion path as coordinates written in binary 16-bit integers 
 The coordinates are part of a cylindrical space.
 
 Usage: dif [options]
+	
+	[dif]
+
+	-o --output : Output file (coordinates), defaults to standard out.
 
 	-t --experiment-time : [GLOBAL] Simulation time.
 	-i --increment : [GLOBAL] Time increment in seconds.
@@ -14,23 +18,18 @@ Usage: dif [options]
 	-r --radius : Radius of the cylinder.
 	-l --half-height : Half height of the cylinder.
 	-d --diff-coef : Diffusion coefficient.
+	
 	-s --seed : Random seed.
-
-	-p --PARAMETERS : Specify a parameter json file. Defaults to PARAMETERS environment variable or 'defaults.json'.
-	-c --config : Generate a config .json file and print it to the standard output.
-	-h --help : Show this help message.
-
 )";
 
 int main (int argc, char *argv[]){
 
-	sim::opt::Parameters globals{argc, argv, "GLOBAL"};
-	double increment = globals.getOption('i', "increment", 1e-7);
-	double ex_time = globals.getOption('t', "experiment-time", 1.0);
+	
+	sim::opt::Parameters p{argc, argv, "dif"};
+	double increment = p.getOption('i', "increment", 1e-7);
+	double ex_time = p.getOption('t', "experiment-time", 1.0);
 	uint64_t steps = (uint64_t) ceil(ex_time/increment);
-	globals.enableConfig(false);
-
- 	sim::opt::Parameters p{argc, argv, "dif"};
+	std::string out_filename = p.getOption('o', "output", sim::opt::empty); 
 	long radius = (long) (1e+9*p.getOption('r', "radius", 500e-9));
 	long half_height = (long) (1e+9*p.getOption('l', "half-height", 1000e-9));
 	double diff_coef = p.getOption('d', "diff-coef", 1e+8);
@@ -38,12 +37,14 @@ int main (int argc, char *argv[]){
 
 	p.enableConfig();
 	p.enableHelp(helpmessage);
+
+	//IO
+	sim::io::Output<sim::io::coordinate> output(out_filename);
 	
 	//set starting coordinates randomly
 	std::uniform_int_distribution<int> dist_c_radius(0, radius);
 	std::uniform_int_distribution<int> dist_c_half_height(-half_height, +half_height);
 	std::uniform_real_distribution<double> dist_angle(0, 1);
-
 
 	sim::io::coordinate c{0, 0, 0};
 	diffusion::particle particle = diffusion::particle(c, increment, radius, half_height, diff_coef, seed);
@@ -64,7 +65,7 @@ int main (int argc, char *argv[]){
 		c.x = particle.getCurrentPositionX();
 		c.y = particle.getCurrentPositionY();
 		c.z = particle.getCurrentPositionZ();
-		sim::io::write_binary(std::cout, c);
+		output.put(c);
 		particle.move();
 	}
 
