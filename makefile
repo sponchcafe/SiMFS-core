@@ -1,5 +1,6 @@
 CPP_COMPILER = g++
-CPP_FLAGS = -Wall -std=c++11
+CPP_FLAGS = -Wall -Wextra -std=c++11 -O3 -march=native
+
 
 BUILD_DIR = ./bin
 
