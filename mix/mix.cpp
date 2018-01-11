@@ -14,95 +14,49 @@ Usage: mix <file1 file2 ...>
 
 )";
 
-typedef struct{
-    //std::string name;
-    //std::ifstream stream;
-    sim::io::Input<sim::io::timetag> *in;
-    sim::io::timetag tag;
-} input;
-
-bool comp(input &i1, input &i2){
-    return (i1.tag < i2.tag);
-}
-
-void swap(std::vector<input> &iv, int i, int j){
-    auto it = iv.begin();
-    input temp;
-    temp = std::move(*(it+i));
-    *(it+i) = std::move(*(it+j));
-    *(it+j) = std::move(temp);
-}
-
-
-// sort the first element into the vector util it is sorted again
-void bubble_up(std::vector<input> &iv){
-    auto it = iv.begin();
-    input temp;
-    while((it+1) < iv.end() && !comp(*it, *(it+1))){
-        temp = std::move(*it);
-        *it = std::move(*(it+1));
-        *(it+1) = std::move(temp);
-        ++it;
-    }
-}
+using mix_input_t = sim::io::Input<sim::io::timetag>;
+using mix_output_t = sim::io::Output<sim::io::timetag>;
 
 int main (int argc, char *argv[]){
 
     sim::opt::Parameters p{argc, argv, "mix"};
     std::string out_filename = p.getOption('o', "output", sim::opt::empty);
-    std::vector<input> inputs;
+    
+    // get the input arguments as file names and create an sim::io::output
     std::vector<std::string> names;
-
     *(p.ops) >> GetOpt::GlobalOption(names);
+    mix_output_t mix_output(out_filename);
     
     p.enableConfig();
     p.enableHelp(helpmessage);
 
-    sim::io::Output<sim::io::timetag> output(out_filename);
-
+    std::vector<mix_input_t> input_handlers;
     for (auto it = names.begin(); it != names.end(); ++it){
-        inputs.push_back(input{});
-        auto last = inputs.end()-1;
-        //last->name = *it;
-        //last->stream = std::ifstream(*it);
-        last->in = new sim::io::Input<sim::io::timetag>(*it);
-        last->in->get(last->tag);
+        input_handlers.push_back(mix_input_t(*it));
     }
 
-    // sort the inputs according to the current timetag
-    std::sort (inputs.begin(), inputs.end(), comp);
+    std::sort(input_handlers.begin(), input_handlers.end());
 
-    while(true){
+    auto first = input_handlers.begin();
+    auto second = (first+1);
 
-        auto first = inputs.begin();
-        auto second = first+1;
-
-        while(first->tag <= second->tag){
-
-            //sim::io::write_binary(std::cout, first->tag);
-            output.put(first->tag);
-
-            //if(!sim::io::read_binary(first->stream, first->tag)){
-            if(!first->in->get(first->tag)){
-                swap(inputs, 0, inputs.size()-1);
-
-                inputs.pop_back();
-                if (inputs.size() <= 1) {
-                    // final pass through of the last stream
-                    do{
-                        //sim::io::write_binary(std::cout, first->tag);
-                        output.put(first->tag);
-                    //}while(sim::io::read_binary(first->stream, first->tag));
-                    }while(first->in->get(first->tag));
-                    for (auto it=inputs.begin(); it!=inputs.end(); ++it){
-                        delete(it->in);
-                    }
-                    exit(EXIT_SUCCESS);
-                }
+    sim::io::timetag current_tag;
+    
+    while(input_handlers.size() > 1){
+        while (first->peek() <= second->peek()){
+            if(!first->get(current_tag)){
+                std::swap(*input_handlers.begin(), *(input_handlers.end()-1));
+                input_handlers.pop_back();
+                break;
             }
+            mix_output.put(current_tag);
+            
         }
-        // reestablishing the invariant: inputs are sorted in the input vector
-        bubble_up(inputs);
+        std::sort(input_handlers.begin(), input_handlers.end());
+    }
+
+    while(first->get(current_tag)){
+        mix_output.put(current_tag);
     }
 
 }
