@@ -5,13 +5,13 @@ export PARAMETERS=$1
 EXEC=../bin
 TMP=./tmp
 
-DIF=$EXEC/dif.exe
-EXI=$EXEC/exiAlpha.exe
-DET=$EXEC/detGauss.exe
-PH2=$EXEC/ph2.exe
-SUM=$EXEC/sum.exe
-BKG=$EXEC/bkg.exe
-MIX=$EXEC/mix.exe
+DIF=$EXEC/sim_dif
+EXI=$EXEC/sim_exiAlpha
+DET=$EXEC/sim_detGauss
+PH2=$EXEC/sim_ph2
+SUM=$EXEC/sim_sum
+BKG=$EXEC/sim_bkg
+MIX=$EXEC/sim_mix
 
 for i in `seq 1 3`; do
 (
@@ -34,7 +34,6 @@ for i in `seq 1 3`; do
     echo "Setting up photophysics."
     $PH2 -s $i -e $TMP/exi_$i -d $TMP/det_$i > $TMP/photons_$i &
     echo $! >> $TMP/PIDS
-
 )
 done
 
@@ -52,7 +51,7 @@ echo "Binning."
 $SUM < $TMP/trace | tee $3 > $TMP/binned &
 echo $! >> $TMP/PIDS
 
-python trace_view.py $TMP/binned
+cat $TMP/binned > binned_trace.dat
 
 echo "Done. Cleaning up."
 rm $TMP/*
