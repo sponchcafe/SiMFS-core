@@ -62,8 +62,8 @@ namespace sim{
             
                 Output<T>(std::string filename="", size_t s=DEFAULT_SIZE) : n_bytes(s){
                     if (filename != ""){
-                        outfile = std::ofstream(filename, std::ofstream::binary);
-                        output = &outfile;
+                        outfile = new std::ofstream(filename, std::ofstream::binary);
+                        output = outfile;
                     }else{
                         output = &std::cout;
                     }
@@ -75,11 +75,17 @@ namespace sim{
                     init();
                 }
 
+                // Rule of five
+                Output<T>(Output<T> &source) = delete;
+                Output<T> &operator=(Output<T> &other) = delete;
+                Output<T>(Output<T> &&other) = default;
+                Output<T> &operator=(Output<T> &&other) = default;
                 ~Output<T>(){
+                    output->flush();
                     if (current>start){
                         dump();
                     }
-                    delete(start);
+                    output->flush(); // strictly necessary for filestreams, std::cout flushes implicitely however.
                 }
 
                 void put(T &item){
@@ -97,20 +103,24 @@ namespace sim{
                     n_elements = (n_bytes/sizeof(T));
                     n_bytes = n_elements * sizeof(T);
                     
-                    start = new T[n_elements];
+                    databuffer = std::unique_ptr<T>(new T[n_elements]);
+                    start = databuffer.get();
                     end = start+n_elements;
                     current = start;
 
                     bytebuffer = reinterpret_cast<const char *>( start );
                 }
-                
+
                 void dump(){
                     output->write(bytebuffer, (current-start)*sizeof(T));
                 }
         
-                std::ofstream outfile;
+                std::ofstream *outfile;
                 std::ostream *output;
 
+                // used to manage buffer ressource, auto deletes
+                std::unique_ptr<T> databuffer; 
+                // buffer position raw pointers, no need to be freed
                 T *start;
                 T *current;
                 T *end;
@@ -132,8 +142,8 @@ namespace sim{
 
                 Input<T>(std::string filename="", size_t s=DEFAULT_SIZE) : n_bytes(s){
                     if (filename != ""){
-                        infile = std::ifstream(filename, std::ifstream::binary);
-                        input = &infile;
+                        infile = new std::ifstream(filename, std::ifstream::binary);
+                        input = infile;
                     }else{
                         input = &std::cin;
                     }
@@ -145,9 +155,12 @@ namespace sim{
                     init();
                 }
 
-                ~Input<T>(){
-                    delete(start);
-                }
+                // Rule of five
+                Input<T>(Input<T> &source) = delete;
+                Input<T> &operator=(Input<T> &other) = delete;
+                Input<T>(Input<T> &&other) = default;
+                Input<T> &operator=(Input<T> &&other) = default;
+                ~Input<T>(){}
 
                 bool get(T &target){
                     if (current >= end){
@@ -158,20 +171,31 @@ namespace sim{
                     return !eof || current < end;
                 }
 
+                T peek() const {
+                    return *current;
+                }
+
+                bool operator< (const Input<T>& rhs) const {
+                    return this->peek() < rhs.peek();
+                }
+
+
+
             private:
 
                 void init(){
                     n_elements = (n_bytes/sizeof(T));
                     n_bytes = n_elements * sizeof(T);
                     
-                    start = new T[n_elements];
+                    databuffer = std::unique_ptr<T>(new T[n_elements]);
+                    start = databuffer.get();
                     end = start;
                     current = start;
-                    
+
                     bytebuffer = reinterpret_cast<char *>( start ) ;
                     fill();
                 }
-                
+    
                 void fill(){
                     input->read(bytebuffer, n_bytes);
                     end = start + input->gcount()/sizeof(T);
@@ -181,9 +205,12 @@ namespace sim{
                     }
                 }
 
-                std::ifstream infile;
+                std::ifstream *infile;
                 std::istream *input;
-
+                
+                // used to manage buffer ressource, auto deletes
+                std::unique_ptr<T> databuffer; 
+                // buffer position raw pointers, no need to be freed
                 T *start;
                 T *current;
                 T *end;

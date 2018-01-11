@@ -28,7 +28,7 @@ int main (int argc, char *argv[]){
 	sim::opt::Parameters p{argc, argv, "dif"};
 	double increment = p.getOption('i', "increment", 1e-7);
 	double ex_time = p.getOption('t', "experiment-time", 1.0);
-	uint64_t steps = (uint64_t) ceil(ex_time/increment);
+	uint64_t steps = (uint64_t) floor(ex_time/increment);
 	std::string out_filename = p.getOption('o', "output", sim::opt::empty); 
 	long radius = (long) (1e+9*p.getOption('r', "radius", 500e-9));
 	long half_height = (long) (1e+9*p.getOption('l', "half-height", 1000e-9));
