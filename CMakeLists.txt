@@ -15,6 +15,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/src/lib/graph)
 
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/components)
+add_subdirectory(${CMAKE_SOURCE_DIR}/src/components/ph2)
 
 
 # ========== GOOGLE TEST INTEGRATION =========== #

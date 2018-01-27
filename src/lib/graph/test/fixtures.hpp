@@ -29,27 +29,26 @@ class StopAction : public Action{
         {
         }
         void fire() override {
+            std::cerr << "stop action\n";
             graph.done = true;
-            std::cerr << "STOPP ACTION\n";
         }
-    private:
-        const std::string message;
 };
 
 class StartAction : public Action{
     public:
-        StartAction(const std::string name, Graph &graph)
-            : Action(name, graph)
+        StartAction(const std::string name, double runtime, Graph &graph)
+            : Action(name, graph), runtime(runtime)
         {
         }
         void fire() override {
-            Event e1 = Event(graph.get_action("update"), 0.0);
-            Event e = Event(graph.get_action("stop"), 0.001);
-            graph.push_event(e1);
-            graph.push_event(e);
+            std::cerr << "start action\n";
+            Event update_event = Event(graph.get_action("update"), 0.0);
+            Event stop_event = Event(graph.get_action("stop"), runtime);
+            graph.push_event(update_event);
+            graph.push_event(stop_event);
         }
     private:
-        const std::string message;
+        double runtime=0.0;
 };
 
 class UpdateAction: public Action{
@@ -59,6 +58,7 @@ class UpdateAction: public Action{
         {
         }
         void fire() override {
+            std::cerr << "update action\n";
             Event e = Event(this, graph.clock+interval);
             graph.push_event(e);
         }
@@ -73,14 +73,14 @@ class UpdateAction: public Action{
 /* =========== */
 
 class GraphBuildTest: public ::testing::Test{
-    protected:
-        GraphBuildTest() : g(Graph(0)){
-            echo_action = new EchoAction("EchoAction", "echo", g);
-        }
-        virtual void SetUp() {}
-        virtual void TearDown(){}
-        Graph g;
-        EchoAction *echo_action;
+protected:
+    GraphBuildTest() : g(Graph(0)){
+        echo_action = new EchoAction("EchoAction", "echo", g);
+    }
+    virtual void SetUp() {}
+    virtual void TearDown(){}
+    Graph g;
+    EchoAction *echo_action;
 };
 
 class GraphLinkTest: public ::testing::Test{
@@ -90,7 +90,7 @@ class GraphLinkTest: public ::testing::Test{
 
             Action *emission = new EchoAction("emission", "emitting", g);
             g.add_action(emission);
-            Action *start = new StartAction("start", g);
+            Action *start = new StartAction("start", 1e-6, g);
             g.add_action(start);
             Action *stop = new StopAction("stop", g);
             g.add_action(stop);
@@ -100,12 +100,13 @@ class GraphLinkTest: public ::testing::Test{
             g.add_node("S0");
             g.add_node("S1");
 
-            g.add_edge("exi", "S0", "S1", 1e+5);
+            g.add_edge("exi", "S0", "S1", 1e+8);
             g.add_edge("emi", "S1", "S0", 1e+8);
 
             g.link_edge_action("emission", "emi");
             g.init("S0", "start");
         }
+
         virtual void SetUp() {}
         virtual void TearDown(){}
         Graph g;

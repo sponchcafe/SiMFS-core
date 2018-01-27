@@ -165,12 +165,11 @@ namespace sim{
 
                 current->traverse(); // will set done when appropriate
 
-                if (done) break;
-
                 next_path = current->get_next();
                 while(!events.empty() && clock + next_path->lifetime >= events.top().time){
                     execute_next_event();
-                    current->get_next(); // new try for lifetime
+                    if (done) return;
+                    next_path = current->get_next(); // new try for lifetime
                 }
 
                 // path found, traversal ok

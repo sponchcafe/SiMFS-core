@@ -16,8 +16,7 @@ namespace sim{
 
         DefaultAction::DefaultAction(Graph &graph) : Action("__default__", graph){};
         void DefaultAction::fire() {
-            std::cerr << "Warning! The default action has been triggered. This possibly means that the graph\
-                graph is not laid out as you expect it. The simulation will be terminated now." << std::endl;
+            std::cerr << "Warning! The default action has been triggered. This possibly means that the graph graph is not laid out as you expect it. The simulation will be terminated now." << std::endl;
             graph.done = true;
             graph.print_state();
         }

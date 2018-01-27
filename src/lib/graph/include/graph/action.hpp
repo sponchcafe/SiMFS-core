@@ -19,7 +19,7 @@ namespace sim{
                 Action(const std::string name, Graph &graph);
 
                 virtual void fire() = 0;
-                void init();
+                virtual void init();
 
                 std::ostream &print_info(std::ostream &os);
 
