@@ -1,42 +1,31 @@
-#ifndef SIM_RATE_GRAPH_ACTION_H
-#define SIM_RATE_GRAPH_ACTION_H
+#ifndef SIM_GRAPH_ACTION_H
+#define SIM_GRAPH_ACTION_H
+
+#include "graph/graph.hpp"
+#include "graph/definitions.hpp"
 
 #include <string>
-#include "graph/rate_graph.hpp"
 
 namespace sim{
     namespace graph{
 
         class Action{
 
-            /* Pure abstract base class for actions occuring in a graph.
-             * specifies fire and init
-             * has name and graph reference
-             */
             public:
 
-                // ctor
-                Action(const std::string name, Graph &graph);
+                //-----------------------------------------------------------//
+                Action(Graph &graph, std::string const name);
 
-                virtual void fire() = 0;
+                virtual void fire();
                 virtual void init();
 
                 std::ostream &print_info(std::ostream &os);
 
-                const std::string name;
+                std::string const name;
 
             protected:
 
                 Graph &graph;
-
-        };
-
-        class DefaultAction : public Action{
-
-            public:
-
-                DefaultAction(Graph &graph);
-                void fire() override;
 
         };
 
