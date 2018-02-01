@@ -65,6 +65,7 @@ namespace sim{
                 void set_action(const std::string action_name);
                 std::string const get_action_name() const;
                 Action * get_action_ptr() const;
+                bool is_active();
 
 
                 //-Get-current-lifetime--------------------------------------//

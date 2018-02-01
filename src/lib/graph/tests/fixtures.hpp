@@ -6,6 +6,7 @@ using namespace sim;
 using namespace graph;
 
 
+//---------------------------------------------------------------------------//
 class EchoAction : public Action{
 
     public:
@@ -34,7 +35,7 @@ class EchoAction : public Action{
 };
 
 
-
+//---------------------------------------------------------------------------//
 class GraphBuildTest: public ::testing::Test{
 
     protected:
@@ -49,6 +50,40 @@ class GraphBuildTest: public ::testing::Test{
 
         //-------------------------------------------------------------------//
         virtual void SetUp() {}
+        
+        
+        //-------------------------------------------------------------------//
+        virtual void TearDown() {}
+        
+        
+        //-------------------------------------------------------------------//
+        Graph g;
+        std::unique_ptr<Action> echo_action;
+
+};
+
+
+//---------------------------------------------------------------------------//
+class GraphTraversalTest: public ::testing::Test{
+
+    protected:
+
+        //-------------------------------------------------------------------//
+        GraphTraversalTest() : g(Graph(0)){
+            echo_action = std::unique_ptr<Action>{
+                new EchoAction(g, "echo_action", "e")
+            };
+        }
+
+
+        //-------------------------------------------------------------------//
+        virtual void SetUp() {
+            g.add_node("S0");
+            g.add_node("S1");
+            g.add_edge("exi", "S0", "S1", 1e+6);
+            g.add_edge("emi", "S1", "S0", 1e+8);
+            g.add_action(echo_action);
+        }
         
         
         //-------------------------------------------------------------------//

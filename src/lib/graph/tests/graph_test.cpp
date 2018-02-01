@@ -156,3 +156,71 @@ TEST_F(GraphBuildTest, AddManyActions){
 }
 
 
+//---------------------------------------------------------------------------//
+TEST_F(GraphBuildTest, GetActionList){
+    g.add_action(echo_action);
+    std::unique_ptr<Action> a{new EchoAction(g, "echo_action2", "y")};
+    g.add_action(a);
+    std::string result = "";
+    for(auto &action : g.get_actions()){
+        result += action->name;
+    }
+    ASSERT_EQ(result.length(), 23);
+}
+
+
+//---------------------------------------------------------------------------//
+TEST_F(GraphTraversalTest, InitializationLinks){
+    g.init();
+    Node * S0 = g.get_node_ptr("S0");
+    Node * S1 = g.get_node_ptr("S1");
+    Edge * exi = g.get_edge_ptr("exi");
+    Edge * emi = g.get_edge_ptr("emi");
+    ASSERT_EQ(S0->get_edges()[0], g.get_edge_ptr("exi"));
+    ASSERT_EQ(S1->get_edges()[0], g.get_edge_ptr("emi"));
+    ASSERT_EQ(exi->get_target_node_ptr(), g.get_node_ptr("S1"));
+    ASSERT_EQ(emi->get_target_node_ptr(), g.get_node_ptr("S0"));
+}
+    
+
+//---------------------------------------------------------------------------//
+TEST_F(GraphTraversalTest, InitializationActions){
+    g.link_node_action("S1", "nothere");
+    g.link_edge_action("exi", "echo_action");
+    g.init();
+    ASSERT_EQ(g.get_node_ptr("S0")->is_active(), false);
+    ASSERT_EQ(g.get_node_ptr("S1")->is_active(), true);
+    ASSERT_EQ(g.get_node_ptr("S1")->get_action_ptr(), 
+            g.get_default_action_ptr());
+    ASSERT_EQ(g.get_edge_ptr("exi")->is_active(), true);
+    ASSERT_EQ(g.get_edge_ptr("emi")->is_active(), false);
+}
+
+
+//---------------------------------------------------------------------------//
+TEST_F(GraphTraversalTest, RunSingleStep){
+    g.link_node_action("S1", "nothere");
+    g.link_edge_action("exi", "echo_action");
+    g.set_current(g.get_node_ptr("S0"));
+    g.init();
+    testing::internal::CaptureStderr();
+    g.traverse();
+    std::string output = testing::internal::GetCapturedStderr();
+    ASSERT_EQ(output.substr(0, 34), "e__default_action__ called from S1");
+}
+
+
+//---------------------------------------------------------------------------//
+TEST_F(GraphTraversalTest, RunSimulation){
+    g.link_edge_action("emi", "echo_action");
+    g.set_current(g.get_node_ptr("S0"));
+    Event e{g.get_default_action_ptr(), 0.1};
+    g.push_event(e);
+    g.init();
+    testing::internal::CaptureStderr();
+    g.traverse();
+    std::string output = testing::internal::GetCapturedStderr();
+    ASSERT_EQ(output.substr(output.size()-41, 40), 
+            "__default_action__ called from " + g.get_current_ptr()->name +
+            " at 0.1");
+}

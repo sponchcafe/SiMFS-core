@@ -48,6 +48,12 @@ namespace sim{
         }
 
 
+        //-------------------------------------------------------------------//
+        bool Node::is_active() {
+            return action_ptr != nullptr;
+        }
+
+
         //-Initialization----------------------------------------------------//
         void Node::init(){
 
@@ -95,7 +101,7 @@ namespace sim{
 
         //-Traversal--------------------------------------------------------//
         void Node::traverse(){
-            if (action_ptr != nullptr){
+            if (is_active()){
                 action_ptr->fire();
             }
         }

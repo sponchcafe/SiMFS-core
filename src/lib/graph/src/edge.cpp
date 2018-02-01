@@ -44,6 +44,12 @@ namespace sim{
         }
 
 
+        //-------------------------------------------------------------------//
+        bool Edge::is_active() {
+            return action_ptr != nullptr;
+        }
+
+
         //-Accese-current-lifetime-------------------------------------------//
         double Edge::get_lifetime() const{
             return lifetime;
@@ -79,7 +85,7 @@ namespace sim{
 
         //-Simulation:-traversal---------------------------------------------//
         void Edge::traverse(){
-            if (action_ptr != nullptr){
+            if (is_active()){
                 action_ptr->fire();
             }
         }

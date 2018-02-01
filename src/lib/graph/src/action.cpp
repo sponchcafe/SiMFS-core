@@ -1,4 +1,5 @@
 #include "graph/action.hpp"
+#include "graph/node.hpp"
 
 #include <iostream>
 
@@ -19,7 +20,9 @@ namespace sim{
         //-------------------------------------------------------------------//
         void Action::fire() {
             graph.set_done(true);
-            std::cerr  << name << std::endl;
+            std::cerr  << name;
+            std::cerr << " called from " << graph.get_current_ptr()->name;
+            std::cerr << " at " << graph.get_clock() << std::endl;
         }
 
 

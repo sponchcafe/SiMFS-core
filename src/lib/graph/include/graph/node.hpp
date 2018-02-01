@@ -61,6 +61,7 @@ namespace sim{
                 void set_action(std::string const action_name);
                 std::string const get_action_name(); 
                 Action * get_action_ptr();
+                bool is_active();
 
             
                 //-Initialization--------------------------------------------//

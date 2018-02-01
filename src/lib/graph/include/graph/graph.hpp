@@ -69,6 +69,7 @@ namespace sim{
                 // via a unique_ptr and manages its lifetime from hereon.
                 //-----------------------------------------------------------//
                 void add_action(std::unique_ptr<Action> &action_uptr);
+                std::vector<std::unique_ptr<Action>> const & get_actions() const;
                 Action * get_action_ptr(std::string const name);
                 Action * get_default_action_ptr();
                 size_t get_action_count() const;

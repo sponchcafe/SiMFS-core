@@ -8,7 +8,9 @@
 namespace sim{
     namespace graph{
 
+        //-------------------------------------------------------------------//
         //-CONSTRUCTOR-------------------------------------------------------//
+        //-------------------------------------------------------------------//
         Graph::Graph(unsigned seed) : seed(seed) {
 
             // default node
@@ -45,8 +47,8 @@ namespace sim{
 
         }
 
+
         /*---Representation---------------*/
-        
         /*void Graph::print_state(){
             std::cerr << "STATE REPORT GRAPH @" << this << std::endl;
             std::cerr << "==================================" << std::endl;
@@ -69,10 +71,12 @@ namespace sim{
             std::cerr << "=======" << std::endl;
         }*/
 
+
         //-------------------------------------------------------------------//
         void Graph::add_node(std::string const name){
             if(!node_exists(name)) nodes.emplace_back(*this, name);
         }
+
 
         //-------------------------------------------------------------------//
         std::vector<Node> const & Graph::get_nodes() const {
@@ -100,14 +104,6 @@ namespace sim{
 
 
         //-------------------------------------------------------------------//
-        /** Adds an edge to the graph
-         * @param
-         * [in]
-         * - **name:** name of the new edge
-         * - **source_name:** name of the outgoing node 
-         * - **target_name:** name of the incoming node
-         * - **lambda:** rate constant
-         */
         void Graph::add_edge(
                 std::string const name,
                 std::string const source_name,
@@ -125,12 +121,19 @@ namespace sim{
                         get_new_seed()
                     );
             }
+
+            // Register name with source node
+            Node * source_node = get_node_ptr(source_name);
+            source_node->add_edge(name);
+
         }
+
 
         //-------------------------------------------------------------------//
         std::vector<Edge> const & Graph::get_edges() const{
             return edges;
         }
+
 
         //-------------------------------------------------------------------//
         Edge * Graph::get_edge_ptr(std::string const name) {
@@ -156,6 +159,13 @@ namespace sim{
             if(!action_exists(action_uptr->name)){
                 actions.push_back(std::move(action_uptr)); 
             }
+        }
+        
+        
+        //-------------------------------------------------------------------//
+        std::vector<std::unique_ptr<Action>> const & Graph::get_actions() 
+            const {
+            return actions;
         }
 
 
@@ -211,14 +221,14 @@ namespace sim{
         //-------------------------------------------------------------------//
         void Graph::traverse() {
 
-            Edge * next_path = default_edge.get();
+            Edge * next_path = get_default_edge_ptr();
 
             // Simulation mainloop
             while (!done){
 
                 current->traverse(); 
-
                 next_path = current->get_next();
+
                 while(
                         !events.empty() 
                         && 
@@ -297,14 +307,13 @@ namespace sim{
         }
 
         
-        
-
-        /* PRIVATE */
-
+        //-------------------------------------------------------------------//
+        //-PRIVATE-----------------------------------------------------------//
         //-------------------------------------------------------------------//
         unsigned Graph::get_new_seed() const{
             return seed+1;
         }
+
 
         /*void Graph::print_actions(size_t indent) const {
             std::string ind(indent, ' ');
@@ -355,6 +364,7 @@ namespace sim{
             for (auto &action: actions) if (action->name == name) return true;
             return false;
         }
+
 
     }
 }
