@@ -6,4 +6,3 @@ target_link_libraries(graph random)
 
 # Tests
 add_subdirectory(tests)
-

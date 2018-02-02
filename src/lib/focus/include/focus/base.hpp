@@ -10,16 +10,18 @@
  *   - List of specific implementations extending the base class
  */
 
-#include "sim/types.hpp" // includes the coordinate definition
+#include "definitions.hpp"
 
 namespace sim{
+
+
     namespace focus{
 
         class BaseFocus{
 
             public:  
 
-                virtual double evaluate(const sim::io::SI_Coordinate &c) const = 0;
+                virtual double evaluate(const sim::SI_Coordinate &c) const = 0;
 
             private:
 

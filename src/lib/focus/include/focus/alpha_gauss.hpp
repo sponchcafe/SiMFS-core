@@ -19,8 +19,8 @@ namespace sim{
 
                 }
 
-                double evaluate(sim::io::SI_Coordinate const &c) const {
-                    double x1 = pow(1/(sqrt(CONST_PI/2) * waist_xy), 2);
+                double evaluate(sim::SI_Coordinate const &c) const {
+                    double x1 = pow(1/(sqrt(sim::CONST_PI/2) * waist_xy), 2);
                     double x2 = pow(c.z,2)/pow(waist_z,2);
                     double x3 = (pow(c.x, 2)+pow(c.y, 2));
                     double x4 = (exp(-2*x2))/pow(waist_xy, 2);

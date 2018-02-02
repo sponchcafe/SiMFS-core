@@ -2,7 +2,7 @@
 #include "focus/base.hpp"
 
 using namespace sim::focus;
-using namespace sim::io; 
+using namespace sim;
 
 class EvaluationTest : public ::testing::Test{
     /* Testing fixure class that initializes a focus funciton object.

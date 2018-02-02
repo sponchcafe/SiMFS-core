@@ -16,10 +16,9 @@ namespace sim{
                 Gaussian(double w_x, double w_y, double w_z) 
                     : waist_x(w_x), waist_y(w_y), waist_z(w_z)
                 {
-
                 }
 
-                double evaluate(const sim::io::SI_Coordinate &c) const {
+                double evaluate(const sim::SI_Coordinate &c) const {
                     double x = gauss(c.x, waist_x);
                     double y = gauss(c.y, waist_y);
                     double z = gauss(c.z, waist_z);

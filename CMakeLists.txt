@@ -6,17 +6,9 @@ set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -O3 -march=native ")
 enable_testing()
 
 # RANDOM LIB defined in this library folder CMakeLists.txt
-add_subdirectory(${CMAKE_SOURCE_DIR}/src/lib/random)
-add_subdirectory(${CMAKE_SOURCE_DIR}/src/lib/getopt)
-add_subdirectory(${CMAKE_SOURCE_DIR}/src/lib/json)
-add_subdirectory(${CMAKE_SOURCE_DIR}/src/lib/sim)
-add_subdirectory(${CMAKE_SOURCE_DIR}/src/lib/focus)
-add_subdirectory(${CMAKE_SOURCE_DIR}/src/lib/graph)
-
-
-add_subdirectory(${CMAKE_SOURCE_DIR}/src/components)
-add_subdirectory(${CMAKE_SOURCE_DIR}/src/components/ph2)
-
+add_subdirectory(${CMAKE_SOURCE_DIR}/src/lib/)
+# add_subdirectory(${CMAKE_SOURCE_DIR}/src/components)
+# add_subdirectory(${CMAKE_SOURCE_DIR}/src/components/ph2)
 
 # ========== GOOGLE TEST INTEGRATION =========== #
 # Download and unpack googletest at configure time
@@ -55,5 +47,4 @@ endif()
 # add_executable(example example.cpp)
 # target_link_libraries(example gtest_main)
 # add_test(NAME example_test COMMAND example)
-
-
+ 

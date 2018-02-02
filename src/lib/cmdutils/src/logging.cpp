@@ -1,4 +1,4 @@
-#include <sim/logging.hpp>
+#include "cmdutils/logging.hpp"
 
 namespace sim{
 
@@ -11,7 +11,8 @@ namespace sim{
             std::cerr << msg;
         }
         void critical(std::string msg) {
-            std::cerr << msg; exit(EXIT_FAILURE);
+            std::cerr << msg; 
+            exit(EXIT_FAILURE);
         }
     };
 

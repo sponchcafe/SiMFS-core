@@ -3,7 +3,7 @@
 #include "focus_test_fixture.hpp"
 
 using namespace sim::focus;
-using namespace sim::io; 
+using namespace sim;
 
 constexpr si_coord_t WAIST = 100e-9;
 
