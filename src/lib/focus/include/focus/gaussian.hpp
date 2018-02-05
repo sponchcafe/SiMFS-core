@@ -2,7 +2,6 @@
 #define SIM_FOCUS_GAUSSIAN_H
 
 #include "focus/base.hpp"
-#include <cmath>
 
 namespace sim{
     namespace focus{
@@ -11,23 +10,20 @@ namespace sim{
 
             public:
 
-                Gaussian(){}
-
                 Gaussian(double w_x, double w_y, double w_z) 
                     : waist_x(w_x), waist_y(w_y), waist_z(w_z)
-                {
-                }
+                {}
 
-                double evaluate(const sim::SI_Coordinate &c) const {
-                    double x = gauss(c.x, waist_x);
-                    double y = gauss(c.y, waist_y);
-                    double z = gauss(c.z, waist_z);
-                    return x*y*z;
+                double evaluate(double x, double y, double z) const {
+                    return 
+                        gauss(x, waist_x) *
+                        gauss(y, waist_y) * 
+                        gauss(z, waist_z);
                 }
 
             private:
 
-                double gauss(const double &x, const double &w) const {
+                double gauss(double x, double w) const {
                     return exp(-4*pow(x, 2)/(2*pow(w, 2)));
                 }
 

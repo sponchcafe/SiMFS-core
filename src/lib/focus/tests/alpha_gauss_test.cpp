@@ -1,12 +1,12 @@
 #include "gtest/gtest.h"
 #include "focus/alpha_gauss.hpp"
 #include "focus/base.hpp"
-#include "focus_test_fixture.hpp"
+#include "fixtures.hpp"
 
 using namespace sim::focus;
 using namespace sim;
 
-constexpr si_coord_t WAIST = 100e-9;
+constexpr double WAIST = 100e-9;
 constexpr double MAX_VAL = 63661977236758.16; 
 constexpr double EPSILON = 1e-12;
 
@@ -20,25 +20,22 @@ class AlphaGaussTest : public EvaluationTest{
 
 TEST_F(AlphaGaussTest, Zero){
     /* Test central amplitude == 1 */
-    EXPECT_DOUBLE_EQ(focus->evaluate(c), MAX_VAL);
+    EXPECT_DOUBLE_EQ(focus->evaluate(0.0, 0.0, 0.0), MAX_VAL);
 }
 
 TEST_F(AlphaGaussTest, InflectionX){
     /* Test inflection point at waist == 1/e^2 */
-    c.x = WAIST;
-    EXPECT_DOUBLE_EQ(focus->evaluate(c), MAX_VAL/pow(CONST_E, 2));
+    EXPECT_DOUBLE_EQ(focus->evaluate(WAIST, 0.0, 0.0), MAX_VAL/pow(CONST_E, 2));
 }
 
 TEST_F(AlphaGaussTest, InflectionZ){
     /* Test inflection point at waist == 1/e^2 */
-    c.z = WAIST;
-    EXPECT_DOUBLE_EQ(focus->evaluate(c), MAX_VAL/pow(CONST_E, 2));
+    EXPECT_DOUBLE_EQ(focus->evaluate(0.0, 0.0, WAIST), MAX_VAL/pow(CONST_E, 2));
 }
 
 TEST_F(AlphaGaussTest, Point){
     /* Test arbitrary precalculated point */
-    c = SI_Coordinate{314e-9, 157e-9, 99e-9};
-    EXPECT_DOUBLE_EQ(focus->evaluate(c), 278611371419.2002); 
+    EXPECT_DOUBLE_EQ(focus->evaluate(314e-9, 157e-9, 99e-9), 278611371419.2002); 
 }
 
 TEST_F(AlphaGaussTest, AreaXYZero){
