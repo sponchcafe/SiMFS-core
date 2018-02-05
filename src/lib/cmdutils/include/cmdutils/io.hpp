@@ -1,20 +1,20 @@
-#ifndef SIM_INFRASTUCTURE_IO_H
-#define SIM_INFRASTUCTURE_IO_H
+#ifndef SIM_CMDUTILS_IO_H
+#define SIM_CMDUTILS_IO_H
 
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <stdlib.h>
 
 
 namespace sim{
     namespace io{
 
-        //-------------------------------------------------------------------//
+        //-Definitions-------------------------------------------------------//
         size_t const DEFAULT_SIZE = 1024;
+        std::string const EMPTY_FILENAME = "";
 
 
-        //-------------------------------------------------------------------//
+        //-Deprecated-------------------------------------------------------//
         template <typename T> std::ostream & write_binary(
                 std::ostream& os, T const & t){
             char const * out_buffer = reinterpret_cast<char const *>(&t);
@@ -22,7 +22,7 @@ namespace sim{
         }
 
 
-        //-------------------------------------------------------------------//
+        //-Deprecated-------------------------------------------------------//
         template <typename T> std::istream & read_binary(
                 std::istream &is, T& t){
             char *in_buffer = reinterpret_cast<char *>(&t);
@@ -31,140 +31,167 @@ namespace sim{
             return is;
         }
 
-        
         //-------------------------------------------------------------------//
         template <typename T> class Output{
 
             public:
+
+                //-----------------------------------------------------------//
+                Output<T>() : Output<T>(EMPTY_FILENAME, DEFAULT_SIZE)
+                {}
+
+                //-----------------------------------------------------------//
+                Output<T>(size_t s) : Output<T>(EMPTY_FILENAME, s)
+                {}
             
                 //-----------------------------------------------------------//
-                Output<T>(std::string filename="", size_t s=DEFAULT_SIZE) : 
-                    n_bytes(s){
-                    if (filename != ""){
-                        outfile = new std::ofstream(filename, 
+                Output<T>(std::string filename, size_t s=DEFAULT_SIZE) 
+                    : n_bytes(s)
+                {
+                    if (filename != EMPTY_FILENAME){
+                        // filename specified, open file and set to output
+                        outfile = std::ofstream(filename, 
                                 std::ofstream::binary);
-                        output = outfile;
-                    }else{
+                        output = &outfile;
+                    }
+                    else{
+                        // no filename, set output to stdout
                         output = &std::cout;
                     }
                     init();
                 }
 
                 //-----------------------------------------------------------//
-                Output<T>(size_t s) : n_bytes(s){
-                    output = &std::cout;
-                    init();
-                }
-
-                //-----------------------------------------------------------//
                 Output<T>(Output<T> &source) = delete;
+
                 //-----------------------------------------------------------//
                 Output<T> &operator=(Output<T> &other) = delete;
-                //-----------------------------------------------------------//
-                Output<T>(Output<T> &&other) = default;
-                //-----------------------------------------------------------//
-                Output<T> &operator=(Output<T> &&other) = default;
-                //-----------------------------------------------------------//
-                ~Output<T>(){
-                    output->flush();
-                    if (current>start){
-                        dump();
-                    }
-                    output->flush(); 
-                }
 
                 //-----------------------------------------------------------//
+                Output<T>(Output<T> &&other) = default;
+
+                //-----------------------------------------------------------//
+                Output<T> &operator=(Output<T> &&other) = default;
+
+                //-----------------------------------------------------------//
+                ~Output<T>(){
+                    dump();                                 // clear the buffer
+                    output->flush();                        // clear the stream
+                    if (outfile.is_open()) outfile.close(); // close file
+                }
+
+                //-Put-a-single-item-to-the-buffer---------------------------//
                 void put(T &item){
                     (*current) = item;
                     current++;
-                    if (current==end){
-                        dump();
-                        current = start;
-                    }
+                    if (current==end) dump();
                 }
 
             private:
 
-                //-----------------------------------------------------------//
+                //-Setup-buffer-and-output-----------------------------------//
                 void init(){
+
+                    // check how many elements fit into the buffer size
                     n_elements = (n_bytes/sizeof(T));
                     n_bytes = n_elements * sizeof(T);
                     
+                    // allocate data buffer
                     databuffer = std::unique_ptr<T>(new T[n_elements]);
-                    start = databuffer.get();
-                    end = start+n_elements;
-                    current = start;
 
+                    // set pointers for running the buffer
+                    start = databuffer.get();
+                    end = start+n_elements; 
+                    current = start; 
+
+                    // byte-view of the data buffer
                     bytebuffer = reinterpret_cast<const char *>( start );
+
                 }
 
-                //-----------------------------------------------------------//
+                //-Write-the-buffer-content-and-reset-pointers---------------//
                 void dump(){
                     output->write(bytebuffer, (current-start)*sizeof(T));
+                    current = start;
                 }
         
-                //-----------------------------------------------------------//
-                std::ofstream *outfile;
+                //-Handles---------------------------------------------------//
+                std::ofstream outfile;
                 std::ostream *output;
 
-                //-----------------------------------------------------------//
+                //-Buffer-memory---------------------------------------------//
                 std::unique_ptr<T> databuffer; 
 
+                //-Pointers-for-buffer-management----------------------------//
                 T *start;
                 T *current;
                 T *end;
             
-                const char *bytebuffer;
+                //-Byte-view-of-the-buffer-----------------------------------//
+                char const *bytebuffer;
                 
+                //-Size-definitions------------------------------------------//
                 size_t n_bytes;
                 size_t n_elements;
 
         };
 
+
+        //-------------------------------------------------------------------//
         template <typename T> class Input{
         
             public:
 
                 //-----------------------------------------------------------//
-                Input<T>(std::istream &in=std::cin, size_t s=DEFAULT_SIZE) 
-                    : input(&in), n_bytes(s){
-                    init();
-                }
+                Input<T>()
+                    : Input<T>(EMPTY_FILENAME, DEFAULT_SIZE)
+                {}
 
                 //-----------------------------------------------------------//
-                Input<T>(std::string filename="", size_t s=DEFAULT_SIZE) 
-                    : n_bytes(s){
-                    if (filename != ""){
-                        infile = new std::ifstream(
+                Input<T>(size_t s)
+                    : Input<T>(EMPTY_FILENAME, s)
+                {}
+
+                //-----------------------------------------------------------//
+                Input<T>(std::string filename, size_t s=DEFAULT_SIZE) 
+                    : n_bytes(s)
+                {
+                    if (filename != EMPTY_FILENAME){
+                        // filename specified, open file and set to output
+                        infile = std::ifstream(
                                 filename, std::ifstream::binary);
-                        input = infile;
-                    }else{
+                        input = &infile;
+                    }
+                    else{
+                        // no filename, set to stdin
                         input = &std::cin;
                     }
                     init();
                 }
 
                 //-----------------------------------------------------------//
-                Input<T>(size_t s) : n_bytes(s){
-                    input = &std::cin;
-                    init();
+                Input<T>(Input<T> &source) = delete;
+                
+                //-----------------------------------------------------------//
+                Input<T> &operator=(Input<T> &other) = delete;
+                
+                //-----------------------------------------------------------//
+                Input<T>(Input<T> &&other) = default;
+                
+                //-----------------------------------------------------------//
+                Input<T> &operator=(Input<T> &&other) = default;
+                
+                //-----------------------------------------------------------//
+                ~Input<T>(){
+                    if (infile.is_open()) infile.close(); // close file
                 }
 
-                //-----------------------------------------------------------//
-                Input<T>(Input<T> &source) = delete;
-                Input<T> &operator=(Input<T> &other) = delete;
-                Input<T>(Input<T> &&other) = default;
-                Input<T> &operator=(Input<T> &&other) = default;
-                ~Input<T>(){}
-
-                //-----------------------------------------------------------//
+                //-Read-a-single-element-------------------------------------//
                 bool get(T &target){
-                    if (current >= end){
-                        fill();
-                    }
+                    if (current >= end) fill();
                     target = *current;
                     current++;
-                    return !eof || current < end;
+                    return !eof || current < end; // not eof or data in buffer
                 }
 
                 //-----------------------------------------------------------//
@@ -172,7 +199,7 @@ namespace sim{
                     return *current;
                 }
 
-                //-----------------------------------------------------------//
+                //-Make-inputs-sortable-by-next-value------------------------//
                 bool operator< (const Input<T>& rhs) const {
                     return this->peek() < rhs.peek();
                 }
@@ -181,42 +208,55 @@ namespace sim{
 
                 //-----------------------------------------------------------//
                 void init(){
+
+                    // check how many elements fit into the buffer size
                     n_elements = (n_bytes/sizeof(T));
                     n_bytes = n_elements * sizeof(T);
                     
+                    // allocate data buffer
                     databuffer = std::unique_ptr<T>(new T[n_elements]);
+
+                    // set pointers for running the buffer
                     start = databuffer.get();
                     end = start;
                     current = start;
 
+                    // byte view of the buffer
                     bytebuffer = reinterpret_cast<char *>( start ) ;
+
+                    // initial read
                     fill();
+
                 }
     
-                //-----------------------------------------------------------//
+                //-Fill-the-buffer-from-the-instream-------------------------//
                 void fill(){
                     input->read(bytebuffer, n_bytes);
                     end = start + input->gcount()/sizeof(T);
                     current = start;
-                    if (!input->gcount()){
-                        eof = true;
-                    }
+                    if (!input->gcount()) eof = true;
                 }
 
-                std::ifstream *infile;
+                //-Handles---------------------------------------------------//
+                std::ifstream infile;
                 std::istream *input;
                 
-                //-----------------------------------------------------------//
+                //-Buffer-memory---------------------------------------------//
                 std::unique_ptr<T> databuffer; 
 
+                //-Pointers-for-buffer-management----------------------------//
                 T *start;
                 T *current;
                 T *end;
                 
+                //-Byte-view-of-the-bufferj----------------------------------//
                 char *bytebuffer;
+
+                //-Size-definitions------------------------------------------//
                 size_t n_bytes;
                 size_t n_elements;
                 
+                //-EOF-flag--------------------------------------------------//
                 bool eof = false;
 
         };
@@ -224,4 +264,5 @@ namespace sim{
     };
 
 };
+
 #endif

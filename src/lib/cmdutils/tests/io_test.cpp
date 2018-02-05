@@ -3,7 +3,6 @@
 #include <fstream>
 #include <array>
 
-void do_stuff(){};
 using namespace sim::io;
 
 
@@ -17,6 +16,14 @@ TEST(IOBasicTest, TestWriteRead){
     std::ifstream i = std::ifstream("./testfile", std::ifstream::binary);
     while(!i.fail()) read_binary<int>(i, x);
     ASSERT_EQ(x, 19999);
+    std::remove("./testfile");
+}
+
+
+//---------------------------------------------------------------------------//
+TEST_F(ReadTest, Creation){
+    auto in_file = Input<int>(bytefile);
+    auto in_file_sized = Input<int>(bytefile, 100);
 }
 
 
@@ -76,6 +83,16 @@ TEST_F(ReadTest, TypedRead){
 
     ASSERT_EQ(count, 1000/sizeof(double));
     ASSERT_EQ(d, *val);
+}
+
+
+//---------------------------------------------------------------------------//
+TEST(WriteTest, Creation){
+   auto out_default = Output<int>();
+   auto out_sized = Output<int>(100);
+   auto out_file = Output<int>("filename.dat");
+   auto out_file_sized = Output<int>("filename.dat", 100);
+   std::remove("filename.dat");
 }
 
 
