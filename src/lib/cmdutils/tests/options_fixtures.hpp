@@ -3,7 +3,7 @@
     
 using namespace sim::opt;
 
-//-Convert-std::vector<std::string>-to-cstyle-char-**-----------------------//
+//-Convert-std::vector<std::string>-to-cstyle-char-**------------------------//
 char ** make_mock_argv(std::vector<std::string> &string_vector){
     char ** cstrings = new char *[string_vector.size()+1];
     int pos = 0;
@@ -17,6 +17,14 @@ char ** make_mock_argv(std::vector<std::string> &string_vector){
     return cstrings;
 }
 
+//-Convert-string-to-non-const-cstring---------------------------------------//
+char * make_cstring(std::string s){
+    char * cstring = new char[128];
+    strcpy(cstring, s.c_str());
+    return cstring;
+}
+
+
 
 //---------------------------------------------------------------------------//
 class ParameterHandlerTest: public ::testing::Test{
@@ -24,78 +32,69 @@ class ParameterHandlerTest: public ::testing::Test{
     protected:
 
         //-------------------------------------------------------------------//
-        ParameterHandlerTest() :
-            argv_mock{"./execname", "-d", "commandline"},
-            json_mock{ {"test", {{"clong", "json"}, {"dlong", "json"}}} }
-        {}
+        ParameterHandlerTest() {}
         
         //-------------------------------------------------------------------//
         virtual void SetUp() {
 
-            char environment[] = "blong=environment";
-            putenv(environment);
+            argv_mock = {"./execname", "./params.json", "anotherfile.txt", "1.9",
+                "--dlong", "commandline", "-z", "something", "else"};
 
-            p = ParameterHandler(
-                    "test", 
-                    json_mock,
-                    argv_mock.size(),
-                    make_mock_argv(argv_mock));
+            // Create JSON parameter file
+            
+            json json_mock = json{
+                {"test", 
+                    {
+                        {"clong", "json"}, 
+                        {"dlong", "json"}, 
+                        {"nested", "nested.json"}
+                    }
+                }
+            };
+
+            json nested_json_mock = json{
+                {"nested_1", 22},
+                {"nested_2", 23}
+            };
+
+            std::ofstream outfile("./params.json");
+            outfile << json_mock;
+            outfile.close();
+
+            std::ofstream outfile2("./nested.json");
+            outfile2 << nested_json_mock;
+            outfile2.close();
+
+        }
+
+        //-Create-parameter-handler-from-argvmock----------------------------//
+        void create_handler(std::vector<std::string> argv, 
+                std::string prefix="test"){
+
+            ParameterHandler *p = new ParameterHandler(
+                    prefix,
+                    argv.size(),
+                    make_mock_argv(argv)
+                    );
 
             std::string default_str = "default";
-            p.get_parameter("along", 'a', default_str, "a description."); // 1.
-            p.get_parameter("blong", 'b', default_str, "b description."); // 2.
-            p.get_parameter("clong", 'c', default_str, "c description."); // 3.
-            p.get_parameter("dlong", 'd', default_str, "d description."); // 4.
+            p->get_parameter("along", 'a', default_str, "a description."); // 1
+            p->get_parameter("blong", 'b', default_str, "b description."); // 2
+            p->get_parameter("clong", 'c', default_str, "c description."); // 3
+            p->get_parameter("dlong", 'd', default_str, "d description."); // 4
+
+            handler.reset(p);
 
         }
 
         //-------------------------------------------------------------------//
         virtual void TearDown() {
+            std::remove("./params.json");
+            std::remove("./nested.json");
         }
+
+        std::unique_ptr<ParameterHandler> handler;
 
         std::vector<std::string> argv_mock;
-        json json_mock;
-        ParameterHandler p;
-
-};
-
-//---------------------------------------------------------------------------//
-class ParameterHandlerDebugTest: public ::testing::Test{
-
-    protected:
-
-        //-------------------------------------------------------------------//
-        ParameterHandlerDebugTest() :
-            argv_mock{"./execname", "-d", "commandline", "-C"},
-            json_mock{ {"test", {{"clong", "json"}, {"dlong", "json"}}} }
-        {}
-        
-        //-------------------------------------------------------------------//
-        virtual void SetUp() {
-
-            char environment[] = "blong=environment";
-            putenv(environment);
-
-            p = ParameterHandler(
-                    "test", 
-                    json_mock,
-                    argv_mock.size(),
-                    make_mock_argv(argv_mock));
-
-            std::string default_str = "default";
-            p.get_parameter("along", 'a', default_str, "a description."); // 1.
-            p.get_parameter("blong", 'b', default_str, "b description."); // 2.
-            p.get_parameter("clong", 'c', default_str, "c description."); // 3.
-            p.get_parameter("dlong", 'd', default_str, "d description."); // 4.
-
-        }
-
-        //-------------------------------------------------------------------//
-        virtual void TearDown() {
-        }
-
-        std::vector<std::string> argv_mock;
-        json json_mock;
-        ParameterHandler p;
 
 };
