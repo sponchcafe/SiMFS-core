@@ -14,11 +14,12 @@ namespace sim{
     namespace opt{
 
         std::string const EMPTY_STRING = "";        
+        std::string const COMMANDLINE_KEY = "COMMANDLINE";
         std::string const GLOBALS_KEY = "GLOBALS";        
         std::string const ENVIRONMENT_KEY = "ENVIRONMENT";
-        std::string const EXECNAME_KEY = "EXECNAME";        
-        std::string const JSON_FILE_TOKEN = ".json"; std::string const SHORT_OPTION_TOKEN = "-";
-        std::string const LONG_OPTION_TOKEN = "--";
+        std::string const META_INFO_KEY = "METAINFO";        
+        std::string const JSON_FILE_TOKEN = ".json"; 
+        std::string const OPTION_TOKEN = "-";
 
         //-------------------------------------------------------------------//
         class JsonCLI{
@@ -29,28 +30,76 @@ namespace sim{
                 JsonCLI(
                         int argc,
                         char* argv[],
+                        std::vector<std::string> env_vars = {},
                         bool load_files = true,
-                        std::vector<std::string> env_vars = {}
-                       ) : env_vars(env_vars), load_files(load_files)
+                        bool flatten = false,
+                        bool store_origin = false
+                       ) :
+                load_files(load_files),
+                store_origin(store_origin)
                 {
 
+                    // exec name
                     parse_argv_vector(argc, argv);
-                    args[EXECNAME_KEY] = argv_vec[0];
+                    args[META_INFO_KEY]["execname"] = argv_vec[0];
 
-                    auto pos = argv_vec.begin()+1;
+                    // env vars
+                    for (auto &it : env_vars) {
+                        args[ENVIRONMENT_KEY][it] = string_to_json(get_env_var(it));
+                    }
 
-                    // inject environment and globals
-                    pos = argv_vec.insert(pos, "--"+GLOBALS_KEY);
-                    pos = argv_vec.insert(pos, "--"+ENVIRONMENT_KEY);
-                    ++pos;
-                    for (auto &it : env_vars) argv_vec.insert(pos, it);
+                    // globals
+                    auto it = argv_vec.begin()+1;
+                    while(it != argv_vec.end() && !is_option(*it)){
+                        globals_vec.push_back(*it++);;
+                    }
+                    args[GLOBALS_KEY] = vec_to_json(globals_vec);
 
-                    for (auto &it : argv_vec) std::cout << it << '\n';
-                    // parse the modified argv vector
-                    argv_to_json();
+                    std::string key = "";
+                    if (it != argv_vec.end()) key = strip_cmd_arg(*it);
+                    else {
+                        // no named cmd args
+                        args[COMMANDLINE_KEY] = json{};
+                        return;
+                    }
+                    std::vector<std::string> parameters{};
+
+                    // the rest are cmd arguments
+                    while(it != argv_vec.end()){
+                        cmd_args_vec.push_back(*it++);
+                    }
+
+                    // parse other options in their scope (flattening)
+                    for (auto it = cmd_args_vec.begin(); it != cmd_args_vec.end(); ++it){
+                        if (is_option(*it)){
+                            if (args[COMMANDLINE_KEY].count(key)){
+                                for (auto it : vec_to_json(parameters, flatten)) {
+                                    args[COMMANDLINE_KEY][key].push_back(it);
+                                }
+                            }
+                            else{
+                                args[COMMANDLINE_KEY][key] = vec_to_json(parameters, flatten);
+                            }
+                            key = strip_cmd_arg(*it);
+                            parameters.clear();
+                        } 
+                        else{
+                            parameters.push_back(*it);
+                        }
+                    }
+
+                    if (args[COMMANDLINE_KEY].count(key)){
+                        for (auto it : vec_to_json(parameters, flatten)) {
+                            args[COMMANDLINE_KEY][key].push_back(it);
+                        }
+                    }
+                    else{
+                        args[COMMANDLINE_KEY][key] = vec_to_json(parameters, flatten);
+                    }
 
                 }
 
+                //-----------------------------------------------------------//
                 json args{};
 
             private:
@@ -65,18 +114,8 @@ namespace sim{
                 }
 
                 //-----------------------------------------------------------//
-                bool is_short_option(std::string s){
-                    return (s.length() == 2) && (s.substr(0, 1) == SHORT_OPTION_TOKEN);
-                }
-
-                //-----------------------------------------------------------//
-                bool is_long_option(std::string s){
-                    return (s.length() > 2) && (s.substr(0, 2) == LONG_OPTION_TOKEN);
-                }
-
-                //-----------------------------------------------------------//
                 bool is_option(std::string s){
-                    return is_short_option(s) || is_long_option(s);
+                    return s.substr(0, 1) == OPTION_TOKEN;
                 }
 
                 //-----------------------------------------------------------//
@@ -87,20 +126,17 @@ namespace sim{
 
                 //-----------------------------------------------------------//
                 std::string strip_cmd_arg(std::string arg){
-                    if (is_long_option(arg)) {
-                        return arg.substr(2, arg.size()-2);
-                    }
-                    if (is_short_option(arg)) {
-                        return arg.substr(1, arg.size()-1);
-                    }
-                    return arg;
+                    int count = 0;
+                    while(count < arg.length() && arg.at(count) == '-') count++;
+                    if (count >= arg.length()) return arg;
+                    return arg.substr(count, arg.length()-count);
                 }
 
                 //-----------------------------------------------------------//
                 json string_to_json(std::string s){
                     json entry{};
                     if (is_json_file_specifier(s) && load_files){
-                        entry = file_to_json(strip_cmd_arg(s));
+                        entry = file_to_json(strip_cmd_arg(s), store_origin);
                         if (entry == json{}) entry = s;
                         return entry;
                     }
@@ -132,7 +168,7 @@ namespace sim{
                 }
 
                 //-----------------------------------------------------------//
-                json file_to_json(std::string const filename){
+                json file_to_json(std::string const filename, bool origin){
                     std::ifstream infile{filename};
                     json js;
                     try{
@@ -142,7 +178,15 @@ namespace sim{
                         std::cerr << filename << std::endl;
                     }
                     infile.close();
-                    return js;
+                    if (origin){
+                        json entry;
+                        entry["_content"] = js;
+                        entry["_origin"] = filename;
+                        return entry;
+                    }
+                    else{
+                        return js;
+                    }
                 }
 
 
@@ -162,30 +206,13 @@ namespace sim{
                 }
                 
                 //-----------------------------------------------------------//
-                void argv_to_json(){
-
-                    std::string key = GLOBALS_KEY;
-                    std::vector<std::string> parameters{};
-
-                    // parse other options in their scope (flattening)
-                    for (auto it = argv_vec.begin(); it != argv_vec.end(); ++it){
-                        if (is_option(*it)){
-                            args[key] = vec_to_json(parameters);
-                            key = strip_cmd_arg(*it);
-                            parameters.clear();
-                        } 
-                        else{
-                            parameters.push_back(*it);
-                        }
-                    }
-                    args[key] = vec_to_json(parameters);
-
-                }
-
-                //-----------------------------------------------------------//
                 std::vector<std::string> argv_vec{};
-                std::vector<std::string> env_vars;
+                std::vector<std::string> env_vars{};
+                std::vector<std::string> globals_vec{};
+                std::vector<std::string> cmd_args_vec{};
+
                 bool load_files = true;
+                bool store_origin = false;
 
         };
     }
