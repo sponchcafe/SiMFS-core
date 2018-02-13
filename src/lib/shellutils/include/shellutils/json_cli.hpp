@@ -18,33 +18,23 @@ namespace jcli{
     std::string const SHELL_KEY = "shell";
     std::string const FILE_TOKEN = "@"; 
     std::string const OPTION_TOKEN = "-";
-    std::string const INFO_TOKEN = "?";
-    std::string const DEBUG_TOKEN = "??";
 
     class JsonCli{
 
         public:
 
             //---------------------------------------------------------------//
-            JsonCli(int argc, char* argv[], char** envp){
+            JsonCli(int argc, char* argv[], char** envp, 
+                    std::vector<std::string> expand_env={}){
                 cli[META_KEY]["execname"] = argv[0];
                 cli[SHELL_KEY] = parse_argv_vector(argc, argv);
                 cli[ENV_KEY] = parse_envp_vector(envp);
+                for (auto &it : expand_env) expand_env_var(it);
             }
 
             //---------------------------------------------------------------//
-            bool info(){
-                return cli[SHELL_KEY].count(INFO_TOKEN) > 0;
-            }
-
-            //---------------------------------------------------------------//
-            bool debug(){
-                return cli[SHELL_KEY].count(DEBUG_TOKEN) > 0;
-            }
-
-            //---------------------------------------------------------------//
-            bool config(){
-                return cli[SHELL_KEY].count(FILE_TOKEN) > 0;
+            bool option_present(std::string const option_name){
+                return cli[SHELL_KEY].count(option_name) > 0;
             }
 
             //---------------------------------------------------------------//

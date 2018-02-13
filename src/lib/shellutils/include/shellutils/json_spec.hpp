@@ -8,7 +8,6 @@ using json = nlohmann::json;
 
 namespace jcli{
 
-
     class JsonSpec{
 
         public:
@@ -33,15 +32,18 @@ namespace jcli{
                 descriptions[name] = description;
                 aliases[name] = shell_aliases;
                 defaults[name] = default_val;
-                T val = query_cli(name, shell_aliases, default_val, validator);
+                json collected_vals = query_cli(name, shell_aliases);
+
+                T val = assign_from_array(collected_vals, default_val, validator);
                 values[name] = val;
                 
                 return val;
 
             }
 
+            //---------------------------------------------------------------//
             void enable_help(){
-                if (cli.info()){
+                if (cli.option_present("help")){
                     for (auto entry=defaults.begin(); entry!=defaults.end(); ++entry){
                         std::cout << entry.key() << "\t[";
                         for (auto alias : aliases[entry.key()]){
@@ -54,8 +56,9 @@ namespace jcli{
                 }
             }
 
+            //---------------------------------------------------------------//
             void enable_debug(){
-                if (cli.debug()){
+                if (cli.option_present("debug")){
                     std::cout << cli.cli.dump(4) << std::endl;
                 }
             }
@@ -63,8 +66,8 @@ namespace jcli{
 
             //---------------------------------------------------------------//
             void enable_config(){
-                if (cli.config()){
-                    json info_params = cli.cli[SHELL_KEY][FILE_TOKEN];
+                if (cli.option_present("config")){
+                    json info_params = cli.cli[SHELL_KEY]["config"];
                     if (info_params.size() == 0){
                         json output;
                         output[scope] = values;
@@ -101,10 +104,13 @@ namespace jcli{
             JsonCli cli;
 
             //---------------------------------------------------------------//
-            template <typename T> T assign_from_array(json array, T default_val,
+            template <typename T> T assign_from_array(
+                    json array, T default_val, 
                     std::function<bool(T)> validator){
+                
                 T val = default_val;
                 T _val = default_val;
+
                 for (auto it: array){ 
                     try {
                         _val = it;
@@ -112,12 +118,14 @@ namespace jcli{
                     catch(std::exception){};
                     if (validator(_val)) val = _val;
                 }
+
                 return val;
             }
 
 
             //---------------------------------------------------------------//
-            json collect_key(json object, std::string scope, std::string key, bool unwind=false){
+            json collect_key(json object, std::string scope, std::string key, 
+                    bool unwind=false){
                 if (
                         object.is_null() || 
                         !object.is_object() || 
@@ -147,44 +155,51 @@ namespace jcli{
             }
 
             //---------------------------------------------------------------//
-            template <typename T> T query_cli(
+            json query_cli(
                     std::string key,
-                    std::vector<std::string> shell_aliases={},
-                    T default_val = T{},
-                    std::function<bool(T)> validator
-                    = [](T val) -> bool {return true;}){
+                    std::vector<std::string> shell_aliases={}
+                    ){
 
-                T val = default_val;
                 std::reverse(shell_aliases.begin(), shell_aliases.end());
+
+                json jvals;
 
                 // search env
                 json jvals_env;
                 for (std::string envkey : cli.get_expanded_env()){
                     for (json object : cli.cli[jcli::ENV_KEY][envkey]){
                         jvals_env = collect_key(object, scope, key);
-                        val = assign_from_array<T>(jvals_env, val, validator);
+                        for (auto it: jvals_env) jvals.push_back(it);
                     }
                 }
 
                 // search args
                 json jvals_args;
-                for (json object : cli.cli[jcli::SHELL_KEY][jcli::OPTION_TOKEN]){
+                for (json object : 
+                        cli.cli[jcli::SHELL_KEY][jcli::OPTION_TOKEN]
+                        ){
                     jvals_args = collect_key(object, scope, key);
-                    val = assign_from_array<T>(jvals_args, val, validator);
+                    for (auto it: jvals_args) jvals.push_back(it);
                 }
 
                 // search options
                 json jvals_shell;
+
                 // search aliases
                 for (auto alias: shell_aliases){
-                    jvals_shell = collect_key(cli.cli, jcli::SHELL_KEY, alias, true);
-                    val = assign_from_array<T>(jvals_shell, val, validator);
+                    jvals_shell = collect_key(
+                            cli.cli, jcli::SHELL_KEY, alias, true
+                            );
+                    for (auto it: jvals_shell) jvals.push_back(it);
                 }
-                // search name
-                jvals_shell = collect_key(cli.cli, jcli::SHELL_KEY, key, true);
-                val = assign_from_array<T>(jvals_shell, val, validator);
 
-                return val;
+                // search name
+                jvals_shell = collect_key(
+                        cli.cli, jcli::SHELL_KEY, key, true
+                        );
+                for (auto it: jvals_shell) jvals.push_back(it);
+
+                return jvals;
             }
     };
 
