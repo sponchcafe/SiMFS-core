@@ -1,8 +1,8 @@
 # graph library
-FILE(GLOB graph_src src/*.cpp)
-add_library(graph ${graph_src})
-target_include_directories(graph PUBLIC ./include)
-target_link_libraries(graph random)
+FILE(GLOB sim_graph_src src/*.cpp)
+add_library(sim_graph ${sim_graph_src})
+target_include_directories(sim_graph PUBLIC ./include)
+target_link_libraries(sim_graph sim_random)
 
 # Tests
 add_subdirectory(tests)

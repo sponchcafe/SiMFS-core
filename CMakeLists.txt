@@ -9,8 +9,6 @@ enable_testing()
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/lib/)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/components)
 
-# add_subdirectory(${CMAKE_SOURCE_DIR}/src/components/ph2)
-
 # ========== GOOGLE TEST INTEGRATION =========== #
 # Download and unpack googletest at configure time
 configure_file(${CMAKE_SOURCE_DIR}/CMakeLists.txt.in googletest-download/CMakeLists.txt)
