@@ -148,7 +148,7 @@ namespace jcli{
 
 
             //---------------------------------------------------------------//
-            json collect_key(json object, std::string scope, std::string key, 
+            json collect_key(json object, json::json_pointer scope, std::string key, 
                     bool unwind=false){
                 if (
                         object.is_null() || 
@@ -212,14 +212,14 @@ namespace jcli{
                 // search aliases
                 for (auto alias: shell_aliases){
                     jvals_shell = collect_key(
-                            cli.cli, jcli::SHELL_KEY, alias, true
+                            cli.cli, json::json_pointer{"/"+jcli::SHELL_KEY}, alias, true
                             );
                     for (auto it: jvals_shell) jvals.push_back(it);
                 }
 
                 // search name
                 jvals_shell = collect_key(
-                        cli.cli, jcli::SHELL_KEY, key, true
+                        cli.cli, json::json_pointer{"/"+jcli::SHELL_KEY}, key, true
                         );
                 for (auto it: jvals_shell) jvals.push_back(it);
 

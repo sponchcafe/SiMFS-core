@@ -51,7 +51,7 @@ class JsonCliTest: public ::testing::Test{
 
             json env = {
                 { 
-                    "scope", {
+                    "my_scope", {
                         {"along", "enva"},
                         {"blong", "envb"},
                         {"clong", "envc"},
@@ -64,7 +64,7 @@ class JsonCliTest: public ::testing::Test{
 
             json args = {
                 {
-                    "scope", {
+                    "my_scope", {
                         {"along", "arga"},
                         {"blong", "argb"},
                         {"clong", "argc"}
@@ -102,7 +102,11 @@ class JsonCliTest: public ::testing::Test{
             cli.reset(new jcli::JsonCli(argc, argv, envp,
                     {"SIM_PARAM_FILE", "SIM_SCOPE_PARAMFILE"}));
 
-            spec.reset(new jcli::JsonSpec(*cli, "scope"));
+            spec.reset(new jcli::JsonSpec(*cli, "my_scope"));
+            spec->enable_scoping();
+            spec->enable_debug();
+            spec->enable_config();
+            spec->enable_help();
 
         }
 
