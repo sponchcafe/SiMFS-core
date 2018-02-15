@@ -13,9 +13,10 @@ namespace jcli{
         public:
 
             //---------------------------------------------------------------//
-            JsonSpec(JsonCli cli, std::string const scope)
-                : scope(scope), cli(cli)
+            JsonSpec(JsonCli cli, std::string const scope_str = EMPTY_STRING)
+                : cli(cli)
             {
+                prepend_to_scope(scope_str);
                 values = json{};
             }
 
@@ -41,6 +42,15 @@ namespace jcli{
 
             }
 
+            void enable_scoping(){
+                if(cli.option_present("scope")){
+                    json scope_params = cli.cli[SHELL_KEY]["scope"];
+                    for (auto it: scope_params){
+                        prepend_to_scope(it);
+                    }
+                }
+            }
+
             //---------------------------------------------------------------//
             void enable_help(){
                 if (cli.option_present("help")){
@@ -53,6 +63,7 @@ namespace jcli{
                         std::cout << descriptions[entry.key()];
                         std::cout << std::endl;
                     }
+                    exit(1);
                 }
             }
 
@@ -60,6 +71,7 @@ namespace jcli{
             void enable_debug(){
                 if (cli.option_present("debug")){
                     std::cout << cli.cli.dump(4) << std::endl;
+                    exit(1);
                 }
             }
 
@@ -89,10 +101,11 @@ namespace jcli{
                         outfile << jfile_before.dump(4) << std::endl;
                         outfile.close();
                     }
+                    exit(1);
                 }
             }
 
-            std::string const scope;
+            json::json_pointer scope;
 
             json values;
             json aliases;
@@ -102,6 +115,17 @@ namespace jcli{
         private:
 
             JsonCli cli;
+
+            //---------------------------------------------------------------//
+            void prepend_to_scope(std::string s){
+                if (s != EMPTY_STRING){
+                    std::string prepend = "/"+s;
+                    std::string scope_str = scope.to_string();
+                    prepend += scope_str;
+                    scope = json::json_pointer(prepend);
+                }
+            }
+
 
             //---------------------------------------------------------------//
             template <typename T> T assign_from_array(
@@ -160,7 +184,7 @@ namespace jcli{
                     std::vector<std::string> shell_aliases={}
                     ){
 
-                std::reverse(shell_aliases.begin(), shell_aliases.end());
+                //std::reverse(shell_aliases.begin(), shell_aliases.end());
 
                 json jvals;
 
