@@ -88,7 +88,6 @@ namespace sim{
                     next = edge_ptr;
                     min_lifetime = current_lifetime;
                 }        
-
             }
 
             // Return next path or the graphs default edge when edge is null.

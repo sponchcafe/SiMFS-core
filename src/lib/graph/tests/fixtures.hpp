@@ -73,6 +73,9 @@ class GraphTraversalTest: public ::testing::Test{
             echo_action = std::unique_ptr<Action>{
                 new EchoAction(g, "echo_action", "e")
             };
+            echo_action2 = std::unique_ptr<Action>{
+                new EchoAction(g, "echo_action2", "f")
+            };
         }
 
 
@@ -82,7 +85,9 @@ class GraphTraversalTest: public ::testing::Test{
             g.add_node("S1");
             g.add_edge("exi", "S0", "S1", 1e+6);
             g.add_edge("emi", "S1", "S0", 1e+8);
+            g.add_edge("ic", "S1", "S0", 1e+8);
             g.add_action(echo_action);
+            g.add_action(echo_action2);
         }
         
         
@@ -93,5 +98,6 @@ class GraphTraversalTest: public ::testing::Test{
         //-------------------------------------------------------------------//
         Graph g;
         std::unique_ptr<Action> echo_action;
+        std::unique_ptr<Action> echo_action2;
 
 };

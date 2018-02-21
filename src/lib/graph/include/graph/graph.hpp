@@ -149,7 +149,7 @@ namespace sim{
             private:
 
                 //-Get-new-seed-based-on-the-graph-seed----------------------//
-                unsigned get_new_seed() const;
+                unsigned get_new_seed();
 
 
                 //-Check-existence-------------------------------------------//

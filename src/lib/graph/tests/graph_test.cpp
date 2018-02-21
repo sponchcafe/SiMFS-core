@@ -176,10 +176,15 @@ TEST_F(GraphTraversalTest, InitializationLinks){
     Node * S1 = g.get_node_ptr("S1");
     Edge * exi = g.get_edge_ptr("exi");
     Edge * emi = g.get_edge_ptr("emi");
+    Edge * ic = g.get_edge_ptr("ic");
+
     ASSERT_EQ(S0->get_edges()[0], g.get_edge_ptr("exi"));
     ASSERT_EQ(S1->get_edges()[0], g.get_edge_ptr("emi"));
+    ASSERT_EQ(S1->get_edges()[1], g.get_edge_ptr("ic"));
+
     ASSERT_EQ(exi->get_target_node_ptr(), g.get_node_ptr("S1"));
     ASSERT_EQ(emi->get_target_node_ptr(), g.get_node_ptr("S0"));
+    ASSERT_EQ(ic->get_target_node_ptr(), g.get_node_ptr("S0"));
 }
     
 
@@ -223,4 +228,24 @@ TEST_F(GraphTraversalTest, RunSimulation){
     ASSERT_EQ(output.substr(output.size()-41, 40), 
             "__default_action__ called from " + g.get_current_ptr()->name +
             " at 0.1");
+}
+
+//---------------------------------------------------------------------------//
+TEST_F(GraphTraversalTest, EqualPaths){
+    g.link_edge_action("emi", "echo_action");
+    g.link_edge_action("ic", "echo_action2");
+    g.set_current(g.get_node_ptr("S0"));
+    Event e{g.get_default_action_ptr(), 1e-3};
+    g.push_event(e);
+    g.init();
+    testing::internal::CaptureStderr();
+    g.traverse();
+    std::string output = testing::internal::GetCapturedStderr();
+    int es = 0;
+    int fs = 0;
+    for (auto it: output){
+        if (it == 'e') es++;
+        if (it == 'f') fs++;
+    }
+    ASSERT_LT(abs(es-fs), (es+fs)/100);
 }
