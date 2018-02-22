@@ -1,5 +1,7 @@
 #include "graph/edge.hpp"
 
+#include <limits>
+
 namespace sim{
     namespace graph{
 
@@ -15,7 +17,7 @@ namespace sim{
             source_name(source_name),
             target_name(target_name),
             graph(graph),
-            lifetime(0.0),
+            lifetime(std::numeric_limits<double>::max()), // Init max for proper lambda=0 behaviour
             exponential(random::Exponential(lambda, seed))
         {}
 
