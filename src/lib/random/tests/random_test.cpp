@@ -89,3 +89,7 @@ TEST (UniformIntTest, Range){
         ASSERT_GE(result, -400); 
     } 
 }
+
+TEST (SeedTest, Seed){
+    ASSERT_NE(sim::random::get_new_seed(), 0);
+}

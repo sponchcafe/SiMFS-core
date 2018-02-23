@@ -6,6 +6,8 @@
 namespace sim {
     namespace random {
 
+        unsigned get_new_seed();
+        
         class Exponential{
 
             public:

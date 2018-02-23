@@ -2,9 +2,20 @@
 #include <iostream>
 #include <cmath>
 #include <limits>
+#include <chrono>
+#include <unistd.h>
+using namespace std::chrono;
 
 namespace sim{
     namespace random{
+
+        unsigned get_new_seed(){
+            milliseconds ms = duration_cast< milliseconds >(
+                        system_clock::now().time_since_epoch()
+                    );
+            pid_t pid = ::getpid();
+            return ms.count()*pid;
+        }
 
         Exponential::Exponential(double lambda, unsigned seed){
             generator = std::mt19937(seed);

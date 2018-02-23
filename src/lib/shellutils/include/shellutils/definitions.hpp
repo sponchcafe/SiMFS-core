@@ -7,14 +7,14 @@ namespace sim{
 
     //-------------------------------------------------------------------//
     typedef int16_t coord_nm_t;
-    typedef float coord_t;
+    typedef double coord_t;
     
-    typedef float realtime_t;
+    typedef double realtime_t;
     typedef uint32_t photon_count_t;
 
     typedef struct{
         realtime_t time;
-        float value;
+        double value;
     } TimedValue;
 
     //-Coordinate-in-integer-nm------------------------------------------//
