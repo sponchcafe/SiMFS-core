@@ -75,32 +75,15 @@ namespace jcli{
                 }
             }
 
+            //---------------------------------------------------------------//
+            void enable_log(){
+                if (cli.option_present("log")) dump_parameters("log");
+            }
 
             //---------------------------------------------------------------//
             void enable_config(){
-                if (cli.option_present("config")){
-                    json info_params = cli.cli[SHELL_KEY]["config"];
-                    if (info_params.size() == 0){
-                        json output;
-                        output[scope] = values;
-                        std::cout << output.dump(4) << std::endl;
-                    }
-                    for (auto it: info_params){
-                        std::string filename = it;
-                        std::ifstream infile;
-                        infile.open(it);
-                        json jfile_before;
-                        try{
-                            infile >> jfile_before;
-                        }
-                        catch (std::exception e){}
-                        infile.close();
-                        std::ofstream outfile;
-                        outfile.open(filename);
-                        jfile_before[scope] = values;
-                        outfile << jfile_before.dump(4) << std::endl;
-                        outfile.close();
-                    }
+                if (cli.option_present("config")) {
+                    dump_parameters("config");
                     exit(1);
                 }
             }
@@ -115,6 +98,32 @@ namespace jcli{
         private:
 
             JsonCli cli;
+
+            //---------------------------------------------------------------//
+            void dump_parameters(std::string key){
+                json info_params = cli.cli[SHELL_KEY][key];
+                if (info_params.size() == 0){
+                    json output;
+                    output[scope] = values;
+                    std::cout << output.dump(4) << std::endl;
+                }
+                for (auto it: info_params){
+                    std::string filename = it;
+                    std::ifstream infile;
+                    infile.open(it);
+                    json jfile_before;
+                    try{
+                        infile >> jfile_before;
+                    }
+                    catch (std::exception e){}
+                    infile.close();
+                    std::ofstream outfile;
+                    outfile.open(filename);
+                    jfile_before[scope] = values;
+                    outfile << jfile_before.dump(4) << std::endl;
+                    outfile.close();
+                }
+            }
 
             //---------------------------------------------------------------//
             void prepend_to_scope(std::string s){
