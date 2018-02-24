@@ -195,7 +195,8 @@ namespace sim{
                 }
 
                 //-----------------------------------------------------------//
-                T peek() const {
+                T peek() {
+                    if (current >= end) fill();
                     return *current;
                 }
 

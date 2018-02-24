@@ -16,6 +16,15 @@ namespace sim{
                 //-----------------------------------------------------------//
                 Action(Graph &graph, std::string const name);
 
+                //-----------------------------------------------------------//
+                // NOTE: A virtual destructor is necessary in an abstract
+                // class to ensure the destructor of derived classes can be
+                // invoked properly. In this case this is necessary to
+                // trigger the stream flushing on destruction of actions 
+                // owning a io stream.
+                //-----------------------------------------------------------//
+                virtual ~Action();
+
                 virtual void fire();
                 virtual void init();
 
