@@ -1,0 +1,5 @@
+# add_subdirectory(./ph2)
+add_subdirectory(./dif)
+# add_subdirectory(./exi)
+# add_subdirectory(./det)
+# add_subdirectory(./jsonargs)
