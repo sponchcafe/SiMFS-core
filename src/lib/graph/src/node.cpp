@@ -19,7 +19,7 @@ namespace sim{
 
 
         //-Get-edege-names---------------------------------------------------//
-        std::vector<std::string const> const &Node::get_edge_names() {
+        std::vector<std::string> const &Node::get_edge_names() {
             return outgoing_edge_names;
         }
 

@@ -5,10 +5,17 @@ TMP=./tmp
 
 export SIM_PARAMS=@$1.json
 
-DIF=../build/src/components/dif/sim_dif
-EXI=../build/src/components/exi/sim_exi
-PH2=../build/src/components/ph2/sim_ph2
-DET=../build/src/components/det/sim_det
+if [ $(uname -s | grep "CYGWIN") ];
+then
+    SUFFIX=".exe"
+else
+    SUFFIX=""
+fi
+
+DIF=../build/src/components/dif/sim_dif$SUFFIX
+EXI=../build/src/components/exi/sim_exi$SUFFIX
+PH2=../build/src/components/ph2/sim_ph2$SUFFIX
+DET=../build/src/components/det/sim_det$SUFFIX
 
 cd $TMP; mkfifo c_exi c_det exi emi; cd ..
 

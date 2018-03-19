@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 project(FCS VERSION 1.0 LANGUAGES CXX)
 
-set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -O3 -march=native ")
+set(CMAKE_CXX_FLAGS "-std=gnu++14 -Wall -O3 -march=native ")
 enable_testing()
 
 # RANDOM LIB defined in this library folder CMakeLists.txt

@@ -1,6 +1,7 @@
 #include "graph/edge.hpp"
 
 #include <limits>
+#include <iostream>
 
 namespace sim{
     namespace graph{

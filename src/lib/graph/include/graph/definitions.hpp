@@ -2,6 +2,7 @@
 #define SIM_GRAPH_DEFINITIONS_H
 
 #include <string>
+#include <memory>
 
 namespace sim{
     namespace graph{

@@ -147,7 +147,7 @@ namespace jcli{
 
             //---------------------------------------------------------------//
             std::string strip_cmd_arg(std::string arg){
-                int count = 0;
+                unsigned count = 0;
                 while(count < arg.length() && arg.at(count) == '-') count++;
                 if (count >= arg.length()) return "-";
                 return arg.substr(count, arg.length()-count);

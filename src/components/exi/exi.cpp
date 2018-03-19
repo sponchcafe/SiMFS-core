@@ -142,7 +142,7 @@ int main(int argc, char **argv, char **envp){
 
     while(input.get(c)){
         double F = focus_ptr->evaluate(c.x+offset_x, c.y+offset_y, c.z+offset_z);
-        for (int i=0; i<shape_offset.size(); i++){
+        for (unsigned i=0; i<shape_offset.size(); i++){
             flux.time = c.t + shape_offset[i]; 
             flux.value = F * shape_power[i] * const_wavelength_scaling;
             output.put(flux);

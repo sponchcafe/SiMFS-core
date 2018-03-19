@@ -43,7 +43,7 @@ namespace sim{
                 // - get_edges:         get vector of resolved edge pointers 
                 //-----------------------------------------------------------//
                 void add_edge(const std::string edge_name);
-                std::vector<std::string const> const &get_edge_names();
+                std::vector<std::string> const &get_edge_names();
                 std::vector<Edge *> const &get_edges();
                     
 
@@ -103,7 +103,7 @@ namespace sim{
                 Graph &graph; 
 
                 //-Outgoing-edges--------------------------------------------//
-                std::vector<std::string const> outgoing_edge_names;
+                std::vector<std::string> outgoing_edge_names;
                 std::vector<Edge *> outgoing_edge_ptrs;
 
                 //-Action-linked-to-node-------------------------------------//
