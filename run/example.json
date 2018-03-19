@@ -1,0 +1,86 @@
+{
+    "det": {
+        "coordinates": "",
+        "max-efficiency": 1.0,
+        "offset-x": 0.0,
+        "offset-y": 0.0,
+        "offset-z": 0.0,
+        "output": "",
+        "photons": "",
+        "seed": 4291931773,
+        "type": "gauss",
+        "waist-x": 3e-07,
+        "waist-y": 3e-07,
+        "waist-z": 7e-07
+    },
+    "dif": {
+        "diff-coef": 1e-10,
+        "experiment-time": 1,
+        "half-height": 1e-06,
+        "increment": 1e-07,
+        "output": "",
+        "radius": 6e-07,
+        "seed": 1160240928,
+        "time-offset": 0.0
+    },
+    "exi": {
+        "input": "",
+        "offset-x": 0.0,
+        "offset-y": 0.0,
+        "offset-z": 0.0,
+        "output": "",
+        "power": 50e-06,
+        "shape": {
+            "offset": [
+                0.0
+            ],
+            "scaling": [
+                1.0
+            ]
+        },
+        "type": "alpha",
+        "waist-x": 2e-07,
+        "waist-y": 2e-07,
+        "waist-z": 6e-07,
+        "wavelength": 4.88e-07
+    },
+    "ph2": {
+        "inputs": {
+            "excitation": {
+                "stream": "./tmp/exi",
+                "target-edge": "exi"
+            }
+        },
+        "jablonsky": {
+            "emi": {
+                "from": "S1",
+                "rate": 1e+10,
+                "to": "S0"
+            },
+            "exi": {
+                "epsilon": 73000,
+                "from": "S0",
+                "rate": 0,
+                "to": "S1"
+            },
+            "isc": {
+                "from": "S1",
+                "rate": 1e+5,
+                "to": "T1"
+            },
+            "risc": {
+                "from": "T1",
+                "rate": 1e+5,
+                "to": "S0"
+            }
+        },
+        "outputs": {
+            "emission": {
+                "stream": "./tmp/emi",
+                "target-edge": "emi"
+            }
+        },
+        "seed": 3248028802,
+        "start-at": "S0"
+    }
+}
