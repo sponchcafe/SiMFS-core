@@ -5,6 +5,7 @@
 #include <fstream> 
 #include <sstream> 
 #include <string>
+#include <unistd.h> // getpid
 
 #include <json/json.hpp>
 
@@ -27,6 +28,7 @@ namespace jcli{
             JsonCli(int argc, char* argv[], char** envp, 
                     std::vector<std::string> expand_env={}){
                 cli[META_KEY]["execname"] = argv[0];
+                cli[META_KEY]["pid"] = ::getpid();
                 cli[SHELL_KEY] = parse_argv_vector(argc, argv);
                 cli[ENV_KEY] = parse_envp_vector(envp);
                 for (auto &it : expand_env) expand_env_var(it);
@@ -193,7 +195,7 @@ namespace jcli{
                 return ss.str();
             }
 
-            //---------------------------------------------------------------//
+
             std::vector<std::string> expanded_env_vars{};
 
     };

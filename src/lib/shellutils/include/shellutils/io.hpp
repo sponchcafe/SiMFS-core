@@ -5,12 +5,17 @@
 #include <fstream>
 #include <string>
 
+#include <thread>             // std::thread
+#include <mutex>              // std::mutex, std::unique_lock
+#include <condition_variable> // std::condition_variable
+
+#include <unistd.h> // getpid
 
 namespace sim{
     namespace io{
 
         //-Definitions-------------------------------------------------------//
-        size_t const DEFAULT_SIZE = 1024;
+        size_t const DEFAULT_SIZE = 1024*1024;
         std::string const EMPTY_FILENAME = "";
 
 
@@ -77,7 +82,9 @@ namespace sim{
                 ~Output<T>(){
                     dump();                                 // clear the buffer
                     output->flush();                        // clear the stream
-                    if (outfile.is_open()) outfile.close(); // close file
+                    if (outfile.is_open()){
+                        outfile.close();                    // close file
+                    }
                 }
 
                 //-Put-a-single-item-to-the-buffer---------------------------//
@@ -109,9 +116,11 @@ namespace sim{
 
                 }
 
+                // size_t total = 0;
                 //-Write-the-buffer-content-and-reset-pointers---------------//
                 void dump(){
                     output->write(bytebuffer, (current-start)*sizeof(T));
+                    // total += (current-start)*sizeof(T);
                     current = start;
                 }
         
@@ -235,8 +244,12 @@ namespace sim{
                     input->read(bytebuffer, n_bytes);
                     end = start + input->gcount()/sizeof(T);
                     current = start;
+                    //eof = input->eof();
                     if (!input->gcount()) eof = true;
                 }
+
+
+                //-Async-IO--------------------------------------------------//
 
                 //-Handles---------------------------------------------------//
                 std::ifstream infile;

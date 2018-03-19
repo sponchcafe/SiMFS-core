@@ -2,6 +2,7 @@
 #define SIM_CMDUTILS_JSONSPEC_H
 
 #include <string>
+#include <sstream>
 #include <json/json.hpp>
 
 using json = nlohmann::json;
@@ -13,10 +14,9 @@ namespace jcli{
         public:
 
             //---------------------------------------------------------------//
-            JsonSpec(JsonCli cli, std::string const scope_str = EMPTY_STRING)
+            JsonSpec(JsonCli cli)
                 : cli(cli)
             {
-                prepend_to_scope(scope_str);
                 values = json{};
             }
 
@@ -42,13 +42,33 @@ namespace jcli{
 
             }
 
+            //---------------------------------------------------------------//
             void enable_scoping(){
+
                 if(cli.option_present("scope")){
                     json scope_params = cli.cli[SHELL_KEY]["scope"];
-                    for (auto it: scope_params){
-                        prepend_to_scope(it);
+                    for (std::string it: scope_params){
+                        scope = json::json_pointer{it};
+                        iscope = json::json_pointer{it};
+                        oscope = json::json_pointer{it};
                     }
                 }
+
+                if(cli.option_present("iscope")){
+                    json scope_params = cli.cli[SHELL_KEY]["iscope"];
+                    for (std::string it: scope_params){
+                        iscope = json::json_pointer{it};
+                    }
+                }
+
+                if(cli.option_present("oscope")){
+                    json scope_params = cli.cli[SHELL_KEY]["oscope"];
+                    for (std::string it: scope_params){
+                        oscope = json::json_pointer{it};
+                    }
+                }
+
+
             }
 
             //---------------------------------------------------------------//
@@ -88,7 +108,9 @@ namespace jcli{
                 }
             }
 
-            json::json_pointer scope;
+            json::json_pointer scope{EMPTY_STRING};
+            json::json_pointer iscope{EMPTY_STRING};
+            json::json_pointer oscope{EMPTY_STRING};
 
             json values;
             json aliases;
@@ -101,25 +123,36 @@ namespace jcli{
 
             //---------------------------------------------------------------//
             void dump_parameters(std::string key){
-                json info_params = cli.cli[SHELL_KEY][key];
-                if (info_params.size() == 0){
+                
+                json params = cli.cli[SHELL_KEY][key];
+               
+                // No params (filenames) specified -> dump to stdout
+                if (params.size() == 0){
                     json output;
-                    output[scope] = values;
+                    output[oscope] = values;
                     std::cout << output.dump(4) << std::endl;
                 }
-                for (auto it: info_params){
+
+                // For all params (filenames) specified -> dump to file
+                for (auto it: params){
+                    
+                    // read file
                     std::string filename = it;
                     std::ifstream infile;
                     infile.open(it);
                     json jfile_before;
+
                     try{
                         infile >> jfile_before;
                     }
                     catch (std::exception e){}
+
                     infile.close();
+
+                    // update
                     std::ofstream outfile;
                     outfile.open(filename);
-                    jfile_before[scope] = values;
+                    jfile_before[oscope] = values;
                     outfile << jfile_before.dump(4) << std::endl;
                     outfile.close();
                 }
@@ -146,33 +179,42 @@ namespace jcli{
 
                 for (auto it: array){ 
                     try {
-                        _val = it;
+                        _val = it; // type checking happens here
                     }
-                    catch(std::exception){};
-                    if (validator(_val)) val = _val;
+                    catch(std::exception){
+                        std::cerr << "Value not accepted: " << it;
+                        std::cerr << " -- Last valid value: " << _val << std::endl;
+                    }
+                    if (validator(_val)) {
+                        val = _val;
+                    }
+                    else{
+                        std::cerr << "Validation failed for value: " << _val;
+                        std::cerr << " -- Last valid value: " << _val << std::endl;
+                    }
                 }
 
                 return val;
             }
 
 
-            //---------------------------------------------------------------//
+            //-Get-all-values-to-a-given-key---------------------------------//
             json collect_key(json object, json::json_pointer scope, std::string key, 
                     bool unwind=false){
                 if (
-                        object.is_null() || 
-                        !object.is_object() || 
+                        object.is_null() ||
+                        !object.is_object() ||
                         object[scope].is_null()
                         ) 
                 {
-                    return json::array();
+                    return json::array(); // no object or no scope
                 }
 
-                json collected = json::array();
-                json val = object[scope][key];
+                json collected = json::array(); // collection array
+                json val = object[scope][key]; // current value
 
                 if (val.is_null()) {
-                    return collected;
+                    return collected; // key not present or no parameters
                 }
 
                 if (unwind && val.is_array()){
@@ -193,15 +235,13 @@ namespace jcli{
                     std::vector<std::string> shell_aliases={}
                     ){
 
-                //std::reverse(shell_aliases.begin(), shell_aliases.end());
-
                 json jvals;
 
                 // search env
                 json jvals_env;
                 for (std::string envkey : cli.get_expanded_env()){
                     for (json object : cli.cli[jcli::ENV_KEY][envkey]){
-                        jvals_env = collect_key(object, scope, key);
+                        jvals_env = collect_key(object, iscope, key);
                         for (auto it: jvals_env) jvals.push_back(it);
                     }
                 }
@@ -211,7 +251,7 @@ namespace jcli{
                 for (json object : 
                         cli.cli[jcli::SHELL_KEY][jcli::OPTION_TOKEN]
                         ){
-                    jvals_args = collect_key(object, scope, key);
+                    jvals_args = collect_key(object, iscope, key);
                     for (auto it: jvals_args) jvals.push_back(it);
                 }
 

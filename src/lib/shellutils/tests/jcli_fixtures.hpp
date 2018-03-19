@@ -89,6 +89,8 @@ class JsonCliTest: public ::testing::Test{
                 "--invalid2", "1", "2", "string", "3",
                 "--parse", "{\"a\":-6}",
                 "--include", "@include.json",
+                "--scope", "/my_scope"
+                
             };
 
             std::vector<std::string> envp_vec = {
@@ -102,7 +104,7 @@ class JsonCliTest: public ::testing::Test{
             cli.reset(new jcli::JsonCli(argc, argv, envp,
                     {"SIM_PARAM_FILE", "SIM_SCOPE_PARAMFILE"}));
 
-            spec.reset(new jcli::JsonSpec(*cli, "my_scope"));
+            spec.reset(new jcli::JsonSpec(*cli));
             spec->enable_scoping();
             spec->enable_debug();
             spec->enable_config();
