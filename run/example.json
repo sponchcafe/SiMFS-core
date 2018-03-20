@@ -1,13 +1,6 @@
 {
     "det": {
-        "coordinates": "",
         "max-efficiency": 1.0,
-        "offset-x": 0.0,
-        "offset-y": 0.0,
-        "offset-z": 0.0,
-        "output": "",
-        "photons": "",
-        "seed": 4291931773,
         "type": "gauss",
         "waist-x": 3e-07,
         "waist-y": 3e-07,
@@ -15,28 +8,16 @@
     },
     "dif": {
         "diff-coef": 1e-10,
-        "experiment-time": 1,
+        "experiment-time": 0.1,
         "half-height": 1e-06,
         "increment": 1e-07,
-        "output": "",
-        "radius": 6e-07,
-        "seed": 1160240928,
-        "time-offset": 0.0
+        "radius": 6e-07
     },
     "exi": {
-        "input": "",
-        "offset-x": 0.0,
-        "offset-y": 0.0,
-        "offset-z": 0.0,
-        "output": "",
         "power": 50e-06,
-        "shape": {
-            "offset": [
-                0.0
-            ],
-            "scaling": [
-                1.0
-            ]
+        "shape": { 
+            "offset": [ 0.0 ],
+            "scaling": [ 1.0 ] 
         },
         "type": "alpha",
         "waist-x": 2e-07,
@@ -80,7 +61,6 @@
                 "target-edge": "emi"
             }
         },
-        "seed": 3248028802,
         "start-at": "S0"
     }
 }
