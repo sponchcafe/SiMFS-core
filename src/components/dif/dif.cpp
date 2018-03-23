@@ -15,7 +15,7 @@ double get_sigma (double diff_coef, double increment){
 bool check_within_box (double x, double y, double z,
         double radius, double half_height){
     bool in_xy = sqrt(pow(x, 2)+pow(y, 2)) < radius;
-    bool in_z = abs(z) < half_height;
+    bool in_z = fabs(z) < half_height;
     return in_xy && in_z;
 }
 
