@@ -2,7 +2,7 @@
 #define SIM_CMDUTILS_IO_H
 
 #include <iostream>
-#include <fstream>
+#include <fstream> 
 #include <string>
 
 #include <thread>             // std::thread
@@ -15,7 +15,7 @@ namespace sim{
     namespace io{
 
         //-Definitions-------------------------------------------------------//
-        size_t const DEFAULT_SIZE = 1024*1024;
+        size_t const DEFAULT_SIZE = 1024;
         std::string const EMPTY_FILENAME = "";
 
 
@@ -167,9 +167,8 @@ namespace sim{
                 {
                     if (filename != EMPTY_FILENAME){
                         // filename specified, open file and set to output
-                        infile = std::ifstream(
-                                filename, std::ifstream::binary);
-                        input = &infile;
+                        infile = std::unique_ptr<std::ifstream>( new std::ifstream(filename, std::ifstream::binary));
+                        input = infile.get();
                     }
                     else{
                         // no filename, set to stdin
@@ -191,21 +190,22 @@ namespace sim{
                 Input<T> &operator=(Input<T> &&other) = default;
                 
                 //-----------------------------------------------------------//
-                ~Input<T>(){
-                    if (infile.is_open()) infile.close(); // close file
-                }
+                ~Input<T>(){}
 
                 //-Read-a-single-element-------------------------------------//
                 bool get(T &target){
-                    if (current >= end) fill();
+                    if (buffer_empty) {
+                        return false; // done
+                    }
                     target = *current;
                     current++;
-                    return !eof || current < end; // not eof or data in buffer
+                    if (current >= end) fill();
+                    return true;
                 }
 
                 //-----------------------------------------------------------//
-                T peek() {
-                    if (current >= end) fill();
+                T peek() const {
+                    //if (current >= end) fill();
                     return *current;
                 }
 
@@ -213,6 +213,7 @@ namespace sim{
                 bool operator< (const Input<T>& rhs) const {
                     return this->peek() < rhs.peek();
                 }
+
 
             private:
 
@@ -244,15 +245,14 @@ namespace sim{
                     input->read(bytebuffer, n_bytes);
                     end = start + input->gcount()/sizeof(T);
                     current = start;
-                    //eof = input->eof();
-                    if (!input->gcount()) eof = true;
+                    buffer_empty = (current >= end);
                 }
 
 
                 //-Async-IO--------------------------------------------------//
 
                 //-Handles---------------------------------------------------//
-                std::ifstream infile;
+                std::unique_ptr<std::ifstream> infile;
                 std::istream *input;
                 
                 //-Buffer-memory---------------------------------------------//
@@ -271,7 +271,7 @@ namespace sim{
                 size_t n_elements;
                 
                 //-EOF-flag--------------------------------------------------//
-                bool eof = false;
+                bool buffer_empty = false;
 
         };
 

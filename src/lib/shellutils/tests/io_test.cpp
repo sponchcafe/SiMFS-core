@@ -183,7 +183,7 @@ TEST(ReproductionTest, WriteRead){
     // Writing
     {
         Output<double> out = Output<double>(file);
-        for (int i=0; i<50; i++){
+        for (int i=0; i<10; i++){
             double value = 0.05*i+0.003*i*i;
             out.put(value);
             expected.push_back(value);
@@ -201,4 +201,3 @@ TEST(ReproductionTest, WriteRead){
     std::remove(file);
 
 }
-
