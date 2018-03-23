@@ -43,6 +43,27 @@ namespace jcli{
             }
 
             //---------------------------------------------------------------//
+            template<typename T> std::vector<T> get_option_list(
+                    std::string const name,
+                    std::vector<std::string> shell_aliases = {},
+                    std::vector<T> default_val = std::vector<T>{},
+                    std::string description = "",
+                    std::function<bool(T)> validator 
+                    = [](T val) -> bool {return true;}
+                    ){
+                descriptions[name] = description;
+                aliases[name] = aliases;
+                json collected_vals = query_cli(name, shell_aliases);
+                values[name] = collected_vals;
+                std::vector<T> list = default_val;
+                if (collected_vals.is_null()) return list;
+                for (json::iterator it = collected_vals.begin(); it != collected_vals.end(); ++it){
+                    list.push_back(*it);
+                }
+                return list;
+            }
+
+            //---------------------------------------------------------------//
             void enable_scoping(){
 
                 if(cli.option_present("scope")){

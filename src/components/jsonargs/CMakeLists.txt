@@ -1,2 +1,0 @@
-add_executable(sim_jsonargs jsonargs.cpp)
-target_link_libraries(sim_jsonargs sim_shellutils)
