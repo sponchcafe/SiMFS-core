@@ -55,12 +55,13 @@ namespace sim{
                 {
                     if (filename != EMPTY_FILENAME){
                         // filename specified, open file and set to output
-                        outfile = std::ofstream(filename, 
-                                std::ofstream::binary);
-                        output = &outfile;
+                        outfile = std::unique_ptr<std::ofstream>(
+                            new std::ofstream(filename, std::ofstream::binary)
+                        );
+                        output = outfile.get();
                     }
                     else{
-                        // no filename, set output to stdout
+                        // no filename, set to stdin
                         output = &std::cout;
                     }
                     init();
@@ -82,9 +83,6 @@ namespace sim{
                 ~Output<T>(){
                     dump();                                 // clear the buffer
                     output->flush();                        // clear the stream
-                    if (outfile.is_open()){
-                        outfile.close();                    // close file
-                    }
                 }
 
                 //-Put-a-single-item-to-the-buffer---------------------------//
@@ -125,7 +123,7 @@ namespace sim{
                 }
         
                 //-Handles---------------------------------------------------//
-                std::ofstream outfile;
+                std::unique_ptr<std::ofstream> outfile;
                 std::ostream *output;
 
                 //-Buffer-memory---------------------------------------------//
@@ -167,7 +165,9 @@ namespace sim{
                 {
                     if (filename != EMPTY_FILENAME){
                         // filename specified, open file and set to output
-                        infile = std::unique_ptr<std::ifstream>( new std::ifstream(filename, std::ifstream::binary));
+                        infile = std::unique_ptr<std::ifstream>(
+                            new std::ifstream(filename, std::ifstream::binary)
+                        );
                         input = infile.get();
                     }
                     else{
