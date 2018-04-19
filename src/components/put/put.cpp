@@ -55,8 +55,10 @@ int main(int argc, char **argv, char **envp){
     spec.enable_log(); // --log
 
     sim::io::Output<sim::Coordinate> out(out_filename);
+    sim::Coordinate c0{0, 0, 0, 0};
     sim::Coordinate c{x, y, z, t};
 
+    out.put(c0);
     out.put(c);
 
 }
