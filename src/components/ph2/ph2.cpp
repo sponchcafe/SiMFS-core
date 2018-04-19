@@ -91,6 +91,77 @@ class EmissionAction : public sim::graph::Action{
 
 };
 
+class TransferAction : public sim::graph::Action{
+    
+    //-----------------------------------------------------------------------//
+    // The transfer action consumes photon timetags from its input and issues
+    // excitation events for its target edge. When the event is fired and the
+    // graph is in an excitable state, an excitation state transtition is
+    // performed. If the graph is however not in an excitable state, the photon
+    // transfer is rejected and the events timetag is put to the rejected
+    // output and can be mixed back into the donor emission stream.
+    //-----------------------------------------------------------------------//
+
+    public: 
+
+        //-------------------------------------------------------------------//
+        TransferAction(
+                std::string const name,
+                sim::graph::Graph &graph,
+                std::string const target_edge_name,
+                std::string const source_node_name,
+                std::string const input_name,
+                std::string const rejected_output_name
+                ) :
+            Action(graph, name), 
+            target_edge_name(target_edge_name),
+            source_node_name(source_node_name),
+            input(sim::io::Input<sim::realtime_t>(input_name)),
+            rejected_output(sim::io::Output<sim::realtime_t>(rejected_output_name))
+        {
+        }
+
+        //-------------------------------------------------------------------//
+        void init() override {
+            target_edge = graph.get_edge_ptr(target_edge_name);
+            source_node = graph.get_node_ptr(source_node_name);
+            input.get(current);
+            graph.push_event(sim::graph::Event(this, current)); 
+        }
+        
+        //-------------------------------------------------------------------//
+        void fire() override {
+
+            if (graph.get_current_ptr() == source_node) {
+                // excitation accepted
+                graph.set_current(target_edge->get_target_node_ptr());
+            }
+            else{
+                // excitation rejetcted
+                rejected_output.put(current);
+            }
+
+            if (input.get(current)){
+                graph.push_event(sim::graph::Event(this, current)); 
+            }
+
+        }
+
+    private:
+
+        std::string const target_edge_name;
+        sim::graph::Edge *target_edge = nullptr;
+
+        std::string const source_node_name;
+        sim::graph::Node *source_node = nullptr;
+
+        sim::io::Input<sim::realtime_t>input;
+        sim::io::Output<sim::realtime_t>rejected_output;
+
+        sim::realtime_t current;
+
+};
+
 const std::string helpmessage = 
 R"(
 Info
@@ -104,15 +175,21 @@ json jablonsky_default = {
     {"risc", {{"from", "T1"}, {"to", "S0"}, {"rate", 1e+8}}}
 };
 
-json inputs_default =  
+json actions_default =  
 {
-    {"excitation", {{"target-edge", "exi"}, {"stream", ""}}}
+    {"excitation", {{"type", "excitation"}, {"target-edge", "exi"}, {"input", ""}}},
+    {"emission", {{"type", "emission"}, {"target-edge", "emi"}, {"output", ""}}},
+    {"transfer", 
+        {
+            {"type", "transfer"}, 
+            {"target-edge", "exi"}, 
+            {"source-node", "S0"}, 
+            {"input", ""}, 
+            {"output", ""}
+        }
+    }
 };
 
-json output_default =  
-{
-    {"emission", {{"target-edge", "emi"}, {"stream", ""}}},
-};
 
 int main (int argc, char **argv, char **envp){
 
@@ -137,21 +214,16 @@ int main (int argc, char **argv, char **envp){
 
     //-----------------------------------------------------------------------//
     std::string start_at = spec.get_option<std::string>(
-            "start-at", {"a", "A"}, jablonsky.begin()->at("from"),
+            "start-at", {"i", "I"}, jablonsky.begin()->at("from"),
             "Initial state."
             );
 
     //----------------------------------------------------------------------//
-    json inputs = spec.get_option<json>(
-            "inputs", {"i", "I"}, inputs_default,
-            "Inputs."
+    json actions = spec.get_option<json>(
+            "actions", {"a", "A"}, actions_default,
+            "Actions"
             );
 
-    //----------------------------------------------------------------------//
-    json outputs = spec.get_option<json>(
-            "outputs", {"o", "O"}, output_default,
-            "Outputs."
-            );
 
     spec.enable_help();
     spec.enable_config();
@@ -171,46 +243,50 @@ int main (int argc, char **argv, char **envp){
     }
 
     //-----------------------------------------------------------------------//
-    for (json::iterator it=inputs.begin(); it!=inputs.end(); ++it){
+    for (json::iterator it=actions.begin(); it!=actions.end(); ++it){
 
         json val = it.value();
-        std::string target_edge_name = val["target-edge"];
+        std::string type = val["type"];
+        std::string name = it.key();
 
-        double abs_coef = jablonsky[target_edge_name]["epsilon"];
-        std::string input_name = val["stream"];
+        if (type == "excitation"){
+            std::unique_ptr<sim::graph::Action> ex_act_ptr{
+                new ExcitationAction(
+                        name,
+                        graph,
+                        val["target-edge"], // target edge name
+                        jablonsky[val["target-edge"].get<std::string>()]["epsilon"], // abs coef
+                        val["input"] // input stream
+                        )
+            };
+            graph.add_action(ex_act_ptr);
+        }
 
-        std::unique_ptr<sim::graph::Action> ex_act_ptr{
-            new ExcitationAction(
-                    it.key(),
-                    graph,
-                    target_edge_name,
-                    abs_coef,
-                    input_name
-                    )
-        };
+        else if(type == "transfer"){
+            std::unique_ptr<sim::graph::Action> transfer_act_ptr{
+                new TransferAction(
+                        name,
+                        graph,
+                        val["target-edge"], // path to excite
+                        val["source-node"], // precondition state
+                        val["input"], // input stream
+                        val["output"] // output for rejected photons
+                        )
+            };
+            graph.add_action(transfer_act_ptr);
+        }
 
-        graph.add_action(ex_act_ptr);
-
-    }
-
-
-    //-----------------------------------------------------------------------//
-    for (json::iterator it=outputs.begin(); it!=outputs.end(); ++it){
-
-        json val = it.value();
-        std::string output_name = val["stream"];
-        std::string target_edge = val["target-edge"];
-
-        std::unique_ptr<sim::graph::Action> emi_act_ptr{
-            new EmissionAction(
-                    it.key(),
-                    graph,
-                    output_name
-                    )
-        };
-
-        graph.add_action(emi_act_ptr);
-        graph.link_edge_action(target_edge, it.key());
+        else if (type == "emission"){
+            std::unique_ptr<sim::graph::Action> emi_act_ptr{
+                new EmissionAction(
+                        name,
+                        graph,
+                        val["output"]
+                        )
+            };
+            graph.add_action(emi_act_ptr);
+            graph.link_edge_action(val["target-edge"], it.key());
+        }
 
     }
 
