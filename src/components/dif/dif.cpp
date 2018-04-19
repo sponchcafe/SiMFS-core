@@ -61,6 +61,13 @@ int main(int argc, char **argv, char **envp){
         );
 
     //----------------------------------------------------------------------//
+    std::string reset_out_filename = spec.get_option<std::string>
+        (
+         "reset-output", {"b", "B"}, "/dev/null",
+         "Output file for resets (time), defaults to /dev/null"
+        );
+
+    //----------------------------------------------------------------------//
     double radius = spec.get_option<double>
         (
          "radius", {"r", "R"}, 5e-7,
@@ -100,6 +107,7 @@ int main(int argc, char **argv, char **envp){
     double sigma = get_sigma(diff_coef, increment); 
 
     sim::io::Output<sim::Coordinate> out(out_filename);
+    sim::io::Output<sim::realtime_t> reset_out(reset_out_filename);
     sim::Coordinate c0{0.0,0.0,0.0,0.0};
     sim::Coordinate c1{0.0,0.0,0.0,0.0};
     sim::random::Normal rand{sigma, seed};
@@ -113,6 +121,7 @@ int main(int argc, char **argv, char **envp){
     } while(!check_within_box(c0.x, c0.y, c0.z, radius, half_height));
 
     uint64_t i = 0;
+    sim::realtime_t last_reset = time_offset;
     while(i<steps){
 
         c1.x = c0.x + rand();
@@ -124,6 +133,12 @@ int main(int argc, char **argv, char **envp){
             c0.t = time_offset + increment * i;
             out.put(c0);
             i++;
+        }
+        else{
+            if (c0.t != last_reset){
+                reset_out.put(c0.t);
+                last_reset = c0.t;
+            }
         }
     }
     
