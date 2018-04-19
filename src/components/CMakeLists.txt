@@ -1,7 +1,11 @@
-add_subdirectory(./ph2)
 add_subdirectory(./dif)
 add_subdirectory(./put)
 add_subdirectory(./exi)
 add_subdirectory(./det)
+add_subdirectory(./ph2)
 add_subdirectory(./mix)
+add_subdirectory(./spl)
+add_subdirectory(./cnf)
+add_subdirectory(./bkg)
+
 add_subdirectory(./arg)
