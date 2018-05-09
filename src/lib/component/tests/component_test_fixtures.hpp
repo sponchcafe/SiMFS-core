@@ -116,10 +116,10 @@ class ComponentIO : public ::testing::Test {
         }
 
         //------------------------------------------------------------------//
-        std::string p1 = "/tmp/P1"; // Pipe 1
-        std::string p2 = "/tmp/P2"; // Pipe 2
-        std::string f1 = "/tmp/F1"; // File 1
-        std::string f2 = "/tmp/F2"; // File 2
+        std::string p1 = "/tmp/simfs_test_P1"; // Pipe 1
+        std::string p2 = "/tmp/simfs_test_P2"; // Pipe 2
+        std::string f1 = "/tmp/simfs_test_F1.dat"; // File 1
+        std::string f2 = "/tmp/simfs_test_F2.dat"; // File 2
 
         //------------------------------------------------------------------//
         std::vector<int> payload{};
