@@ -17,11 +17,12 @@ namespace sim{
 
     //-SI-Coordinate-----------------------------------------------------//
     typedef struct{
-        coord_t x;
-        coord_t y;
-        coord_t z;
+        coordinate_t x;
+        coordinate_t y;
+        coordinate_t z;
         realtime_t t;
     } Coordinate;
 
 }
+
 #endif

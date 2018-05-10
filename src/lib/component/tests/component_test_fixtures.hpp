@@ -27,26 +27,23 @@ class ComponentIO : public ::testing::Test {
         > void serial_PIC_test(){
 
             {
-                ProducerComponent<InputT, OutputT> prod{};
+                ProducerComponent<OutputT> prod{};
                 prod.set_data(payload);
                 prod.set_output(f1);
                 prod.run();
             }
-
             {
                 TransformComponent<InputT, OutputT> trans{};
                 trans.set_input(f1);
                 trans.set_output(f2);
                 trans.run();
             }
-
             {
-                ConsumerComponent<InputT, OutputT> cons{};
+                ConsumerComponent<InputT> cons{};
                 cons.set_input(f2);
                 cons.run();
                 result = cons.get_data();
             }
-
         }
 
         //------------------------------------------------------------------//
@@ -56,7 +53,7 @@ class ComponentIO : public ::testing::Test {
         > void parallel_PIC_test(){
 
             std::thread prod_thread = std::thread ( [&]() {
-                    ProducerComponent<InputT, OutputT> prod{};
+                    ProducerComponent<OutputT> prod{};
                     prod.set_data(payload);
                     prod.set_output(p1);
                     prod.run();
@@ -70,7 +67,7 @@ class ComponentIO : public ::testing::Test {
                     });
 
             std::thread cons_thread = std::thread ( [&]() {
-                    ConsumerComponent<InputT, OutputT> cons{};
+                    ConsumerComponent<InputT> cons{};
                     cons.set_input(p2);
                     cons.run();
                     result = cons.get_data();
@@ -126,7 +123,8 @@ class ComponentIO : public ::testing::Test {
         std::vector<int> result{};
 
         //------------------------------------------------------------------//
-        size_t const payload_size = 1024*1024*25; // 200MB payload
+        size_t const payload_size = 1024*1024*200/sizeof(int); // 200MB payload
+
 
 };
 

@@ -16,19 +16,18 @@
 // Queues (parallel)
 //--------------------------------------------------------------------------//
 
-using namespace sim;
+using namespace sim::comp;
 
 //--------------------------------------------------------------------------//
 //--------------------------------------------------------------------------//
 template <
-    template<class InputT> class InputT,
     template<class OutputT> class OutputT
-    > class ProducerComponent : public Component <InputT, OutputT> {
+    > class ProducerComponent : public Component {
 
     public:
 
         //------------------------------------------------------------------//
-        ProducerComponent<InputT, OutputT>() { }
+        ProducerComponent<OutputT>() { }
 
         //------------------------------------------------------------------//
         void run() override {
@@ -39,7 +38,7 @@ template <
 
         //------------------------------------------------------------------//
         void set_output(std::string outname){
-            output = std::make_unique<OutputT<int>>(outname);
+            output = create_output<OutputT, int>(outname);
         }
 
         //------------------------------------------------------------------//
@@ -50,7 +49,7 @@ template <
     private:
 
         //------------------------------------------------------------------//
-        std::unique_ptr<OutputT<int>> output;
+        std::unique_ptr<Output<int>> output;
         std::vector<int> data{};
 
 };
@@ -60,14 +59,12 @@ template <
 template <
     template<class InputT> class InputT,
     template<class OutputT> class OutputT
-    > class TransformComponent : public Component <InputT, OutputT> {
+    > class TransformComponent : public Component {
 
     public:
 
         //------------------------------------------------------------------//
-        TransformComponent<InputT, OutputT> () : 
-            Component<InputT, OutputT>() {
-        }
+        TransformComponent<InputT, OutputT> () { }
 
         //------------------------------------------------------------------//
         void run() override {
@@ -79,19 +76,19 @@ template <
 
         //------------------------------------------------------------------//
         void set_output(std::string outname){
-            output = std::make_unique<OutputT<int>>(outname);
+            output = create_output<OutputT, int>(outname);
         }
 
         //------------------------------------------------------------------//
         void set_input(std::string inname){
-            input = std::make_unique<InputT<int>>(inname);
+            input = create_input<InputT, int>(inname);
         }
 
     private:
 
         //------------------------------------------------------------------//
-        std::unique_ptr<OutputT<int>> output;
-        std::unique_ptr<InputT<int>> input;
+        std::unique_ptr<Output<int>> output;
+        std::unique_ptr<Input<int>> input;
 
 };
 
@@ -99,14 +96,13 @@ template <
 //--------------------------------------------------------------------------//
 //--------------------------------------------------------------------------//
 template <
-    template<class InputT> class InputT,
-    template<class OutputT> class OutputT
-    > class ConsumerComponent : public Component <InputT, OutputT> {
+    template<class InputT> class InputT
+    > class ConsumerComponent : public Component {
 
     public:
 
         //------------------------------------------------------------------//
-        ConsumerComponent<InputT, OutputT>() {}
+        ConsumerComponent<InputT>() {}
 
         //------------------------------------------------------------------//
         void run(){
@@ -118,7 +114,7 @@ template <
 
         //------------------------------------------------------------------//
         void set_input(std::string inname){
-            input = std::make_unique<InputT<int>>(inname);
+            input = create_input<InputT, int>(inname);
         }
 
         //------------------------------------------------------------------//
@@ -129,7 +125,7 @@ template <
     private:
 
         //------------------------------------------------------------------//
-        std::unique_ptr<InputT<int>> input;
+        std::unique_ptr<Input<int>> input;
         std::vector<int> data{};
 
 };

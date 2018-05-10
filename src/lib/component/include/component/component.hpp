@@ -13,41 +13,31 @@
 //---------------------------------------------------------------------------//
 
 namespace sim{
+    namespace comp{
 
-    using json = nlohmann::json;
+        using json = nlohmann::json;
 
-    //-----------------------------------------------------------------------//
-    template <
-        template<class InputT> class InputT,
-        template<class OutputT> class OutputT
-    > class Component{
+        class Component{
 
-        public: 
+            public: 
 
-            //---------------------------------------------------------------//
-            Component<InputT, OutputT>(){
+                //-----------------------------------------------------------//
+                Component(){} 
 
-                static_assert(
-                    std::is_base_of<Input<double>, 
-                    InputT<double>>::value,
-                    "InputT has to be derived from the baseclass Input."
-                );
+                //-----------------------------------------------------------//
+                virtual ~Component() {};
 
-                static_assert(
-                    std::is_base_of<Output<double>, 
-                    OutputT<double>>::value,
-                    "OutputT has to be derived from the baseclass Output."
-                );
+                //-----------------------------------------------------------//
+                virtual void run() = 0;
 
-            }
+                //-----------------------------------------------------------//
+                virtual void init() {} // = 0;
 
-            //---------------------------------------------------------------//
-            virtual void run() = 0;
+                //-----------------------------------------------------------//
+                virtual void configure_json(json j) {} // = 0;
 
-            //---------------------------------------------------------------//
-            virtual void configure_json(json j) {}
-
-    };
+        };
+    }
 
 }
 

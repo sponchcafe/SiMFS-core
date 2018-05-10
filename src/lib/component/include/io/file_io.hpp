@@ -8,6 +8,7 @@
 #include "io/base_io.hpp"
 
 namespace sim{
+    using namespace comp;
     namespace file_io{
 
         constexpr unsigned DEFAULT_SIZE = 1024;

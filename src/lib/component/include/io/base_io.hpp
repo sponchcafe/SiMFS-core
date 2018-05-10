@@ -18,74 +18,104 @@
 //---------------------------------------------------------------------------//
 
 namespace sim{
+    namespace comp{
 
-    //-----------------------------------------------------------------------//
-    template <typename T> class Input{
+        //-------------------------------------------------------------------//
+        template <typename T> class Input{
 
-        public:
+            public:
 
-            //-Ctor----------------------------------------------------------//
-            Input<T>() {};
-            
-            //-Ctor----------------------------------------------------------//
-            Input<T>(std::string const id) : id(id) {}
+                //-Ctor------------------------------------------------------//
+                Input<T>() {};
+                
+                //-Ctor------------------------------------------------------//
+                Input<T>(std::string const id) : id(id) {}
 
-            //-Dtor----------------------------------------------------------//
-            ~Input<T>() {};
+                //-Dtor------------------------------------------------------//
+                virtual ~Input<T>() {};
 
-            //-get-----------------------------------------------------------//
-            // Get the next value into target and progress the stream.
-            // Should return true as long the stream has data.
-            //---------------------------------------------------------------//
-            virtual bool get(T &target) = 0;
+                //-get-------------------------------------------------------//
+                // Get the next value into target and progress the stream.
+                // Should return true as long the stream has data.
+                //-----------------------------------------------------------//
+                virtual bool get(T &target) = 0;
 
-            //-Copy-the-next-value-without-taking-it-------------------------//
-            virtual T peek() const = 0;
+                //-Copy-the-next-value-without-taking-it---------------------//
+                virtual T peek() const = 0;
 
-            //-Compare-input-order-by-current-value--------------------------//
-            bool operator< (Input<T> const &rhs) const {
-                return peek() < rhs.peek();
-            }
+                //-Compare-input-order-by-current-value----------------------//
+                bool operator< (Input<T> const &rhs) const {
+                    return peek() < rhs.peek();
+                }
 
-            //-getID---------------------------------------------------------//
-            std::string const get_id() const{
-                return id;
-            }
+                //-getID-----------------------------------------------------//
+                std::string const get_id() const{
+                    return id;
+                }
 
-            //-ID------------------------------------------------------------//
-            std::string id;
+                //-ID--------------------------------------------------------//
+                std::string id;
 
-    };
+        };
 
-    //-----------------------------------------------------------------------//
-    template <typename T> class Output{
+        //-------------------------------------------------------------------//
+        // Input factory.
+        //-------------------------------------------------------------------//
+        template <template <typename T> class InputT, typename T>
+        std::unique_ptr<Input<T>> create_input(std::string id) {
+            static_assert(
+                std::is_base_of<Input<T>, InputT<T>>::value,
+                "OutputT has to be derived from the baseclass Output."
+            );
+            return std::make_unique<InputT<T>>(id);
+        }
+        //-------------------------------------------------------------------//
+        
 
-        public:
 
-            //-Ctor----------------------------------------------------------//
-            Output<T>() {}
+        //-------------------------------------------------------------------//
+        template <typename T> class Output{
 
-            //-Ctor----------------------------------------------------------//
-            Output<T>(std::string const id) : id(id) {}
+            public:
 
-            //-Dtor----------------------------------------------------------//
-            ~Output<T>() {} 
+                //-Ctor------------------------------------------------------//
+                Output<T>() {}
 
-            //-Put-----------------------------------------------------------//
-            // Put item into the stream.
-            //---------------------------------------------------------------//
-            virtual void put(T &item) = 0;
+                //-Ctor------------------------------------------------------//
+                Output<T>(std::string const id) : id(id) {}
 
-            //-getID---------------------------------------------------------//
-            std::string const get_id() const{
-                return id;
-            }
+                //-Dtor------------------------------------------------------//
+                virtual ~Output<T>() {} 
 
-            //-ID------------------------------------------------------------//
-            std::string id;
+                //-Put-------------------------------------------------------//
+                // Put item into the stream.
+                //-----------------------------------------------------------//
+                virtual void put(T &item) = 0;
 
-    };
+                //-getID-----------------------------------------------------//
+                std::string const get_id() const{
+                    return id;
+                }
 
+                //-ID--------------------------------------------------------//
+                std::string id;
+
+        };
+
+        //-------------------------------------------------------------------//
+        // Output factory.
+        //-------------------------------------------------------------------//
+        template <template <typename T> class OutputT, typename T>
+        std::unique_ptr<Output<T>> create_output(std::string id) {
+            static_assert(
+                std::is_base_of<Output<T>, OutputT<T>>::value,
+                "OutputT has to be derived from the baseclass Output."
+            );
+            return std::make_unique<OutputT<T>>(id);
+        }
+        //-------------------------------------------------------------------//
+    
+    }
 }
 
 #endif
