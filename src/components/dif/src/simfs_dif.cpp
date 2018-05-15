@@ -11,7 +11,6 @@ int main(int argc, char *argv[]) {
     //-Get-parameters--------------------------------------------------------//
     json params = cli::get_parameters();
     std::vector<std::string> opts = cli::parse_argv_vector(argc, argv);
-    for (auto &it: opts) std::cerr << it << '\n';
 
     //-Create----------------------------------------------------------------//
     comp::Diffusion dif;
@@ -28,6 +27,8 @@ int main(int argc, char *argv[]) {
     cli::log_parameters(dif.get_json());
 
     //-Run-------------------------------------------------------------------//
-    dif.run();
+    if (!cli::check_list(opts)){
+        dif.run();
+    }
 
 }
