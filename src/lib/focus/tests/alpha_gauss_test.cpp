@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "focus/alpha_gauss.hpp"
+#include "focus/alpha.hpp"
 #include "focus/base.hpp"
 #include "fixtures.hpp"
 
@@ -13,7 +13,7 @@ constexpr double EPSILON = 1e-12;
 class AlphaGaussTest : public EvaluationTest{
     protected:
         void SetUp(){
-            focus = new AlphaGauss(WAIST, WAIST);
+            focus = new Alpha(WAIST, WAIST);
         }
 };
 

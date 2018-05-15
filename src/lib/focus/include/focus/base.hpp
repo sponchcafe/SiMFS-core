@@ -6,6 +6,9 @@
  */
 
 #include <cmath>
+#include "json/json.hpp"
+
+using json = nlohmann::json;
 
 namespace sim{
 
@@ -17,11 +20,18 @@ namespace sim{
 
     namespace focus{
 
-        class BaseFocus{
+        class Focus{
 
             public:  
 
+                //-----------------------------------------------------------//
                 virtual double evaluate(double x, double y, double z) const = 0;
+
+                //-----------------------------------------------------------//
+                virtual void set_json(json j) = 0;
+
+                //-----------------------------------------------------------//
+                virtual json get_json() = 0;
 
             private:
 

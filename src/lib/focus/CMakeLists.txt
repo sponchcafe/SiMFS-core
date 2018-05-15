@@ -1,6 +1,6 @@
-add_library(sim_focus INTERFACE)
-# INTERFACE notation for header only libraries.
-target_include_directories(sim_focus INTERFACE ./include)
+FILE(GLOB sim_focus_src src/*.cpp)
+add_library(sim_focus ${sim_focus_src})
+target_include_directories(sim_focus PUBLIC ./include ../component/include/)
 
 add_executable(gaussian_test tests/gaussian_test.cpp)
 target_link_libraries(gaussian_test sim_focus)

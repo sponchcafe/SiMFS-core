@@ -31,6 +31,6 @@ class EvaluationTest : public ::testing::Test{
             return total;
         }
 
-        BaseFocus *focus;
+        Focus *focus;
 
 };
