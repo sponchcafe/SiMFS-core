@@ -15,16 +15,16 @@ namespace sim{
                 Diffusion ();
 
                 //-----------------------------------------------------------//
-                void set_json(json j);
+                void set_json(json j) override;
 
                 //-----------------------------------------------------------//
-                json get_json();
+                json get_json() override;
 
                 //-----------------------------------------------------------//
-                void init();
+                void init() override;
 
                 //-----------------------------------------------------------//
-                void run();
+                void run() override;
 
                 //-----------------------------------------------------------//
                 // Parameter setters
@@ -38,10 +38,19 @@ namespace sim{
                 void set_coordinate_output(std::string id);
                 void set_collision_output(std::string id);
                 //-----------------------------------------------------------//
+                
+                //-----------------------------------------------------------//
+                // Function templates for setting in- and outputs
+                //-----------------------------------------------------------//
+                template <template <class> class OutputT>
+                void set_coordinate_output(){
+                    set_coordinate_output<OutputT>(coordinate_output_id);
+                }
 
                 //-----------------------------------------------------------//
-                template <template <class OutputT> class OutputT> 
-                void set_coordinate_output(){
+                template <template <class> class OutputT> 
+                void set_coordinate_output(std::string id){
+                    coordinate_output_id = id;
                     coordinate_output_ptr = 
                         create_output<OutputT, Coordinate>(
                             coordinate_output_id
@@ -49,13 +58,21 @@ namespace sim{
                 }
 
                 //-----------------------------------------------------------//
-                template <template <class OutputT> class OutputT>
+                template <template <class> class OutputT>
                 void set_collision_output(){
+                    set_collision_output<OutputT>(collision_output_id);
+                }
+
+                //-----------------------------------------------------------//
+                template <template <class> class OutputT>
+                void set_collision_output(std::string id){
+                    collision_output_id = id;
                     collision_output_ptr = 
                         create_output<OutputT, Coordinate>(
                             collision_output_id
                         );
                 }
+                //-----------------------------------------------------------//
 
             private:
 
@@ -82,9 +99,9 @@ namespace sim{
 
                 //-----------------------------------------------------------//
                 double sigma = 0;
+                unsigned long long steps = 0;
                 random::Uniform uni{0};         // seed 0
                 random::Normal normal{1, 0};     // sigma 1, seed 0
-                unsigned long long steps = 0;
                 realtime_t last_reset = 0;
 
                 //-----------------------------------------------------------//

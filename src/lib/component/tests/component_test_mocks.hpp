@@ -27,7 +27,10 @@ template <
     public:
 
         //------------------------------------------------------------------//
-        ProducerComponent<OutputT>() { }
+        ProducerComponent<OutputT>() {}
+        void set_json(json j) override {}
+        json get_json() override { return json{}; }
+        void init() override {}
 
         //------------------------------------------------------------------//
         void run() override {
@@ -65,6 +68,9 @@ template <
 
         //------------------------------------------------------------------//
         TransformComponent<InputT, OutputT> () { }
+        void set_json(json j) override {}
+        json get_json() override { return json{}; }
+        void init() override {}
 
         //------------------------------------------------------------------//
         void run() override {
@@ -103,9 +109,12 @@ template <
 
         //------------------------------------------------------------------//
         ConsumerComponent<InputT>() {}
+        void set_json(json j) override {}
+        json get_json() override { return json{}; }
+        void init() override {}
 
         //------------------------------------------------------------------//
-        void run(){
+        void run() override {
             int current;
             while(input->get(current)){
                 data.push_back(current);

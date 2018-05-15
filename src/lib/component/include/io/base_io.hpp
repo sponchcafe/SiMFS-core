@@ -61,7 +61,7 @@ namespace sim{
         //-------------------------------------------------------------------//
         // Input factory.
         //-------------------------------------------------------------------//
-        template <template <typename T> class InputT, typename T>
+        template <template <typename> class InputT, typename T>
         std::unique_ptr<Input<T>> create_input(std::string id) {
             static_assert(
                 std::is_base_of<Input<T>, InputT<T>>::value,
@@ -105,7 +105,7 @@ namespace sim{
         //-------------------------------------------------------------------//
         // Output factory.
         //-------------------------------------------------------------------//
-        template <template <typename T> class OutputT, typename T>
+        template <template <typename> class OutputT, typename T>
         std::unique_ptr<Output<T>> create_output(std::string id) {
             static_assert(
                 std::is_base_of<Output<T>, OutputT<T>>::value,

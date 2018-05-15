@@ -4,4 +4,4 @@ target_include_directories(sim_diffusion PUBLIC ./include)
 target_link_libraries(sim_diffusion sim_random sim_component)
 
 add_executable(simfs_dif src/simfs_dif.cpp)
-target_link_libraries(simfs_dif sim_diffusion)
+target_link_libraries(simfs_dif sim_diffusion sim_component)
