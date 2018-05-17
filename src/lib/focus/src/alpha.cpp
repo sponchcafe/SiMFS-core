@@ -11,6 +11,11 @@ namespace sim{
         }
 
         //------------------------------------------------------------------//
+        std::string Alpha::get_type() const  {
+            return type;
+        }
+
+        //------------------------------------------------------------------//
         void Alpha::set_waist_xy (double wxy) {
             waist_xy = wxy;
         }
@@ -46,7 +51,7 @@ namespace sim{
 
             j["waist_xy"] = waist_xy;
             j["waist_z"] = waist_z;
-            j["type"] = type;
+            j["type"] = get_type();
 
             return j;
 

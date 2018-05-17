@@ -31,6 +31,9 @@ namespace sim{
                 //-----------------------------------------------------------//
                 json get_json() override;
 
+                //-----------------------------------------------------------//
+                std::string get_type() const override;
+
             private:
 
                 //-----------------------------------------------------------//
@@ -40,6 +43,8 @@ namespace sim{
                 double waist_x = 200e-9;
                 double waist_y = 200e-9;
                 double waist_z = 800e-9;
+
+                std::string const type = "gauss";
 
         };
 

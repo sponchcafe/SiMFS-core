@@ -12,6 +12,11 @@ namespace sim{
         {}
 
         //------------------------------------------------------------------//
+        std::string Gaussian::get_type() const {
+            return type;
+        }
+
+        //------------------------------------------------------------------//
         void Gaussian::set_waist_x (double wx) {
             waist_x = wx;
         }
@@ -56,6 +61,7 @@ namespace sim{
             j["waist_x"] = waist_x;
             j["waist_y"] = waist_y;
             j["waist_z"] = waist_z;
+            j["type"] = get_type();
 
             return j;
 

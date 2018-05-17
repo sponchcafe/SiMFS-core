@@ -30,6 +30,9 @@ namespace sim{
                 //-----------------------------------------------------------//
                 json get_json() override;
 
+                //-----------------------------------------------------------//
+                std::string get_type() const override;
+
             private:
 
                 double waist_xy = 200e-9;
