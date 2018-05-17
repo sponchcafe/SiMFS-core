@@ -1,5 +1,5 @@
 #include <iostream>
-#include "diffusion/component.hpp"
+#include "excitation/component.hpp"
 #include "component/cli.hpp"
 #include "io/file_io.hpp"
 
@@ -12,22 +12,22 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> opts = cli::parse_argv_vector(argc, argv);
 
     //-Create----------------------------------------------------------------//
-    comp::Diffusion dif;
+    comp::Excitation exi;
 
     //-Configure-------------------------------------------------------------//
-    dif.set_json(params);
-    dif.set_coordinate_output< file_io::FileOutput >(); // template spec.
-    dif.set_collision_output<  file_io::FileOutput >();  // template spec.
+    exi.set_json(params);
+    exi.set_coordinate_input< file_io::FileInput >(); // template spec.
+    exi.set_flux_output<  file_io::FileOutput >();  // template spec.
 
     //-Initialize------------------------------------------------------------//
-    dif.init();
+    exi.init();
 
     //-Log-------------------------------------------------------------------//
-    cli::log_parameters(dif.get_json());
+    cli::log_parameters(exi.get_json());
 
     //-Run-------------------------------------------------------------------//
     if (!cli::check_list(opts)){
-        dif.run();
+        exi.run();
     }
 
 }

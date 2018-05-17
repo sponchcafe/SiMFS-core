@@ -1,6 +1,6 @@
 add_subdirectory(./dif)
+add_subdirectory(./exi)
 #add_subdirectory(./put)
-#add_subdirectory(./exi)
 #add_subdirectory(./det)
 #add_subdirectory(./ph2)
 #add_subdirectory(./mix)

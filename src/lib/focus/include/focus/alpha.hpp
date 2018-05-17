@@ -7,7 +7,7 @@ namespace sim{
     namespace focus{
 
     //-------------------------------------------------------------------//
-        class Alpha : public  Focus{
+        class Alpha : public Focus{
 
             public:
 
@@ -34,6 +34,7 @@ namespace sim{
 
                 double waist_xy = 200e-9;
                 double waist_z = 800e-9;
+                std::string const type = "alpha";
 
         };
 

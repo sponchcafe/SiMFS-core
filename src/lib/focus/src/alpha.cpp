@@ -46,6 +46,7 @@ namespace sim{
 
             j["waist_xy"] = waist_xy;
             j["waist_z"] = waist_z;
+            j["type"] = type;
 
             return j;
 
