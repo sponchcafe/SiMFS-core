@@ -145,7 +145,7 @@ namespace sim{
 
                 flux.time = count * repetition_time + *it_t;
                 
-                while (flux.time > coordinate_input_ptr->peek().t) {
+                while (flux.time >= coordinate_input_ptr->peek().t) {
                     if(!coordinate_input_ptr->get(c)) return;
                     auto it_p_prev = it_p-1;
                     if (it_p_prev < pulse_power.begin()) it_p_prev = pulse_power.end()-1;
@@ -156,9 +156,11 @@ namespace sim{
                     
                     TimedValue dif_flux{
                         focus_ptr->evaluate(c.x, c.y, c.z) * *it_p_prev * const_scaling,
-                        c.t
+                            c.t
                     };
-                    flux_output_ptr->put(dif_flux);
+                    if (dif_flux.value != flux.value){
+                        flux_output_ptr->put(dif_flux);
+                    }
                 } 
 
                 flux.value = focus_ptr->evaluate(c.x, c.y, c.z) * *it_p * const_scaling;
