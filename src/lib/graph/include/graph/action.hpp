@@ -3,8 +3,10 @@
 
 #include "graph/graph.hpp"
 #include "graph/definitions.hpp"
+#include "json/json.hpp"
+#include "component/types.hpp"
 
-#include <string>
+using json = nlohmann::json;
 
 namespace sim{
     namespace graph{
@@ -12,6 +14,9 @@ namespace sim{
         class Action{
 
             public:
+
+                //-----------------------------------------------------------//
+                Action() = delete;
 
                 //-----------------------------------------------------------//
                 Action(Graph &graph, std::string const name);
@@ -25,15 +30,30 @@ namespace sim{
                 //-----------------------------------------------------------//
                 virtual ~Action();
 
-                virtual void fire();
+                //-----------------------------------------------------------//
                 virtual void init();
 
+                //-----------------------------------------------------------//
+                virtual void fire();
+
+                //-----------------------------------------------------------//
+                virtual void set_json(json j);
+
+                //-----------------------------------------------------------//
+                virtual json get_json();
+
+                //-----------------------------------------------------------//
+                static std::string get_type ();
+
+                //-----------------------------------------------------------//
                 std::ostream &print_info(std::ostream &os);
 
+                //-----------------------------------------------------------//
                 std::string const name;
 
             protected:
 
+                //-----------------------------------------------------------//
                 Graph &graph;
 
         };

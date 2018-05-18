@@ -76,7 +76,7 @@ namespace sim{
 
         };
 
-        std::ostream &operator<<(std::ostream &os, Event const &event);
+        std::ostream &operator<<(std::ostream &os, const Event &event);
     }
 }
 
