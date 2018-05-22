@@ -6,6 +6,8 @@
 namespace sim{
     namespace graph{
 
+        std::string Action::type = "__default__";
+
         //-------------------------------------------------------------------//
         Action::Action(Graph &graph, std::string const name) 
             : name(name), graph(graph)
@@ -35,13 +37,13 @@ namespace sim{
         }
 
         //-------------------------------------------------------------------//
-        static std::string get_type (){
-            return "__default__";
+        std::ostream &Action::print_info(std::ostream &os){
+            return os << "<Action " << name << " at " << this << ">";
         }
 
         //-------------------------------------------------------------------//
-        std::ostream &Action::print_info(std::ostream &os){
-            return os << "<Action " << name << " at " << this << ">";
+        bool action_type_compare(std::string lhs, std::string rhs){
+            return lhs.compare(rhs) == 0;
         }
 
     }
