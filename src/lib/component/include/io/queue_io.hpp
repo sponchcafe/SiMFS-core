@@ -4,6 +4,8 @@
 #include "queue_fs.hpp"
 #include "io/base_io.hpp"
 
+using namespace sim::comp;
+
 namespace sim{
     namespace queue_io{
 
