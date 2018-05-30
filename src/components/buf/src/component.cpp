@@ -1,9 +1,6 @@
 #include "buffer/component.hpp"
 #include "io/queue_io.hpp"
 
-using namespace sim::queue_io;
-
-
 namespace sim{
     namespace comp{
 
@@ -67,12 +64,12 @@ namespace sim{
         //-------------------------------------------------------------------//
         void Buffer::input_worker(){
 
-            std::vector<QueueOutput<char>> buffer_inlets;
+            std::vector<sim::queue_io::QueueOutput<double>> buffer_inlets;
             for(auto &it: output_ids){
                 buffer_inlets.emplace_back(it);
             }
 
-            char current;
+            double current;
 
             while(input_ptr->get(current)){
                 for (auto &it: buffer_inlets){
@@ -84,10 +81,10 @@ namespace sim{
 
 
         //-------------------------------------------------------------------//
-        void Buffer::output_worker(std::string id, std::unique_ptr<Output<char>> &out){
+        void Buffer::output_worker(std::string id, std::unique_ptr<Output<double>> &out){
 
-            QueueInput<char> buffer_outlet{id};
-            char current;
+            sim::queue_io::QueueInput<double> buffer_outlet{id};
+            double current;
             while (buffer_outlet.get(current)){
                 out->put(current);
             }

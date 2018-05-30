@@ -1,3 +1,6 @@
+#ifndef SIM_BUFFER_H
+#define SIM_BUFFER_H
+
 #include "component/component.hpp"
 #include <thread>
 #include <vector>
@@ -51,8 +54,8 @@ namespace sim{
                     output_ids = ids;
                     output_ptrs.clear();
                     for (auto &it: output_ids){
-                        std::unique_ptr<Output<char>> output_ptr = 
-                            create_output<OutputT, char>(it);
+                        std::unique_ptr<Output<double>> output_ptr = 
+                            create_output<OutputT, double>(it);
                         output_ptrs.push_back(std::move(output_ptr));
                     }
                 }
@@ -67,7 +70,7 @@ namespace sim{
                 template <template <class> class InputT>
                 void set_input(std::string id){
                     input_id = id;
-                    input_ptr = create_input<InputT, char> (input_id);
+                    input_ptr = create_input<InputT, double> (input_id);
                 } 
                 //-----------------------------------------------------------//
                 
@@ -76,7 +79,7 @@ namespace sim{
             private:
 
                 //-----------------------------------------------------------//
-                void output_worker(std::string id, std::unique_ptr<Output<char>> &out);
+                void output_worker(std::string id, std::unique_ptr<Output<double>> &out);
                 void input_worker();
                 
                 //-----------------------------------------------------------//
@@ -85,11 +88,13 @@ namespace sim{
                 std::string input_id = "./buffer_input";
                 std::vector<std::string> output_ids{"./buffer_output"};
 
-                std::unique_ptr<Input<char>> input_ptr;
-                std::vector<std::unique_ptr<Output<char>>> output_ptrs;
+                std::unique_ptr<Input<double>> input_ptr;
+                std::vector<std::unique_ptr<Output<double>>> output_ptrs;
 
 
         };
 
     }
 }
+
+#endif
