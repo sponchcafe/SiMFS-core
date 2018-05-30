@@ -1,10 +1,10 @@
-#ifndef SIMFS_QUEUE_FS_T
-#define SIMFS_QUEUE_FS_T
+#ifndef SIM_QUEUE_FS_T
+#define SIM_QUEUE_FS_T
 
 #include <unordered_map>
-#include <thread>
 #include <mutex>
 #include <atomic>
+#include <string>
 
 #include "queue/readerwriterqueue.h"
 #include "queue/atomicops.h"
@@ -55,7 +55,7 @@ namespace sim{
         //-----------------------------------------------------------------------//
         // Mutex for thread safe access to the pseudo-filesystem
         //-----------------------------------------------------------------------//
-        std::mutex mtx{};
+        template <typename T> std::mutex mtx{}; // One mutex per data type T.
 
         //-----------------------------------------------------------------------//
         // Assembly of a new queue object in the pseudo-filesystem.
@@ -75,7 +75,7 @@ namespace sim{
         template <typename T> queue_handle_t<T> &open(std::string id){
 
             //-------------------------------------------------------------------//
-            mtx.lock(); // Critical section begin -------------------------------//
+            mtx<T>.lock(); // Critical section begin ----------------------------//
             //-------------------------------------------------------------------//
 
             try { fs<T>.at(id); }
@@ -83,7 +83,7 @@ namespace sim{
             queue_handle_t<T> &queue = fs<T>.at(id);
                     
             //-------------------------------------------------------------------//
-            mtx.unlock(); // Critical section end -------------------------------//
+            mtx<T>.unlock(); // Critical section end ----------------------------//
             //-------------------------------------------------------------------//
 
             return queue;

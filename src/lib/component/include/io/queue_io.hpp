@@ -1,5 +1,5 @@
-#ifndef SIMFS_QUEUE_IO_H
-#define SIMFS_QUEUE_IO_H
+#ifndef SIM_QUEUE_IO_H
+#define SIM_QUEUE_IO_H
 
 #include "queue_fs.hpp"
 #include "io/base_io.hpp"

@@ -1,5 +1,5 @@
-#ifndef SIMFS_VECTOR_IO_H
-#define SIMFS_VECTOR_IO_H
+#ifndef SIM_VECTOR_IO_H
+#define SIM_VECTOR_IO_H
 
 #include "io/base_io.hpp"
 #include "io/vector_fs.hpp"
