@@ -31,6 +31,7 @@ namespace sim{
             det->set_json(params["det"]);
             ph2->set_json(params["ph2"]);
             dif->set_json(params["spl"]);
+            set_photon_output_id(params["photon_output"]);
 
         }
 
