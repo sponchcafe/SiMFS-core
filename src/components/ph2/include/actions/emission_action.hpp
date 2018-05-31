@@ -57,7 +57,7 @@ namespace sim{
             private:
 
                 //-----------------------------------------------------------//
-                std::string photon_output_id = "./emission";
+                std::string photon_output_id = "__emission__";
                 std::string trigger_edge_id = "emi";
 
                 //-----------------------------------------------------------//

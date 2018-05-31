@@ -62,8 +62,8 @@ namespace sim{
 
                 //-----------------------------------------------------------//
                 std::string target_edge_id = "exi";
-                std::string flux_input_id = "./excitation";
-                double absorption_coefficient = 0.0;
+                std::string flux_input_id = "__excitation__";
+                double absorption_coefficient = 10000;
 
 
                 //-----------------------------------------------------------//

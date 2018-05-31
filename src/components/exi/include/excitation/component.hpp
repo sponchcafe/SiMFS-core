@@ -94,7 +94,7 @@ namespace sim{
                 //-----------------------------------------------------------//
 
                 //-----------------------------------------------------------//
-                bool cw = false; // if no pulse is specified, cw ex. is assumed
+                bool cw = true; // if no pulse is specified, cw ex. is assumed
                 Coordinate c{0.0,0.0,0.0,0.0};
                 TimedValue flux{0.0, 0.0};
                                

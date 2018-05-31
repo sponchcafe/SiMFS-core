@@ -82,8 +82,8 @@ namespace sim{
                 //-----------------------------------------------------------//
                 std::string target_edge_id = "exi";
                 std::string source_node_id = "S0";
-                std::string photon_input_id = "./transferred";
-                std::string rejected_photon_output_id = "./rejected";
+                std::string photon_input_id = "__transferred__";
+                std::string rejected_photon_output_id = "__rejected__";
 
                 //-----------------------------------------------------------//
                 Edge *target_edge_ptr = nullptr;

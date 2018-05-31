@@ -17,6 +17,7 @@ namespace sim{
         //-------------------------------------------------------------------//
         void SingleDye::set_photon_output_id(std::string id){
             photon_output_id = id;
+            spl->set_accepted_photon_output_id(id);
         }
         //-------------------------------------------------------------------//
         
@@ -26,12 +27,23 @@ namespace sim{
             json params = get_json();
             params.merge_patch(j);
 
-            dif->set_json(params["dif"]);
-            exi->set_json(params["exi"]);
-            det->set_json(params["det"]);
-            ph2->set_json(params["ph2"]);
-            dif->set_json(params["spl"]);
-            set_photon_output_id(params["photon_output"]);
+            dif->set_json(params["diffusion"]);
+            exi->set_json(params["excitation"]);
+            det->set_json(params["detection"]);
+
+            ph2_params = ph2->get_json();
+
+            ph2_params["actions"]["__excitation__"]["absorption_coefficient"] = params["photophysics"]["absorption_coefficient"];
+            ph2_params["initial_state"] = params["photophysics"]["initial_state"];
+            ph2_params["jablonsky"]["emi"]["rate"] = params["photophysics"]["k_emi"];
+            ph2_params["jablonsky"]["isc"]["rate"] = params["photophysics"]["k_isc"];
+            ph2_params["jablonsky"]["risc"]["rate"] = params["photophysics"]["k_risc"];
+            ph2_params["seed"] = params["photophysics"]["seed"];
+
+            ph2->set_json(ph2_params);
+
+            set_photon_output_id(params["detection"]["photon_output"]);
+            spl->set_seed(params["detection"]["seed"]);
 
         }
 
@@ -40,13 +52,19 @@ namespace sim{
 
             json j;
 
-            j["dif"] = get_reduced_dif_params();
-            j["exi"] = get_reduced_exi_params();
-            j["det"] = get_reduced_det_params();
-            j["ph2"] = get_reduced_ph2_params();
-            j["spl"] = get_reduced_spl_params();
+            j["diffusion"] = get_reduced_dif_params();
+            j["excitation"] = get_reduced_exi_params();
+            j["detection"] = get_reduced_det_params();
+            j["detection"]["seed"] = spl->get_json()["seed"];
+            j["detection"]["photon_output"] = spl->get_json()["accepted_output"];
 
-            j["photon_output"] = photon_output_id;
+            json ph2_params = ph2->get_json();
+            j["photophysics"]["absorption_coefficient"] = ph2_params["actions"]["__excitation__"]["absorption_coefficient"];
+            j["photophysics"]["initial_state"] = ph2_params["initial_state"];
+            j["photophysics"]["k_emi"] = ph2_params["jablonsky"]["emi"]["rate"];
+            j["photophysics"]["k_isc"] = ph2_params["jablonsky"]["isc"]["rate"];
+            j["photophysics"]["k_risc"] = ph2_params["jablonsky"]["risc"]["rate"];
+            j["photophysics"]["seed"] = ph2_params["seed"];
 
             return j;
 
@@ -120,8 +138,8 @@ namespace sim{
         //-------------------------------------------------------------------//
         json SingleDye::get_reduced_ph2_params(){
             json j = ph2->get_json();
-            j["actions"]["emission"].erase("photon_output");
-            j["actions"]["excitation"].erase("flux_input");
+            j["absorption_coefficient"] = j["actions"]["__excitation__"]["absorption_coefficient"];
+            j["actions"] = json::object();
             return j;
         }
 
@@ -159,8 +177,8 @@ namespace sim{
 
         //-------------------------------------------------------------------//
         void SingleDye::run_ph2(std::unique_ptr<comp::Photophysics> ph2){
-            graph::ExcitationAction &exi_act = ph2->get_action<graph::ExcitationAction>("excitation");
-            graph::EmissionAction &emi_act = ph2->get_action<graph::EmissionAction>("emission");
+            auto &exi_act = ph2->get_action<graph::ExcitationAction>("__excitation__");
+            auto &emi_act = ph2->get_action<graph::EmissionAction>("__emission__");
             exi_act.set_flux_input < queue_io::QueueInput > ("__flux__");
             emi_act.set_photon_output < queue_io::QueueOutput > ("__emission__");
             ph2->run();

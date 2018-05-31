@@ -66,6 +66,10 @@ namespace sim{
                 std::cerr << "CW mode\n";
                 cw = true;
             }
+            else{
+                std::cerr << "pulsed mode\n";
+                cw = false;
+            }
 
             json params = get_json();
             params.merge_patch(j);

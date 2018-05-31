@@ -57,14 +57,14 @@ namespace sim{
                 //-----------------------------------------------------------//
                 unsigned seed = 0;
                 json jablonsky = {
-                    {"exi", {{"from", "S0"}, {"to", "S1"}, {"rate", 1e+8}}},
-                    {"emi", {{"from", "S1"}, {"to", "S0"}, {"rate", 1e+8}}},
-                    {"isc", {{"from", "S1"}, {"to", "T1"}, {"rate", 1e+8}}},
-                    {"risc", {{"from", "T1"}, {"to", "S0"}, {"rate", 1e+8}}}
+                    {"exi", {{"from", "S0"}, {"to", "S1"}, {"rate", 0}}},
+                    {"emi", {{"from", "S1"}, {"to", "S0"}, {"rate", 1e+9}}},
+                    {"isc", {{"from", "S1"}, {"to", "T1"}, {"rate", 1e+7}}},
+                    {"risc", {{"from", "T1"}, {"to", "S0"}, {"rate", 1e+7}}}
                 };
                 json actions = {
-                    {"excitation", {{"type", graph::ExcitationAction::type}}},
-                    {"emission", {{"type", graph::EmissionAction::type}, {"trigger_edge", "emi"}}}
+                    {"__excitation__", {{"type", graph::ExcitationAction::type}}},
+                    {"__emission__", {{"type", graph::EmissionAction::type}}}
                 };
                 std::string initial_state_id = "S0";
                
