@@ -74,11 +74,17 @@ namespace sim{
 
         //-------------------------------------------------------------------//
         void Diffusion::init() {
+            
+            // parameter initializtaion
             steps = (unsigned long long) floor(experiment_time/increment);
             sigma = sqrt(2 * diffusion_coefficient * increment);
             normal = random::Normal{sigma, seed};
             uni = random::Uniform{seed};
             c0 = get_initial_coordinate();
+
+            // IO initialization
+            coordinate_output_ptr = std::make_unique< queue_io::QueueOutput<Coordinate> >(coordinate_output_id);
+            collision_output_ptr = std::make_unique< queue_io::QueueOutput<Coordinate> >(collision_output_id);
         }
 
         //-------------------------------------------------------------------//

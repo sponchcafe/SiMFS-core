@@ -2,6 +2,7 @@
 #define SIM_BASE_COMPONENT_H
 
 #include <type_traits>
+#include <thread>
 #include <iostream>
 #include <json/json.hpp>
 
@@ -40,8 +41,17 @@ namespace sim{
                 virtual void init() = 0;
 
         };
-    }
 
+        //-Thread-helper-----------------------------------------------------//
+        template <typename T> std::thread run_component(T &comp){
+            std::thread thr{ [&] () { 
+                T _comp = std::move(comp); // stealing the component object
+                _comp.run(); 
+            } };
+            return thr;
+        }
+
+    }
 }
 
 #endif

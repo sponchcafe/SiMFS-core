@@ -2,6 +2,7 @@
 #define SIM_QUEUE_IO_H
 
 #include <fstream> 
+#include <thread>
 #include "queue_fs.hpp"
 #include "io/base_io.hpp"
 
@@ -185,6 +186,18 @@ namespace sim{
                 chunk.resize(is.gcount()/sizeof(T));
                 queue.push_chunk(std::move(chunk));
             }
+        }
+
+        //-----------------------------------------------------------------------//
+        template <typename T> std::thread file_to_queue_thread(std::string id){
+            std::thread thr{ [&] () { file_to_queue<T>(id); } };
+            return thr;
+        }
+
+        //-----------------------------------------------------------------------//
+        template <typename T> std::thread queue_to_file_thread(std::string id){
+            std::thread thr{ [&] () { queue_to_file<T>(id); } };
+            return thr;
         }
 
     }

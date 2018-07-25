@@ -1,4 +1,5 @@
 #include "component/component.hpp"
+#include "io/queue_io.hpp"
 #include "component/types.hpp"
 #include "random/random.hpp"
 #include <cmath>
@@ -44,41 +45,6 @@ namespace sim{
                 void set_collision_output(std::string id);
                 //-----------------------------------------------------------//
                
-                
-                //-----------------------------------------------------------//
-                // Function templates for setting in- and outputs
-                //-----------------------------------------------------------//
-                template <template <class> class OutputT>
-                void set_coordinate_output(){
-                    set_coordinate_output<OutputT>(coordinate_output_id);
-                }
-
-                //-----------------------------------------------------------//
-                template <template <class> class OutputT> 
-                void set_coordinate_output(std::string id){
-                    coordinate_output_id = id;
-                    coordinate_output_ptr = 
-                        create_output<OutputT, Coordinate>(
-                            coordinate_output_id
-                        );
-                }
-
-                //-----------------------------------------------------------//
-                template <template <class> class OutputT>
-                void set_collision_output(){
-                    set_collision_output<OutputT>(collision_output_id);
-                }
-
-                //-----------------------------------------------------------//
-                template <template <class> class OutputT>
-                void set_collision_output(std::string id){
-                    collision_output_id = id;
-                    collision_output_ptr = 
-                        create_output<OutputT, Coordinate>(
-                            collision_output_id
-                        );
-                }
-                //-----------------------------------------------------------//
 
             private:
 
