@@ -2,8 +2,14 @@
 #include "diffusion/component.hpp"
 #include "component/cli.hpp"
 #include "io/file_io.hpp"
+#include "io/queue_io.hpp"
+#include <thread>
 
 using namespace sim;
+
+void run (comp::Diffusion dif){
+    dif.run();
+}
 
 int main(int argc, char *argv[]) {
 
@@ -16,18 +22,36 @@ int main(int argc, char *argv[]) {
 
     //-Configure-------------------------------------------------------------//
     dif.set_json(params);
-    dif.set_coordinate_output< file_io::FileOutput >(); // template spec.
-    dif.set_collision_output<  file_io::FileOutput >();  // template spec.
+    dif.set_coordinate_output<queue_io::QueueOutput>();
+    dif.set_collision_output<queue_io::QueueOutput>();
 
     //-Initialize------------------------------------------------------------//
     dif.init();
 
     //-Log-------------------------------------------------------------------//
-    cli::log_parameters(dif.get_json());
+    json log = dif.get_json();
+    cli::log_parameters(log);
 
     //-Run-------------------------------------------------------------------//
     if (!cli::check_list(opts)){
-        dif.run();
+
+        //-File-writer-threads-----------------------------------------------//
+        std::thread coord_thr{[&] () {
+            queue_io::queue_to_file<Coordinate>(log["coordinate_output"]);
+        }};
+      
+        std::thread collision_thr{[&] () {
+            queue_io::queue_to_file<Coordinate>(log["collision_output"]);
+        }};
+
+        std::thread run_thr{[&] () {
+            run(std::move(dif));
+        }};
+
+        run_thr.join();
+        collision_thr.join();
+        coord_thr.join();
+
     }
 
 }

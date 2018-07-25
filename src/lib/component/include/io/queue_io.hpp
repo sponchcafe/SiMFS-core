@@ -1,6 +1,7 @@
 #ifndef SIM_QUEUE_IO_H
 #define SIM_QUEUE_IO_H
 
+#include <fstream> 
 #include "queue_fs.hpp"
 #include "io/base_io.hpp"
 
@@ -14,6 +15,8 @@ namespace sim{
         // producer thread is done (eof == true)
         //-----------------------------------------------------------------------//
         constexpr size_t DEAD_TIME_MILLIS = 10;
+        constexpr size_t CHUNK_SIZE = 1<<14;
+
 
         //-----------------------------------------------------------------------//
         // Template for lock-free queue based input.
@@ -25,8 +28,7 @@ namespace sim{
                 //---------------------------------------------------------------//
                 QueueInput<T>(std::string id) : 
                     Input<T>(id),
-                    queue_handle(open<T>(id)) {
-                        eof = !get_next();
+                    queue_handle(open<std::vector<T>>(id)) {
                     }
 
                 //-Copy-ctor:-DELETED--------------------------------------------//
@@ -43,28 +45,38 @@ namespace sim{
 
                 //---------------------------------------------------------------//
                 bool get(T &target) override {
-                    target = current;
-                    if (!eof && !get_next()){
-                        eof = true;
-                        return true;
+                    bool valid = true; // true if value set to target is valid
+                    if (current == current_chunk.end()){
+                        valid = get_next();
                     }
-                    return !eof;
+                    target = *current++;
+                    return valid;
+                }
+
+                //---------------------------------------------------------------//
+                bool get_chunk(std::vector<T> &target){
+                    bool valid = get_next(); // true if a new (valid) chunk is provided
+                    target = std::move(current_chunk);
+                    return valid;
                 }
 
                 //---------------------------------------------------------------//
                 T peek() const override {
-                    return current;
+                    return *current;
                 }
 
             private:
 
                 //---------------------------------------------------------------//
+                // Get the next chunk to the current member
+                //---------------------------------------------------------------//
                 bool get_next(){
-                    T next = current;
+                    std::vector<T> next_chunk;
                     do {
-                        if (queue_handle.queue->wait_dequeue_timed(next, 
+                        if (queue_handle.queue->wait_dequeue_timed(next_chunk,
                                     std::chrono::milliseconds(DEAD_TIME_MILLIS))){
-                            current = next;
+                            current_chunk = std::move(next_chunk);
+                            current = current_chunk.begin();
                             return true;
                         } 
                     }while(!queue_handle.eof->load());
@@ -72,9 +84,9 @@ namespace sim{
                 }
 
                 //---------------------------------------------------------------//
-                queue_handle_t<T> &queue_handle;
-                bool eof = false;
-                T current;
+                queue_handle_t<std::vector<T>> &queue_handle;
+                std::vector<T> current_chunk{};
+                typename std::vector<T>::iterator current;
 
         };
 
@@ -92,11 +104,16 @@ namespace sim{
                 //---------------------------------------------------------------//
                 QueueOutput<T>(std::string id) :
                     Output<T>(id),
-                    queue_handle(open<T>(id)) { }
+                    queue_handle(open<std::vector<T>>(id)) { 
+                        make_new_chunk();
+                    }
 
                 //---------------------------------------------------------------//
                 ~QueueOutput<T>(){
                     // notify the user that the output is done.
+                    if (chunk.size() > 0) {
+                        push_chunk();
+                    }
                     queue_handle.eof->store(true);
                 }
 
@@ -114,18 +131,63 @@ namespace sim{
 
                 //---------------------------------------------------------------//
                 void put(T &item) override {
-                    queue_handle.queue->enqueue(item);
+                    chunk.push_back(item);
+                    if (chunk.size() >= CHUNK_SIZE){
+                        push_chunk();
+                        make_new_chunk();
+                    }
+                }
+
+                //---------------------------------------------------------------//
+                void put_chunk(std::vector<T> &c){
+                    push_chunk(); // commit current chunk
+                    chunk = std::move(c);
                 }
 
             private:
 
                 //---------------------------------------------------------------//
-                queue_handle_t<T> &queue_handle;
+                void make_new_chunk(){
+                    chunk = std::vector<T>();
+                    chunk.reserve(CHUNK_SIZE);
+                }
+
+                void push_chunk(){
+                    queue_handle.queue->enqueue(std::move(chunk));
+                }
+                
+                //---------------------------------------------------------------//
+                queue_handle_t<std::vector<T>> &queue_handle;
+                std::vector<T> chunk;
+                
 
         };
 
-    }
+        //-----------------------------------------------------------------------//
+        template <typename T> void queue_to_file(std::string id){
+            auto queue = queue_io::QueueInput<T>(id);
+            auto os = std::ofstream(id, std::ofstream::binary);
+            std::vector<T> chunk;
+            while (queue.get_chunk(chunk)){
+                char const *data = reinterpret_cast<char const *>(chunk.data());
+                os.write(data, chunk.size()*sizeof(T));
+            }
+        }
 
+        //-----------------------------------------------------------------------//
+        template <typename T> void file_to_queue(std::string id){
+            auto queue = queue_io::QueueOutput<T>(id);
+            auto is = std::ifstream(id, std::ifstream::binary);
+            std::vector<T> chunk;
+            while (!is.eof()){
+                chunk.reserve(CHUNK_SIZE);
+                is.read(reinterpret_cast<char *>(chunk.data()), CHUNK_SIZE*sizeof(T));
+                chunk.resize(is.gcount()/sizeof(T));
+                queue.push_chunk(std::move(chunk));
+            }
+        }
+
+    }
 }
 
 #endif

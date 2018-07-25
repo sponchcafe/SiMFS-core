@@ -123,7 +123,7 @@ class ComponentIO : public ::testing::Test {
         std::vector<int> result{};
 
         //------------------------------------------------------------------//
-        size_t const payload_size = 1024*1024*200/sizeof(int); // 200MB payload
+        size_t const payload_size = 1024*1024*10*sizeof(int); // 200MB payload
 
 
 };
