@@ -3,13 +3,10 @@
 
 #include <fstream> 
 #include <thread>
-#include "queue_fs.hpp"
-#include "io/base_io.hpp"
-
-using namespace sim::comp;
+#include "buffer_fs.hpp"
 
 namespace sim{
-    namespace queue_io{
+    namespace io{
 
         //-----------------------------------------------------------------------//
         // Time an input thread waits on an empty queue until it rechecks if the 
@@ -22,30 +19,30 @@ namespace sim{
         //-----------------------------------------------------------------------//
         // Template for lock-free queue based input.
         //-----------------------------------------------------------------------//
-        template <typename T> class QueueInput : public Input<T>{
+        template <typename T> class BufferInput { 
 
             public:
 
                 //---------------------------------------------------------------//
-                QueueInput<T>(std::string id) : 
-                    Input<T>(id),
+                BufferInput<T>(std::string id) : 
                     queue_handle(open<std::vector<T>>(id)) {
+                        current = current_chunk.begin();
                     }
 
                 //-Copy-ctor:-DELETED--------------------------------------------//
-                QueueInput<T> (QueueInput<T> &other) = delete;
+                BufferInput<T> (BufferInput<T> &other) = delete;
 
                 //-Copy-assgin:-DELETED------------------------------------------//
-                QueueInput<T> &operator=(QueueInput<T> &other) = delete;
+                BufferInput<T> &operator=(BufferInput<T> &other) = delete;
 
                 //-Move-ctor:-DEFAULT--------------------------------------------//
-                QueueInput<T>(QueueInput<T> &&other) = default;
+                BufferInput<T>(BufferInput<T> &&other) = default;
 
                 //-Move-assign:-DEFAULT------------------------------------------//
-                QueueInput<T> &operator=(QueueInput<T> &&other) = default;
+                BufferInput<T> &operator=(BufferInput<T> &&other) = default;
 
                 //---------------------------------------------------------------//
-                bool get(T &target) override {
+                bool get(T &target) {
                     bool valid = true; // true if value set to target is valid
                     if (current == current_chunk.end()){
                         valid = get_next();
@@ -62,7 +59,7 @@ namespace sim{
                 }
 
                 //---------------------------------------------------------------//
-                T peek() const override {
+                T peek() const {
                     return *current;
                 }
 
@@ -98,40 +95,37 @@ namespace sim{
         //-----------------------------------------------------------------------//
         // Template for lock-free queue based output.
         //-----------------------------------------------------------------------//
-        template <typename T> class QueueOutput : public Output<T>{
+        template <typename T> class BufferOutput { 
 
             public:
 
                 //---------------------------------------------------------------//
-                QueueOutput<T>(std::string id) :
-                    Output<T>(id),
+                BufferOutput<T>(std::string id) :
                     queue_handle(open<std::vector<T>>(id)) { 
                         make_new_chunk();
                     }
 
                 //---------------------------------------------------------------//
-                ~QueueOutput<T>(){
+                ~BufferOutput<T>(){
                     // notify the user that the output is done.
-                    if (chunk.size() > 0) {
-                        push_chunk();
-                    }
+                    push_chunk();
                     queue_handle.eof->store(true);
                 }
 
                 //-Copy-ctor:-DELETED--------------------------------------------//
-                QueueOutput<T>(QueueOutput<T> &source) = delete;
+                BufferOutput<T>(BufferOutput<T> &source) = delete;
 
                 //-Copy-assgin:-DELETED------------------------------------------//
-                QueueOutput<T> &operator=(QueueOutput<T> &other) = delete;
+                BufferOutput<T> &operator=(BufferOutput<T> &other) = delete;
 
                 //-Move-ctor:-DEFAULT--------------------------------------------//
-                QueueOutput<T>(QueueOutput<T> &&other)  = default;
+                BufferOutput<T>(BufferOutput<T> &&other)  = default;
 
                 //-Move-assign:-DEFAULT------------------------------------------//
-                QueueOutput<T> &operator=(QueueOutput<T> &&other) = default;
+                BufferOutput<T> &operator=(BufferOutput<T> &&other) = default;
 
                 //---------------------------------------------------------------//
-                void put(T &item) override {
+                void put(T &item) {
                     chunk.push_back(item);
                     if (chunk.size() >= CHUNK_SIZE){
                         push_chunk();
@@ -140,7 +134,7 @@ namespace sim{
                 }
 
                 //---------------------------------------------------------------//
-                void put_chunk(std::vector<T> &c){
+                void put_chunk(std::vector<T> c){
                     push_chunk(); // commit current chunk
                     chunk = std::move(c);
                 }
@@ -154,7 +148,9 @@ namespace sim{
                 }
 
                 void push_chunk(){
-                    queue_handle.queue->enqueue(std::move(chunk));
+                    if (chunk.size() > 0) {
+                        queue_handle.queue->enqueue(std::move(chunk));
+                    }
                 }
                 
                 //---------------------------------------------------------------//
@@ -165,10 +161,11 @@ namespace sim{
         };
 
         //-----------------------------------------------------------------------//
-        template <typename T> void queue_to_file(std::string id){
-            auto queue = queue_io::QueueInput<T>(id);
-            auto os = std::ofstream(id, std::ofstream::binary);
-            std::vector<T> chunk;
+        template <typename T> void buffer2file(std::string buffer_id, std::string filename = ""){
+            if (filename == "") filename = buffer_id;
+            auto queue = BufferInput<T>(buffer_id);
+            auto os = std::ofstream(filename, std::ofstream::binary);
+            std::vector<T> chunk{};
             while (queue.get_chunk(chunk)){
                 char const *data = reinterpret_cast<char const *>(chunk.data());
                 os.write(data, chunk.size()*sizeof(T));
@@ -176,29 +173,31 @@ namespace sim{
         }
 
         //-----------------------------------------------------------------------//
-        template <typename T> void file_to_queue(std::string id){
-            auto queue = queue_io::QueueOutput<T>(id);
-            auto is = std::ifstream(id, std::ifstream::binary);
-            std::vector<T> chunk;
+        template <typename T> std::thread buffer2file_thread(std::string buffer_id, std::string filename = ""){
+            std::thread thr{ [&] () { buffer2file<T>(buffer_id, filename); } };
+            return thr;
+        }
+
+        //-----------------------------------------------------------------------//
+        template <typename T> void file2buffer(std::string filename, std::string buffer_id = ""){
+            if (buffer_id == "") buffer_id = filename;
+            auto queue = BufferOutput<T>(buffer_id);
+            auto is = std::ifstream(filename, std::ifstream::binary);
             while (!is.eof()){
-                chunk.reserve(CHUNK_SIZE);
+                std::vector<T> chunk{CHUNK_SIZE};
+                chunk.resize(CHUNK_SIZE);
                 is.read(reinterpret_cast<char *>(chunk.data()), CHUNK_SIZE*sizeof(T));
                 chunk.resize(is.gcount()/sizeof(T));
-                queue.push_chunk(std::move(chunk));
+                queue.put_chunk(chunk);
             }
         }
 
         //-----------------------------------------------------------------------//
-        template <typename T> std::thread file_to_queue_thread(std::string id){
-            std::thread thr{ [&] () { file_to_queue<T>(id); } };
+        template <typename T> std::thread file2buffer_thread(std::string filename, std::string buffer_id = ""){
+            std::thread thr{ [&] () { file2buffer<T>(filename, buffer_id); } };
             return thr;
         }
 
-        //-----------------------------------------------------------------------//
-        template <typename T> std::thread queue_to_file_thread(std::string id){
-            std::thread thr{ [&] () { queue_to_file<T>(id); } };
-            return thr;
-        }
 
     }
 }

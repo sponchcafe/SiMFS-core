@@ -21,61 +21,87 @@ class ComponentIO : public ::testing::Test {
         }
 
         //------------------------------------------------------------------//
-        template <
-            template <class InputT> class InputT,
-            template <class Output> class OutputT
-        > void serial_PIC_test(){
+        void with_named_pipe_test(){
 
-            {
-                ProducerComponent<OutputT> prod{};
-                prod.set_data(payload);
-                prod.set_output(f1);
-                prod.run();
-            }
-            {
-                TransformComponent<InputT, OutputT> trans{};
-                trans.set_input(f1);
-                trans.set_output(f2);
-                trans.run();
-            }
-            {
-                ConsumerComponent<InputT> cons{};
-                cons.set_input(f2);
-                cons.run();
-                result = cons.get_data();
-            }
+            ProducerComponent prod{};
+            prod.set_output("prod");
+            prod.set_data(payload);
+
+            auto prod_thr = run_component<ProducerComponent>(prod);
+            auto out_thr = io::buffer2file_thread<int>("prod", p1);
+            auto in_thr = io::file2buffer_thread<int>(p1, "cons");
+           
+            std::thread cons_thr = std::thread{
+                [&] () {
+                    ConsumerComponent cons{};
+                    cons.set_input("cons");
+                    cons.run();
+                    result = cons.get_data();
+                }
+            };
+
+            prod_thr.join();
+            out_thr.join();
+            in_thr.join();
+            cons_thr.join();
+            
         }
 
         //------------------------------------------------------------------//
-        template <
-            template <class InputT> class InputT,
-            template <class Output> class OutputT
-        > void parallel_PIC_test(){
+        void with_file_test(){
 
-            std::thread prod_thread = std::thread ( [&]() {
-                    ProducerComponent<OutputT> prod{};
-                    prod.set_data(payload);
-                    prod.set_output(p1);
-                    prod.run();
-                    });
+            ProducerComponent prod{};
+            prod.set_output("prod");
+            prod.set_data(payload);
 
-            std::thread trans_thread = std::thread ( [&]() {
-                    TransformComponent<InputT, OutputT> trans{};
-                    trans.set_input(p1);
-                    trans.set_output(p2);
-                    trans.run();
-                    });
+            auto prod_thr = run_component<ProducerComponent>(prod);
+            auto out_thr = io::buffer2file_thread<int>("prod", f1);
+               
+            prod_thr.join();
+            out_thr.join();
 
-            std::thread cons_thread = std::thread ( [&]() {
-                    ConsumerComponent<InputT> cons{};
-                    cons.set_input(p2);
+            auto in_thr = io::file2buffer_thread<int>(f1, "cons");
+           
+            std::thread cons_thr = std::thread{
+                [&] () {
+                    ConsumerComponent cons{};
+                    cons.set_input("cons");
                     cons.run();
                     result = cons.get_data();
-                    });
+                }
+            };
 
-            prod_thread.join();
-            trans_thread.join();
-            cons_thread.join();
+            in_thr.join();
+            cons_thr.join();
+
+        }
+
+        //------------------------------------------------------------------//
+        void pure_in_memory_test(){
+
+            ProducerComponent prod{};
+            prod.set_output(p1);
+            prod.set_data(payload);
+
+            TransformComponent trans{};
+            trans.set_input(p1);
+            trans.set_output(p2);
+
+            ConsumerComponent cons{};
+            cons.set_input(p2);
+            
+            std::thread prod_thr = run_component<ProducerComponent>(prod);
+            std::thread trans_thr = run_component<TransformComponent>(trans);
+            std::thread cons_thr = std::thread{
+                [&] () {
+                    cons.run();
+                    result = cons.get_data();
+                }
+            };
+
+            prod_thr.join();
+            trans_thr.join();
+            cons_thr.join();
 
         }
 
@@ -123,7 +149,7 @@ class ComponentIO : public ::testing::Test {
         std::vector<int> result{};
 
         //------------------------------------------------------------------//
-        size_t const payload_size = 1024*1024*10*sizeof(int); // 200MB payload
+        size_t const payload_size = 1024*1024*500/sizeof(int); // 100MB payload
 
 
 };

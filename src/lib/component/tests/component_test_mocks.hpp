@@ -7,27 +7,22 @@
 //--------------------------------------------------------------------------//
 // Fixtures: 
 //--------------------------------------------------------------------------//
-// Dummy components to test the flow of data with different IO implementations
+// Dummy components to test the flow of data across buffers
 //
 // Producer ---P1---> Transfer ---P2---> Consumer
-// Files (serial)
-// Pipes (parallel)
-// Vectors (serial)
-// Queues (parallel)
 //--------------------------------------------------------------------------//
 
 using namespace sim::comp;
+using namespace sim::io;
 
 //--------------------------------------------------------------------------//
 //--------------------------------------------------------------------------//
-template <
-    template<class OutputT> class OutputT
-    > class ProducerComponent : public Component {
+class ProducerComponent : public Component {
 
     public:
 
         //------------------------------------------------------------------//
-        ProducerComponent<OutputT>() {}
+        ProducerComponent() {}
         void set_json(json j) override {}
         json get_json() override { return json{}; }
         void init() override {}
@@ -40,8 +35,8 @@ template <
         }
 
         //------------------------------------------------------------------//
-        void set_output(std::string outname){
-            output = create_output<OutputT, int>(outname);
+        void set_output(std::string id){
+            output = std::make_unique<BufferOutput<int>>(id);
         }
 
         //------------------------------------------------------------------//
@@ -52,22 +47,19 @@ template <
     private:
 
         //------------------------------------------------------------------//
-        std::unique_ptr<Output<int>> output;
+        std::unique_ptr<BufferOutput<int>> output;
         std::vector<int> data{};
 
 };
 
 //--------------------------------------------------------------------------//
 //--------------------------------------------------------------------------//
-template <
-    template<class InputT> class InputT,
-    template<class OutputT> class OutputT
-    > class TransformComponent : public Component {
+class TransformComponent : public Component {
 
     public:
 
         //------------------------------------------------------------------//
-        TransformComponent<InputT, OutputT> () { }
+        TransformComponent () { }
         void set_json(json j) override {}
         json get_json() override { return json{}; }
         void init() override {}
@@ -81,34 +73,32 @@ template <
         }
 
         //------------------------------------------------------------------//
-        void set_output(std::string outname){
-            output = create_output<OutputT, int>(outname);
+        void set_output(std::string id){
+            output = std::make_unique<BufferOutput<int>>(id);
         }
 
         //------------------------------------------------------------------//
-        void set_input(std::string inname){
-            input = create_input<InputT, int>(inname);
+        void set_input(std::string id){
+            input = std::make_unique<BufferInput<int>>(id);
         }
 
     private:
 
         //------------------------------------------------------------------//
-        std::unique_ptr<Output<int>> output;
-        std::unique_ptr<Input<int>> input;
+        std::unique_ptr<BufferOutput<int>> output;
+        std::unique_ptr<BufferInput<int>> input;
 
 };
 
 
 //--------------------------------------------------------------------------//
 //--------------------------------------------------------------------------//
-template <
-    template<class InputT> class InputT
-    > class ConsumerComponent : public Component {
+class ConsumerComponent : public Component {
 
     public:
 
         //------------------------------------------------------------------//
-        ConsumerComponent<InputT>() {}
+        ConsumerComponent() {}
         void set_json(json j) override {}
         json get_json() override { return json{}; }
         void init() override {}
@@ -122,8 +112,8 @@ template <
         }
 
         //------------------------------------------------------------------//
-        void set_input(std::string inname){
-            input = create_input<InputT, int>(inname);
+        void set_input(std::string id){
+            input = std::make_unique<BufferInput<int>>(id);
         }
 
         //------------------------------------------------------------------//
@@ -134,7 +124,7 @@ template <
     private:
 
         //------------------------------------------------------------------//
-        std::unique_ptr<Input<int>> input;
+        std::unique_ptr<BufferInput<int>> input;
         std::vector<int> data{};
 
 };

@@ -1,5 +1,5 @@
 #include "component/component.hpp"
-#include "io/queue_io.hpp"
+#include "io/buffer.hpp"
 #include "component/types.hpp"
 #include "random/random.hpp"
 #include <cmath>
@@ -81,8 +81,8 @@ namespace sim{
                 Coordinate c1{0.0,0.0,0.0,0.0};
 
                 //-----------------------------------------------------------//
-                std::unique_ptr<Output<Coordinate>> coordinate_output_ptr;
-                std::unique_ptr<Output<Coordinate>> collision_output_ptr;
+                std::unique_ptr<io::BufferOutput<Coordinate>> coordinate_output_ptr;
+                std::unique_ptr<io::BufferOutput<Coordinate>> collision_output_ptr;
 
         };
 

@@ -6,7 +6,7 @@
 #include <iostream>
 #include <json/json.hpp>
 
-#include "io/base_io.hpp"
+#include "io/buffer.hpp"
 
 //---------------------------------------------------------------------------//
 // Abstract base definition of the component interface.
