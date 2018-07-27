@@ -161,41 +161,66 @@ namespace sim{
         };
 
         //-----------------------------------------------------------------------//
-        template <typename T> void buffer2file(std::string buffer_id, std::string filename = ""){
+        template <typename T> void buffer2file(
+                std::string buffer_id, 
+                std::string filename = "")
+        {
+
             if (filename == "") filename = buffer_id;
             auto queue = BufferInput<T>(buffer_id);
             auto os = std::ofstream(filename, std::ofstream::binary);
+
             std::vector<T> chunk{};
             while (queue.get_chunk(chunk)){
                 char const *data = reinterpret_cast<char const *>(chunk.data());
                 os.write(data, chunk.size()*sizeof(T));
             }
+
         }
 
         //-----------------------------------------------------------------------//
-        template <typename T> std::thread buffer2file_thread(std::string buffer_id, std::string filename = ""){
-            std::thread thr{ [&] () { buffer2file<T>(buffer_id, filename); } };
-            return thr;
+        // Capture by copy (=) essential for safe thread initialization
+        //-----------------------------------------------------------------------//
+        template <typename T> std::thread buffer2file_thread(
+                std::string buffer_id, 
+                std::string filename = ""){
+
+            return std::thread{ 
+                [=] () { 
+                    buffer2file<T>(buffer_id, filename); 
+                }
+            };
         }
 
         //-----------------------------------------------------------------------//
         template <typename T> void file2buffer(std::string filename, std::string buffer_id = ""){
+
             if (buffer_id == "") buffer_id = filename;
             auto queue = BufferOutput<T>(buffer_id);
             auto is = std::ifstream(filename, std::ifstream::binary);
+
             while (!is.eof()){
-                std::vector<T> chunk{CHUNK_SIZE};
+                std::vector<T> chunk{};
                 chunk.resize(CHUNK_SIZE);
                 is.read(reinterpret_cast<char *>(chunk.data()), CHUNK_SIZE*sizeof(T));
                 chunk.resize(is.gcount()/sizeof(T));
                 queue.put_chunk(chunk);
             }
+
         }
 
         //-----------------------------------------------------------------------//
-        template <typename T> std::thread file2buffer_thread(std::string filename, std::string buffer_id = ""){
-            std::thread thr{ [&] () { file2buffer<T>(filename, buffer_id); } };
-            return thr;
+        // Capture by copy (=) essential for safe thread initialization
+        //-----------------------------------------------------------------------//
+        template <typename T> std::thread file2buffer_thread(
+                std::string filename, 
+                std::string buffer_id = "")
+        {
+            return std::thread{ 
+                [=] () { 
+                    file2buffer<T>(filename, buffer_id); 
+                }
+            };
         }
 
 

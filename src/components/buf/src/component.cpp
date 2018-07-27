@@ -1,5 +1,7 @@
 #include "buffer/component.hpp"
-#include "io/queue_io.hpp"
+#include "io/buffer.hpp"
+#include <algorithm>
+#include <iterator>
 
 namespace sim{
     namespace comp{
@@ -10,9 +12,15 @@ namespace sim{
         //-------------------------------------------------------------------//
         void Buffer::set_input_id(std::string id){
             input_id = id;
+            input_ptr = std::make_unique<io::BufferInput<char>> (input_id);
         }
         void Buffer::set_output_ids(std::vector<std::string> ids){
             output_ids = ids;
+            output_ptrs.clear();
+            for (auto &it: output_ids){
+                auto output_ptr = std::make_unique<io::BufferOutput<char>> (it);
+                output_ptrs.push_back(std::move(output_ptr));
+            }
         }
         //-------------------------------------------------------------------//
         
@@ -47,49 +55,26 @@ namespace sim{
         //-------------------------------------------------------------------//
         void Buffer::run(){
 
-            std::thread in_thread([this] {input_worker();});
-            std::vector<std::thread> out_threads;
-            for (auto &it: output_ptrs){
-                out_threads.emplace_back([this, &it] {output_worker(it->id, it);});
-            }
-
-            in_thread.join();
-            for (auto &it: out_threads){
-                it.join();
-            }
-
-        }
-
-
-        //-------------------------------------------------------------------//
-        void Buffer::input_worker(){
-
-            std::vector<sim::queue_io::QueueOutput<double>> buffer_inlets;
-            for(auto &it: output_ids){
-                buffer_inlets.emplace_back(it);
-            }
-
-            double current;
-
-            while(input_ptr->get(current)){
-                for (auto &it: buffer_inlets){
-                    it.put(current);
+            std::vector<char> chunk{};
+            std::vector<std::vector<char>> copies{};
+            while(input_ptr->get_chunk(chunk)){
+                copies.clear();
+                for (int i=0; i<output_ptrs.size(); i++){
+                    std::vector<char> copy{};
+                    for (auto it=chunk.begin(); it!=chunk.end(); ++it){
+                        copy.push_back(*it);
+                    }
+                    copies.push_back(copy);
+                }
+                for (int i=0; i<output_ptrs.size(); i++){
+                    output_ptrs[i]->put_chunk(copies[i]);
                 }
             }
 
         }
 
 
-        //-------------------------------------------------------------------//
-        void Buffer::output_worker(std::string id, std::unique_ptr<Output<double>> &out){
 
-            sim::queue_io::QueueInput<double> buffer_outlet{id};
-            double current;
-            while (buffer_outlet.get(current)){
-                out->put(current);
-            }
-
-        }
 
     }
 }

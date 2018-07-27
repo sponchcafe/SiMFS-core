@@ -1,7 +1,7 @@
 #include <iostream>
 #include "buffer/component.hpp"
 #include "component/cli.hpp"
-#include "io/file_io.hpp"
+#include "io/buffer.hpp"
 
 using namespace sim;
 
@@ -16,18 +16,29 @@ int main(int argc, char *argv[]) {
 
     //-Configure-------------------------------------------------------------//
     buf.set_json(params);
-    buf.set_input< file_io::FileInput >(); // template spec.
-    buf.set_outputs< file_io::FileOutput >(); // template spec.
 
     //-Initialize------------------------------------------------------------//
     buf.init();
 
     //-Log-------------------------------------------------------------------//
-    cli::log_parameters(buf.get_json());
+    json log = buf.get_json();
+    cli::log_parameters(log);
 
     //-Run-------------------------------------------------------------------//
     if (!cli::check_list(opts)){
-        buf.run();
+
+        std::vector<std::thread> out_threads{};
+        std::vector<std::string> outputs = log["outputs"];
+        for (auto it=outputs.begin(); it!=outputs.end(); ++it){
+            out_threads.emplace_back(io::buffer2file_thread<char>(*it));
+        }
+
+        auto in_thread = io::file2buffer_thread<char>(log["input"]);
+        auto buf_thread = comp::run_component<comp::Buffer>(buf);
+
+        in_thread.join();
+        buf_thread.join();
+        for (auto &it: out_threads) it.join();
     }
 
 }
