@@ -25,7 +25,9 @@ class ProducerComponent : public Component {
         ProducerComponent() {}
         void set_json(json j) override {}
         json get_json() override { return json{}; }
-        void init() override {}
+        void init() override {
+            output = std::make_unique<BufferOutput<int>>(output_id);
+        }
 
         //------------------------------------------------------------------//
         void run() override {
@@ -36,7 +38,7 @@ class ProducerComponent : public Component {
 
         //------------------------------------------------------------------//
         void set_output(std::string id){
-            output = std::make_unique<BufferOutput<int>>(id);
+            output_id = id;
         }
 
         //------------------------------------------------------------------//
@@ -49,6 +51,7 @@ class ProducerComponent : public Component {
         //------------------------------------------------------------------//
         std::unique_ptr<BufferOutput<int>> output;
         std::vector<int> data{};
+        std::string output_id;
 
 };
 
@@ -62,7 +65,10 @@ class TransformComponent : public Component {
         TransformComponent () { }
         void set_json(json j) override {}
         json get_json() override { return json{}; }
-        void init() override {}
+        void init() override {
+            output = std::make_unique<BufferOutput<int>>(output_id);
+            input = std::make_unique<BufferInput<int>>(input_id);
+        }
 
         //------------------------------------------------------------------//
         void run() override {
@@ -74,12 +80,12 @@ class TransformComponent : public Component {
 
         //------------------------------------------------------------------//
         void set_output(std::string id){
-            output = std::make_unique<BufferOutput<int>>(id);
+            output_id = id;
         }
 
         //------------------------------------------------------------------//
         void set_input(std::string id){
-            input = std::make_unique<BufferInput<int>>(id);
+            input_id = id;
         }
 
     private:
@@ -87,6 +93,8 @@ class TransformComponent : public Component {
         //------------------------------------------------------------------//
         std::unique_ptr<BufferOutput<int>> output;
         std::unique_ptr<BufferInput<int>> input;
+        std::string output_id;
+        std::string input_id;
 
 };
 
@@ -101,7 +109,9 @@ class ConsumerComponent : public Component {
         ConsumerComponent() {}
         void set_json(json j) override {}
         json get_json() override { return json{}; }
-        void init() override {}
+        void init() override {
+            input = std::make_unique<BufferInput<int>>(input_id);
+        }
 
         //------------------------------------------------------------------//
         void run() override {
@@ -113,8 +123,9 @@ class ConsumerComponent : public Component {
 
         //------------------------------------------------------------------//
         void set_input(std::string id){
-            input = std::make_unique<BufferInput<int>>(id);
+            input_id = id;
         }
+        
 
         //------------------------------------------------------------------//
         std::vector<int> &get_data(){
@@ -126,6 +137,7 @@ class ConsumerComponent : public Component {
         //------------------------------------------------------------------//
         std::unique_ptr<BufferInput<int>> input;
         std::vector<int> data{};
+        std::string input_id;
 
 };
 

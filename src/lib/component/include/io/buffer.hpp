@@ -12,8 +12,9 @@ namespace sim{
         // Time an input thread waits on an empty queue until it rechecks if the 
         // producer thread is done (eof == true)
         //-----------------------------------------------------------------------//
-        constexpr size_t DEAD_TIME_MILLIS = 10;
-        constexpr size_t CHUNK_SIZE = 1<<14;
+        constexpr unsigned int DEAD_TIME_NANOS_MIN = 1<<6; // 32 ns min delay
+        constexpr unsigned int DEAD_TIME_NANOS_MAX = 1<<28;// 268.4 ms max delay
+        constexpr size_t CHUNK_SIZE = 1<<12; // 1024 elements per chunk
 
 
         //-----------------------------------------------------------------------//
@@ -25,8 +26,9 @@ namespace sim{
 
                 //---------------------------------------------------------------//
                 BufferInput<T>(std::string id) : 
+                    buffer_id(id),
                     queue_handle(open<std::vector<T>>(id)) {
-                        current = current_chunk.begin();
+                        get_next_chunk();
                     }
 
                 //-Copy-ctor:-DELETED--------------------------------------------//
@@ -41,21 +43,31 @@ namespace sim{
                 //-Move-assign:-DEFAULT------------------------------------------//
                 BufferInput<T> &operator=(BufferInput<T> &&other) = default;
 
-                //---------------------------------------------------------------//
-                bool get(T &target) {
-                    bool valid = true; // true if value set to target is valid
-                    if (current == current_chunk.end()){
-                        valid = get_next();
-                    }
-                    target = *current++;
-                    return valid;
+                ~BufferInput<T>() {
+                    io::close<std::vector<T>>(buffer_id);
                 }
 
                 //---------------------------------------------------------------//
+                bool get(T &target) {
+                    if (current == current_chunk.end()){
+                        if(!get_next_chunk()){
+                            return false;
+                        }
+                    }
+                    target = *current++;
+                    return true;
+                }
+        
+
+                //---------------------------------------------------------------//
                 bool get_chunk(std::vector<T> &target){
-                    bool valid = get_next(); // true if a new (valid) chunk is provided
-                    target = std::move(current_chunk);
-                    return valid;
+                    if (!done){
+                        target = std::move(current_chunk);
+                    } else {
+                        return false;
+                    }
+                    done = !get_next_chunk();
+                    return true; // true if a new (valid) chunk is provided
                 }
 
                 //---------------------------------------------------------------//
@@ -63,28 +75,61 @@ namespace sim{
                     return *current;
                 }
 
+                //-Compare-input-order-by-current-value--------------------------//
+                bool operator< (BufferInput<T> const &rhs) const {
+                    return peek() < rhs.peek();
+                }
+
             private:
 
                 //---------------------------------------------------------------//
                 // Get the next chunk to the current member
                 //---------------------------------------------------------------//
-                bool get_next(){
+                bool get_next_chunk(){
                     std::vector<T> next_chunk;
                     do {
                         if (queue_handle.queue->wait_dequeue_timed(next_chunk,
-                                    std::chrono::milliseconds(DEAD_TIME_MILLIS))){
+                                    std::chrono::microseconds(deadtime))){
                             current_chunk = std::move(next_chunk);
                             current = current_chunk.begin();
+                            half_dead_time(); 
                             return true;
                         } 
+                        else{
+                            double_dead_time();
+                        }
                     }while(!queue_handle.eof->load());
+                    current = current_chunk.begin();
                     return false;
                 }
 
                 //---------------------------------------------------------------//
+                void double_dead_time(){
+                    if (deadtime >= DEAD_TIME_NANOS_MAX) {
+                        deadtime =  DEAD_TIME_NANOS_MAX;
+                    }
+                    else{
+                        deadtime<<=2;
+                    }
+                }
+
+                //---------------------------------------------------------------//
+                void half_dead_time(){
+                    if (deadtime <= DEAD_TIME_NANOS_MIN) {
+                        deadtime =  DEAD_TIME_NANOS_MIN;
+                    }
+                    else{
+                        deadtime>>=2;
+                    }
+                }
+
+                //---------------------------------------------------------------//
+                std::string const buffer_id;
+                unsigned int deadtime = DEAD_TIME_NANOS_MIN;
                 queue_handle_t<std::vector<T>> &queue_handle;
                 std::vector<T> current_chunk{};
                 typename std::vector<T>::iterator current;
+                bool done = false;
 
         };
 
@@ -151,6 +196,8 @@ namespace sim{
                     if (chunk.size() > 0) {
                         queue_handle.queue->enqueue(std::move(chunk));
                     }
+                    else{
+                    }
                 }
                 
                 //---------------------------------------------------------------//
@@ -175,6 +222,7 @@ namespace sim{
                 char const *data = reinterpret_cast<char const *>(chunk.data());
                 os.write(data, chunk.size()*sizeof(T));
             }
+            os.close();
 
         }
 
@@ -206,6 +254,7 @@ namespace sim{
                 chunk.resize(is.gcount()/sizeof(T));
                 queue.put_chunk(chunk);
             }
+            is.close();
 
         }
 

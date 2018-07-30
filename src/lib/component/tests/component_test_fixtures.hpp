@@ -10,16 +10,16 @@ using namespace sim;
 
 //--------------------------------------------------------------------------//
 class ComponentIO : public ::testing::Test {
-
+    
     protected:
-
+        
         //------------------------------------------------------------------//
         ComponentIO () {
             for(size_t i = 0; i<payload_size; i++){
                 payload.push_back(i);
             }
         }
-
+    
         //------------------------------------------------------------------//
         void with_named_pipe_test(){
 
@@ -35,14 +35,15 @@ class ComponentIO : public ::testing::Test {
                 [&] () {
                     ConsumerComponent cons{};
                     cons.set_input("cons");
+                    cons.init();
                     cons.run();
                     result = cons.get_data();
                 }
             };
 
             prod_thr.join();
-            out_thr.join();
             in_thr.join();
+            out_thr.join();
             cons_thr.join();
             
         }
@@ -59,6 +60,7 @@ class ComponentIO : public ::testing::Test {
                
             prod_thr.join();
             out_thr.join();
+            
 
             auto in_thr = io::file2buffer_thread<int>(f1, "cons");
            
@@ -66,6 +68,7 @@ class ComponentIO : public ::testing::Test {
                 [&] () {
                     ConsumerComponent cons{};
                     cons.set_input("cons");
+                    cons.init();
                     cons.run();
                     result = cons.get_data();
                 }
@@ -86,14 +89,14 @@ class ComponentIO : public ::testing::Test {
             TransformComponent trans{};
             trans.set_input(p1);
             trans.set_output(p2);
-
-            ConsumerComponent cons{};
-            cons.set_input(p2);
             
             std::thread prod_thr = run_component<ProducerComponent>(prod);
             std::thread trans_thr = run_component<TransformComponent>(trans);
             std::thread cons_thr = std::thread{
                 [&] () {
+                    ConsumerComponent cons{};
+                    cons.set_input(p2);
+                    cons.init();
                     cons.run();
                     result = cons.get_data();
                 }
@@ -122,6 +125,7 @@ class ComponentIO : public ::testing::Test {
 
         //------------------------------------------------------------------//
         void SetUp() {
+
             // Create named pipes
             mkfifo(p1.c_str(), S_IRUSR | S_IWUSR);
             mkfifo(p2.c_str(), S_IRUSR | S_IWUSR);
@@ -136,6 +140,7 @@ class ComponentIO : public ::testing::Test {
             // Remove created files
             remove(f1.c_str());
             remove(f2.c_str());
+
         }
 
         //------------------------------------------------------------------//
@@ -149,8 +154,7 @@ class ComponentIO : public ::testing::Test {
         std::vector<int> result{};
 
         //------------------------------------------------------------------//
-        size_t const payload_size = 1024*1024*500/sizeof(int); // 100MB payload
-
+        size_t const payload_size = 1024*1024*10/sizeof(int); // 100MB payload
 
 };
 

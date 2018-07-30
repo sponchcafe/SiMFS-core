@@ -46,6 +46,7 @@ namespace sim{
         template <typename T> std::thread run_component(T &comp){
             std::thread thr{ [&] () { 
                 T _comp = std::move(comp); // stealing the component object
+                _comp.init();
                 _comp.run(); 
             } };
             return thr;
