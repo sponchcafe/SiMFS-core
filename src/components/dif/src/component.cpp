@@ -84,6 +84,7 @@ namespace sim{
             // IO initialization
             coordinate_output_ptr = std::make_unique< io::BufferOutput<Coordinate> >(coordinate_output_id);
             collision_output_ptr = std::make_unique< io::BufferOutput<Coordinate> >(collision_output_id);
+
         }
 
         //-------------------------------------------------------------------//

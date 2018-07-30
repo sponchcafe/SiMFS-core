@@ -10,6 +10,7 @@ namespace sim{
         //-------------------------------------------------------------------//
         void Mixer::set_photon_output_id(std::string id){
             photon_output_id = id;
+
         }
         void Mixer::set_photon_input_ids(std::vector<std::string> ids){
             photon_input_ids = ids;
@@ -42,6 +43,12 @@ namespace sim{
 
         //-------------------------------------------------------------------//
         void Mixer::init() {
+            photon_output_ptr = std::make_unique<io::BufferOutput<realtime_t>>(photon_output_id);
+            photon_input_ptrs.clear();
+            for (auto id: photon_input_ids){
+                auto input = std::make_unique<io::BufferInput<realtime_t>>(id);
+                photon_input_ptrs.push_back(std::move(input));
+            }
         }
 
         //-------------------------------------------------------------------//
@@ -60,13 +67,14 @@ namespace sim{
                             *(photon_input_ptrs.end()-1)
                         );
                         photon_input_ptrs.pop_back();
+                        std::cerr << "Removing...\n";
                         break;
                     }
                     photon_output_ptr->put(current);
                 }
-
                 sort_inputs();
             }
+                std::cerr << "last run...\n";
             while(first->get()->get(current)){
                 photon_output_ptr->put(current);
             }
@@ -79,8 +87,8 @@ namespace sim{
                 photon_input_ptrs.begin(),
                 photon_input_ptrs.end(),
                 [](
-                    std::unique_ptr<Input<realtime_t>> &lhs, 
-                    std::unique_ptr<Input<realtime_t>> &rhs
+                    std::unique_ptr<io::BufferInput<realtime_t>> &lhs, 
+                    std::unique_ptr<io::BufferInput<realtime_t>> &rhs
                   ) {
                     return *lhs < *rhs;
                 }

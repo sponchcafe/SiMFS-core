@@ -13,7 +13,7 @@ namespace sim{
         // producer thread is done (eof == true)
         //-----------------------------------------------------------------------//
         constexpr unsigned int DEAD_TIME_NANOS_MIN = 1<<6; // 32 ns min delay
-        constexpr unsigned int DEAD_TIME_NANOS_MAX = 1<<28;// 268.4 ms max delay
+        constexpr unsigned int DEAD_TIME_NANOS_MAX = 1<<30; // 1 s max delay
         constexpr size_t CHUNK_SIZE = 1<<12; // 1024 elements per chunk
 
 
@@ -125,7 +125,7 @@ namespace sim{
 
                 //---------------------------------------------------------------//
                 std::string const buffer_id;
-                unsigned int deadtime = DEAD_TIME_NANOS_MIN;
+                unsigned long int deadtime = DEAD_TIME_NANOS_MIN;
                 queue_handle_t<std::vector<T>> &queue_handle;
                 std::vector<T> current_chunk{};
                 typename std::vector<T>::iterator current;
@@ -217,6 +217,12 @@ namespace sim{
             auto queue = BufferInput<T>(buffer_id);
             auto os = std::ofstream(filename, std::ofstream::binary);
 
+            if (!os.good()){
+                os.close();
+                std::cerr << "Failed to open " << filename << "\n";
+                return;
+            }
+
             std::vector<T> chunk{};
             while (queue.get_chunk(chunk)){
                 char const *data = reinterpret_cast<char const *>(chunk.data());
@@ -246,6 +252,12 @@ namespace sim{
             if (buffer_id == "") buffer_id = filename;
             auto queue = BufferOutput<T>(buffer_id);
             auto is = std::ifstream(filename, std::ifstream::binary);
+
+            if (!is.good()){
+                is.close();
+                std::cerr << "Failed to open " << filename << "\n";
+                return;
+            }
 
             while (!is.eof()){
                 std::vector<T> chunk{};

@@ -1,7 +1,6 @@
 #include <iostream>
 #include "mixer/component.hpp"
 #include "component/cli.hpp"
-#include "io/file_io.hpp"
 
 using namespace sim;
 
@@ -12,22 +11,35 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> opts = cli::parse_argv_vector(argc, argv);
 
     //-Create----------------------------------------------------------------//
-    comp::Mixer mix;
+    comp::Mixer mix{};
 
     //-Configure-------------------------------------------------------------//
     mix.set_json(params);
-    mix.set_photon_output< file_io::FileOutput >(); // template spec.
-    mix.set_photon_inputs< file_io::FileInput >(); // template spec.
 
     //-Initialize------------------------------------------------------------//
-    mix.init();
 
     //-Log-------------------------------------------------------------------//
-    cli::log_parameters(mix.get_json());
+    json log = mix.get_json();
+    cli::log_parameters(log);
+
 
     //-Run-------------------------------------------------------------------//
     if (!cli::check_list(opts)){
-        mix.run();
+
+        auto out_thread = io::buffer2file_thread<realtime_t>(log["photon_output"]);
+
+        std::vector<std::string> inputs = log["photon_inputs"];
+        std::vector<std::thread> in_threads{};
+
+        for (auto it=inputs.begin(); it!=inputs.end(); ++it){
+            in_threads.emplace_back(io::file2buffer_thread<realtime_t>(*it));
+        }
+
+        auto mix_thread = comp::run_component<comp::Mixer> (mix);
+        mix_thread.join();
+        out_thread.join();
+        for (auto &th: in_threads) th.join();
+
     }
 
 }

@@ -12,15 +12,9 @@ namespace sim{
         //-------------------------------------------------------------------//
         void Buffer::set_input_id(std::string id){
             input_id = id;
-            input_ptr = std::make_unique<io::BufferInput<char>> (input_id);
         }
         void Buffer::set_output_ids(std::vector<std::string> ids){
             output_ids = ids;
-            output_ptrs.clear();
-            for (auto &it: output_ids){
-                auto output_ptr = std::make_unique<io::BufferOutput<char>> (it);
-                output_ptrs.push_back(std::move(output_ptr));
-            }
         }
         //-------------------------------------------------------------------//
         
@@ -50,6 +44,12 @@ namespace sim{
 
         //-------------------------------------------------------------------//
         void Buffer::init() {
+            input_ptr = std::make_unique<io::BufferInput<char>> (input_id);
+            output_ptrs.clear();
+            for (auto &it: output_ids){
+                auto output_ptr = std::make_unique<io::BufferOutput<char>> (it);
+                output_ptrs.push_back(std::move(output_ptr));
+            }
         }
 
         //-------------------------------------------------------------------//
