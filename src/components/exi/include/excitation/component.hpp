@@ -30,6 +30,8 @@ namespace sim{
                 //-----------------------------------------------------------//
                 // Parameter setters
                 //-----------------------------------------------------------//
+                void set_flux_output(std::string id);
+                void set_coordinate_input(std::string id);
                 void set_wavelength(double w);
                 void set_power(double p);
                 void set_coordinate_input_id(std::string id);
@@ -38,41 +40,6 @@ namespace sim{
                 void set_focus(json params);
                 //-----------------------------------------------------------//
                  
-                
-                //-----------------------------------------------------------//
-                // Function templates for setting in- and outputs
-                //-----------------------------------------------------------//
-                template <template <class> class InputT>
-                void set_coordinate_input(){
-                    set_coordinate_input<InputT>(coordinate_input_id);
-                }
-
-                //-----------------------------------------------------------//
-                template <template <class> class InputT> 
-                void set_coordinate_input(std::string id){
-                    set_coordinate_input_id(id);
-                    coordinate_input_ptr = 
-                        create_input<InputT, Coordinate>(
-                            coordinate_input_id
-                        );
-                }
-
-                //-----------------------------------------------------------//
-                template <template <class> class OutputT>
-                void set_flux_output(){
-                    set_flux_output<OutputT>(flux_output_id);
-                }
-
-                //-----------------------------------------------------------//
-                template <template <class> class OutputT>
-                void set_flux_output(std::string id){
-                    set_flux_output_id(id);
-                    flux_output_ptr = 
-                    create_output<OutputT, TimedValue>(
-                            flux_output_id
-                        );
-                }
-                //-----------------------------------------------------------//
                 
             private:
 
@@ -100,8 +67,8 @@ namespace sim{
                                
                 //-----------------------------------------------------------//
                 std::unique_ptr<focus::Focus> focus_ptr;
-                std::unique_ptr<Input<Coordinate>> coordinate_input_ptr;
-                std::unique_ptr<Output<TimedValue>> flux_output_ptr;
+                std::unique_ptr<io::BufferInput<Coordinate>> coordinate_input_ptr;
+                std::unique_ptr<io::BufferOutput<TimedValue>> flux_output_ptr;
 
         };
     }

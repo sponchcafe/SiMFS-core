@@ -61,6 +61,10 @@ namespace sim{
         //-------------------------------------------------------------------//
         void Detection::init(){
             focus_scaling = origin_efficiency / focus_ptr->evaluate(0, 0, 0);
+            coordinate_input_ptr = 
+                std::make_unique<io::BufferInput<Coordinate>>(coordinate_input_id);
+            efficiency_output_ptr = 
+                std::make_unique<io::BufferOutput<TimedValue>>(efficiency_output_id);
         }
 
         //-------------------------------------------------------------------//

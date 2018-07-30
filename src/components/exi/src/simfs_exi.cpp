@@ -1,7 +1,7 @@
 #include <iostream>
 #include "excitation/component.hpp"
 #include "component/cli.hpp"
-#include "io/file_io.hpp"
+#include "io/buffer.hpp"
 
 using namespace sim;
 
@@ -16,18 +16,19 @@ int main(int argc, char *argv[]) {
 
     //-Configure-------------------------------------------------------------//
     exi.set_json(params);
-    exi.set_coordinate_input< file_io::FileInput >(); // template spec.
-    exi.set_flux_output<  file_io::FileOutput >();  // template spec.
-
-    //-Initialize------------------------------------------------------------//
-    exi.init();
 
     //-Log-------------------------------------------------------------------//
-    cli::log_parameters(exi.get_json());
+    json log = exi.get_json();
+    cli::log_parameters(log);
 
     //-Run-------------------------------------------------------------------//
     if (!cli::check_list(opts)){
-        exi.run();
+        auto input_thr = io::file2buffer_thread<Coordinate>(log["coordinate_input"]);
+        auto output_thr = io::buffer2file_thread<TimedValue>(log["flux_output"]);
+        auto exi_thr = comp::run_component<comp::Excitation>(exi);
+        input_thr.join();
+        exi_thr.join();
+        output_thr.join();
     }
 
 }

@@ -36,42 +36,6 @@ namespace sim{
                 void set_focus(json params);
                 //-----------------------------------------------------------//
                  
-                
-                //-----------------------------------------------------------//
-                // Function templates for setting in- and outputs
-                //-----------------------------------------------------------//
-                template <template <class> class InputT>
-                void set_coordinate_input(){
-                    set_coordinate_input<InputT>(coordinate_input_id);
-                }
-
-                //-----------------------------------------------------------//
-                template <template <class> class InputT> 
-                void set_coordinate_input(std::string id){
-                    set_coordinate_input_id(id);
-                    coordinate_input_ptr = 
-                        create_input<InputT, Coordinate>(
-                            coordinate_input_id
-                        );
-                }
-
-                //-----------------------------------------------------------//
-                template <template <class> class OutputT>
-                void set_efficiency_output(){
-                    set_efficiency_output<OutputT>(efficiency_output_id);
-                }
-
-                //-----------------------------------------------------------//
-                template <template <class> class OutputT>
-                void set_efficiency_output(std::string id){
-                    set_efficiency_output_id(id);
-                    efficiency_output_ptr = 
-                    create_output<OutputT, TimedValue>(
-                            efficiency_output_id
-                        );
-                }
-                //-----------------------------------------------------------//
-                
             private:
 
                 //-----------------------------------------------------------//
@@ -91,8 +55,8 @@ namespace sim{
                                
                 //-----------------------------------------------------------//
                 std::unique_ptr<focus::Focus> focus_ptr;
-                std::unique_ptr<Input<Coordinate>> coordinate_input_ptr;
-                std::unique_ptr<Output<TimedValue>> efficiency_output_ptr;
+                std::unique_ptr<io::BufferInput<Coordinate>> coordinate_input_ptr;
+                std::unique_ptr<io::BufferOutput<TimedValue>> efficiency_output_ptr;
 
         };
     }
