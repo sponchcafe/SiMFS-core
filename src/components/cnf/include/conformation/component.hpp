@@ -1,6 +1,9 @@
+#pragma once
+
 #include "component/component.hpp"
 #include "component/types.hpp"
 #include "graph/main.hpp"
+#include "io/buffer.hpp"
 #include <cmath>
 
 namespace sim{
@@ -41,25 +44,6 @@ namespace sim{
                 void set_values(json j);
                 //-----------------------------------------------------------//
                
-                
-                //-----------------------------------------------------------//
-                // Function templates for setting in- and outputs
-                //-----------------------------------------------------------//
-                template <template <class> class OutputT>
-                void set_value_output(){
-                    set_value_output<OutputT>(value_output_id);
-                }
-
-                //-----------------------------------------------------------//
-                template <template <class> class OutputT> 
-                void set_value_output(std::string id){
-                    value_output_id = id;
-                    value_output_ptr = 
-                        create_output<OutputT, TimedValue>(
-                            value_output_id
-                        );
-                }
-
 
             private:
 
@@ -70,20 +54,20 @@ namespace sim{
                 // Simulation parameters + defaults
                 //-----------------------------------------------------------//
                 unsigned seed = 0;
-                std::string value_output_id = "./fret_efficiency";
-                std::string initial_state_id = "FO";
+                std::string value_output_id = "__value_output__";
+                std::string initial_state_id = "N0";
                 realtime_t experiment_time = 1.0;
                 json states = {
-                    {"open", {{"from", "FC"}, {"to", "FO"}, {"rate", 1e+2}}},
-                    {"close", {{"from", "FO"}, {"to", "FC"}, {"rate", 1e+2}}}
+                    {"N0->N1", {{"from", "N0"}, {"to", "N1"}, {"rate", 1e+2}}},
+                    {"N1->N0", {{"from", "N1"}, {"to", "N0"}, {"rate", 1e+2}}}
                 };
                 json values = {
-                    {"FO", {{"node", "FO"}, {"value", 0.3}}},
-                    {"FC", {{"node", "FC"}, {"value", 0.7}}}
+                    {"N0", 0.3},
+                    {"N1", 0.7}
                 };
 
                 //-----------------------------------------------------------//
-                std::unique_ptr<Output<TimedValue>> value_output_ptr;
+                std::unique_ptr<io::BufferOutput<TimedValue>> value_output_ptr;
                 graph::Graph graph;
 
 

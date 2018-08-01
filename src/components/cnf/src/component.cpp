@@ -1,6 +1,6 @@
 #include "conformation/component.hpp"
-#include "actions/end_action.hpp"
-#include "actions/value_emission_action.hpp"
+#include "actions/terminate_action.hpp"
+#include "actions/output_timed_value_action.hpp"
 
 using namespace sim::graph;
 
@@ -71,40 +71,42 @@ namespace sim{
             graph = sim::graph::Graph(seed);
 
             // add end action
-            std::unique_ptr<Action> end_action_uptr = std::make_unique<EndAction>("end", graph);
-            graph.add_action(end_action_uptr);
+            std::unique_ptr<Action> terminate_action_ptr = 
+                std::make_unique<TerminateAction>("terminate", graph);
+            graph.add_action(terminate_action_ptr);
 
-            // add jablonsky
+            // add graph
             for (json::iterator it=states.begin(); it!=states.end(); ++it){
                 add_edge(it.key(), it.value());
             }
 
-            // Set initial node
-            graph.set_current(graph.get_node_ptr(initial_state_id));
+            // Initialize output
+            value_output_ptr = std::make_unique<io::BufferOutput<TimedValue>> (value_output_id);
 
-            // initialize actions here
+            // Initialize actions here
             for (json::iterator it=values.begin(); it!=values.end(); ++it){
 
-                json &j = it.value();
-                std::string action_name = it.key();
+                // get node name (used as trigger _and_ action name)
+                std::string node_name = it.key();
 
-                std::unique_ptr<Action> act_uptr =
-                    std::make_unique<ValueEmissionAction> (
-                            action_name,
-                            graph,
-                            *value_output_ptr
-                            );
-
-                act_uptr->set_json(j);
-                j = act_uptr->get_json();
+                std::unique_ptr<OutputTimedValueAction> otval_act_uptr =
+                    std::make_unique<OutputTimedValueAction>(node_name, graph, value_output_ptr);
+                
+                otval_act_uptr->set_value(it.value());
+                std::unique_ptr<Action> act_uptr = std::move(otval_act_uptr);
 
                 graph.add_action(act_uptr);
-                graph.link_node_action(j["node"], action_name);
+                graph.link_node_action(node_name, node_name); // trigger node name, action name
                 
             }
 
             graph.init();
-            graph.push_event(Event(graph.get_action_ptr("end"), experiment_time));
+
+            // Set initial node
+            graph.set_current(graph.get_node_ptr(initial_state_id));
+
+            // bootstrap termination
+            graph.push_event(Event(graph.get_action_ptr("terminate"), experiment_time));
         }
 
         //-------------------------------------------------------------------//

@@ -1,7 +1,7 @@
 #include <iostream>
 #include "conformation/component.hpp"
 #include "component/cli.hpp"
-#include "io/file_io.hpp"
+#include "io/buffer.hpp"
 
 using namespace sim;
 
@@ -17,18 +17,16 @@ int main(int argc, char *argv[]) {
     //-Configure-------------------------------------------------------------//
     cnf.set_json(params);
 
-    //-Connect-io------------------------------------------------------------//
-    cnf.set_value_output < file_io::FileOutput > ();
-
-    //-Initialize------------------------------------------------------------//
-    cnf.init();
-
     //-Log-------------------------------------------------------------------//
-    cli::log_parameters(cnf.get_json());
+    json log = cnf.get_json();
+    cli::log_parameters(log);
 
     //-Run-------------------------------------------------------------------//
     if (!cli::check_list(opts)){
-        cnf.run();
+        auto output_thr = io::buffer2file_thread<TimedValue>(log["output"]);
+        auto cnf_thr = comp::run_component(cnf);
+        output_thr.join();
+        cnf_thr.join();
     }
 
 }
