@@ -12,9 +12,9 @@ namespace sim{
         // Time an input thread waits on an empty queue until it rechecks if the 
         // producer thread is done (eof == true)
         //-----------------------------------------------------------------------//
-        constexpr unsigned int DEAD_TIME_NANOS_MIN = 1<<6; // 32 ns min delay
+        constexpr unsigned int DEAD_TIME_NANOS_MIN = 1<<8; // 32 ns min delay
         constexpr unsigned int DEAD_TIME_NANOS_MAX = 1<<30; // 1 s max delay
-        constexpr size_t CHUNK_SIZE = 1<<12; // 1024 elements per chunk
+        constexpr size_t CHUNK_SIZE = 1<<12; // 8096 elements per chunk
 
 
         //-----------------------------------------------------------------------//
