@@ -45,8 +45,8 @@ namespace sim{
                 //-----------------------------------------------------------//
                 // Simulation parameters + defaults
                 //-----------------------------------------------------------//
-                std::string input_id = "./buffer_input";
-                std::vector<std::string> output_ids{"./buffer_output"};
+                std::string input_id = "__input__";
+                std::vector<std::string> output_ids{"__output1__", "__output2__"};
 
                 std::unique_ptr<io::BufferInput<char>> input_ptr;
                 std::vector<std::unique_ptr<io::BufferOutput<char>>> output_ptrs;

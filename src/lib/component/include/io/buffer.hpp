@@ -179,7 +179,7 @@ namespace sim{
                 }
 
                 //---------------------------------------------------------------//
-                void put_chunk(std::vector<T> c){
+                void put_chunk(std::vector<T> &c){
                     push_chunk(); // commit current chunk
                     chunk = std::move(c);
                 }

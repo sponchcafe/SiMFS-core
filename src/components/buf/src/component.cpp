@@ -56,19 +56,12 @@ namespace sim{
         void Buffer::run(){
 
             std::vector<char> chunk{};
-            std::vector<std::vector<char>> copies{};
             while(input_ptr->get_chunk(chunk)){
-                copies.clear();
-                for (int i=0; i<output_ptrs.size(); i++){
-                    std::vector<char> copy{};
-                    for (auto it=chunk.begin(); it!=chunk.end(); ++it){
-                        copy.push_back(*it);
-                    }
-                    copies.push_back(copy);
+                for (int i=1; i<output_ptrs.size(); i++){
+                    std::vector<char> new_chunk{chunk};
+                    output_ptrs[i]->put_chunk(new_chunk);
                 }
-                for (int i=0; i<output_ptrs.size(); i++){
-                    output_ptrs[i]->put_chunk(copies[i]);
-                }
+                output_ptrs[0]->put_chunk(chunk);
             }
 
         }

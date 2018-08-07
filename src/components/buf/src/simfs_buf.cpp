@@ -23,8 +23,10 @@ int main(int argc, char *argv[]) {
     //-Run-------------------------------------------------------------------//
     if (!cli::check_list(opts)){
 
-        auto buf_thread = comp::run_component<comp::Buffer>(buf);
         auto in_thread = io::file2buffer_thread<char>(log["input"]);
+
+        buf.init();
+        auto buf_thread = comp::run_component<comp::Buffer>(buf);
         
         std::vector<std::thread> out_threads{};
         std::vector<std::string> outputs = log["outputs"];
