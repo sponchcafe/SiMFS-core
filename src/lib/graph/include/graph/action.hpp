@@ -1,5 +1,4 @@
-#ifndef SIM_GRAPH_ACTION_H
-#define SIM_GRAPH_ACTION_H
+#pragma once
 
 #include "graph/graph.hpp"
 #include "graph/definitions.hpp"
@@ -40,12 +39,6 @@ namespace sim{
                 virtual void fire();
 
                 //-----------------------------------------------------------//
-                virtual void set_json(json j);
-
-                //-----------------------------------------------------------//
-                virtual json get_json();
-
-                //-----------------------------------------------------------//
                 std::ostream &print_info(std::ostream &os);
 
                 //-----------------------------------------------------------//
@@ -64,4 +57,3 @@ namespace sim{
     }
 }
 
-#endif

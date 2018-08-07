@@ -1,7 +1,7 @@
 #include <iostream>
 #include "photophysics/component.hpp"
 #include "component/cli.hpp"
-#include "io/file_io.hpp"
+#include "io/buffer.hpp"
 
 using namespace sim;
 using namespace sim::graph;
@@ -18,43 +18,27 @@ int main(int argc, char *argv[]) {
     //-Configure-------------------------------------------------------------//
     ph2.set_json(params);
 
-    //-Initialize------------------------------------------------------------//
+    //-Init------------------------------------------------------------------//
     ph2.init();
 
-    //-Cnnect-action-io------------------------------------------------------//
-    json actions = ph2.get_json()["actions"];
-    for (json::iterator it=actions.begin(); it!=actions.end(); ++it){
-
-        std::string action_type = it.value()["type"];
-        std::string action_name = it.key();
-
-        if (action_type_compare(action_type, ExcitationAction::type)){
-            ExcitationAction &exi_act = 
-                ph2.get_action<ExcitationAction>(action_name);
-            exi_act.set_flux_input< file_io::FileInput > (); // template spec
-        }
-
-        else if (action_type_compare(action_type, EmissionAction::type)){
-            EmissionAction &emi_act = 
-                ph2.get_action<EmissionAction>(action_name);
-            emi_act.set_photon_output< file_io::FileOutput > (); // template spec
-        }
-
-        else if (action_type_compare(action_type, TransferAction::type)){
-            TransferAction &trs_act = 
-                ph2.get_action<TransferAction>(action_name);
-            trs_act.set_photon_input< file_io::FileInput > (); // template spec
-            trs_act.set_rejected_photon_output< file_io::FileOutput > (); // template spec
-        }
-
-    }
-
     //-Log-------------------------------------------------------------------//
-    cli::log_parameters(ph2.get_json());
+    json log = ph2.get_json();
+    cli::log_parameters(log);
 
     //-Run-------------------------------------------------------------------//
     if (!cli::check_list(opts)){
-        ph2.run();
+
+        std::vector<std::thread> io_threads{};
+        for (auto &id: ph2.get_timetag_output_ids()){
+            io_threads.push_back(io::buffer2file_thread<realtime_t>(id));
+        }
+        for (auto &id: ph2.get_flux_input_ids()){
+            io_threads.push_back(io::file2buffer_thread<TimedValue>(id));
+        }
+        auto ph2_thread = comp::run_component(ph2);
+
+        ph2_thread.join();
+        for (auto &th: io_threads) th.join();
     }
 
 }

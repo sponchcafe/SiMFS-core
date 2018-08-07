@@ -97,6 +97,8 @@ namespace sim{
                 //-The-nodes-unique-name-------------------------------------//
                 std::string const name;
 
+                std::ostream &print_edges(std::ostream &os) const;
+
             private:
 
                 //-Parent-graph----------------------------------------------//

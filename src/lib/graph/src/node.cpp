@@ -105,6 +105,13 @@ namespace sim{
             }
         }
 
+        std::ostream &Node::print_edges(std::ostream &os) const{
+            for (auto &it: outgoing_edge_ptrs){
+                os << *it << '\n';
+            }
+            return os;
+        }
+
 
         //-Stream-representation--------------------------------------------//
         // friend function

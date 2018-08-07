@@ -103,7 +103,10 @@ namespace sim{
 
 
                 //-Debugging-output------------------------------------------//
-                //void print_state(); // TODO: make prettier....
+                void print_state(); // TODO: make prettier....
+                void print_actions(size_t indent) const;
+                void print_events(size_t indent) const;
+                void print_nodes(size_t indent) const;
 
 
                 //-Simulation:-initialization--------------------------------//
@@ -146,11 +149,13 @@ namespace sim{
                 bool is_done() const;
 
 
+
             private:
 
                 //-Get-new-seed-based-on-the-graph-seed----------------------//
                 unsigned get_new_seed();
 
+                void init_defaults();
 
                 //-Check-existence-------------------------------------------//
                 bool node_exists(std::string const name) const;

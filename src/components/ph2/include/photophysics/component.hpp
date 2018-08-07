@@ -1,9 +1,11 @@
 #include "component/component.hpp"
 #include "component/types.hpp"
 #include "graph/main.hpp"
-#include "actions/excitation_action.hpp"
-#include "actions/emission_action.hpp"
-#include "actions/transfer_action.hpp"
+#include "actions/set_rates_action.hpp"
+#include "actions/output_time_action.hpp"
+#include "actions/set_state_if_action.hpp"
+#include <unordered_map>
+#include <set>
 
 namespace sim{
     namespace comp{
@@ -30,46 +32,70 @@ namespace sim{
                 //-----------------------------------------------------------//
                 void set_seed(unsigned s);
                 void set_jablonsky(json j);
-                void set_actions(json a);
                 void set_initial_state_id(std::string s);
                 //-----------------------------------------------------------//
                
-                //-----------------------------------------------------------//
-                // get_action
-                // Used to get access to the registered actions in order to 
-                // connect their specific input and output interfaces.
-                //-----------------------------------------------------------//
-                template <class ActionT> 
-                ActionT &get_action(std::string id){
-                    sim::graph::Action *act_ptr = graph.get_action_ptr(id);
-                    ActionT &exi_act = dynamic_cast<ActionT&>(*act_ptr);
-                    return exi_act;
-                }
+                std::set<std::string> get_timetag_output_ids();
+                std::set<std::string> get_flux_input_ids();
+                std::set<std::string> get_transition_input_ids();
 
             private:
-
-                //-Helpers---------------------------------------------------//
-                void add_edge(std::string id, json j);
-                void configure_action(std::unique_ptr<graph::Action> &act_uptr, json &j);
 
                 //-----------------------------------------------------------//
                 // Simulation parameters + defaults
                 //-----------------------------------------------------------//
                 unsigned seed = 0;
                 json jablonsky = {
-                    {"exi", {{"from", "S0"}, {"to", "S1"}, {"rate", 0}}},
-                    {"emi", {{"from", "S1"}, {"to", "S0"}, {"rate", 1e+9}}},
-                    {"isc", {{"from", "S1"}, {"to", "T1"}, {"rate", 1e+7}}},
-                    {"risc", {{"from", "T1"}, {"to", "S0"}, {"rate", 1e+7}}}
+                    {"exi",         {{"from", "S0"}, {"to", "S1"}, {"rate", 1e+7},  {"input", "__fret__"}}},
+                    {"emi",         {{"from", "S1"}, {"to", "S0"}, {"rate", 1e+9}, {"output", "__emission__"}}},
+                    {"isc",         {{"from", "S1"}, {"to", "T1"}, {"rate", 1e+7}}},
+                    {"risc",        {{"from", "T1"}, {"to", "S0"}, {"rate", 1e+7}}},
+                    {"bleach",      {{"from", "T1"}, {"to", "X0"}, {"rate", 1e+5}}},
+                    {"unbleach",    {{"from", "X0"}, {"to", "S0"}, {"input", "__collision__"}}}                        
                 };
-                json actions = {
-                    {"__excitation__", {{"type", graph::ExcitationAction::type}}},
-                    {"__emission__", {{"type", graph::EmissionAction::type}}}
-                };
+
                 std::string initial_state_id = "S0";
                
                 //-Derived-parameters----------------------------------------//
-                graph::Graph graph;
+                std::unique_ptr<graph::Graph> graph;
+
+                //-Helpers---------------------------------------------------//
+                void add_edges();
+                void make_output_actions();
+                void make_transition_input_actions();
+                void make_flux_input_actions();
+
+                json_filter_t has_output = [] (json const &e) -> bool {
+                    return (e.find("output") != e.end());
+                };
+                json_filter_t has_input = [] (json const &e) -> bool {
+                    return (e.find("input") != e.end());
+                };
+                json_filter_t has_rate = [] (json const &e) -> bool {
+                    return (e.find("rate") != e.end());
+                };
+                json_filter_t has_constant_rate = [] (json const &e) -> bool {
+                    return e["rate"].is_number();
+                };
+                json_filter_t has_input_rate = [] (json const &e) -> bool {
+                    return e["rate"].is_object();
+                };
+
+                //-IO-handles------------------------------------------------//
+                std::unordered_map<
+                    std::string, 
+                    std::unique_ptr<io::BufferOutput<realtime_t>>
+                        > time_output_map;
+
+                std::unordered_map<
+                    std::string, 
+                    std::unique_ptr<io::BufferInput<TimedValue>>
+                        > flux_input_map;
+
+                std::unordered_map<
+                    std::string, 
+                    std::unique_ptr<io::BufferInput<realtime_t>>
+                        > transition_input_map;
 
         };
 

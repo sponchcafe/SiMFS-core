@@ -11,47 +11,13 @@ namespace sim{
         //-------------------------------------------------------------------//
         //-CONSTRUCTOR-------------------------------------------------------//
         //-------------------------------------------------------------------//
-        Graph::Graph(unsigned seed) : seed(seed) {
-
-            // default node
-            default_node = std::unique_ptr<Node>{
-                new Node(*this, DEFAULT_NODE_NAME)
-            };
-            
-            // default edge
-            default_edge = std::unique_ptr<Edge>{
-                new Edge(
-                        *this,
-                        DEFAULT_EDGE_NAME, // edge name
-                        DEFAULT_NODE_NAME, // source name
-                        DEFAULT_NODE_NAME, // target name
-                        0, // lambda
-                        0 // seed
-                        )
-            };
-
-            // default action
-            default_action = std::unique_ptr<Action>{
-                new Action(*this, DEFAULT_ACTION_NAME) // TODO: Action factory
-            };
-
-            // link default loop
-            default_node->add_edge(DEFAULT_EDGE_NAME);
-            default_node->set_action(DEFAULT_ACTION_NAME);
-            default_edge->set_action(DEFAULT_ACTION_NAME);
-
-            // !!! MAYBE DANGEROUS IN CTOR ? //
-            default_node->init();
-            default_edge->init();
-            default_action->init();
-
-        }
-
+        Graph::Graph(unsigned seed) : seed(seed) { }
 
         /*---Representation---------------*/
-        /*void Graph::print_state(){
+        void Graph::print_state() {
             std::cerr << "STATE REPORT GRAPH @" << this << std::endl;
             std::cerr << "==================================" << std::endl;
+            std::cerr << "Current state: " << *current << '\n';
             std::cerr << std::endl;
             std::cerr << "ACTIONS" << std::endl;
             std::cerr << "-------" << std::endl;
@@ -69,7 +35,7 @@ namespace sim{
             print_nodes(4);
             std::cerr << std::endl;
             std::cerr << "=======" << std::endl;
-        }*/
+        }
 
 
         //-------------------------------------------------------------------//
@@ -86,6 +52,7 @@ namespace sim{
 
         //-------------------------------------------------------------------//
         Node * Graph::get_node_ptr(std::string const name) {
+            if (name == DEFAULT_NODE_NAME) return get_default_node_ptr();
             for (auto &node: nodes) if (node.name == name) return &node;
             return get_default_node_ptr();
         }
@@ -137,6 +104,7 @@ namespace sim{
 
         //-------------------------------------------------------------------//
         Edge * Graph::get_edge_ptr(std::string const name) {
+            if (name == DEFAULT_EDGE_NAME) return get_default_edge_ptr();
             for (auto &it: edges) if (it.name == name) return &it;
             return get_default_edge_ptr();
         }
@@ -171,6 +139,7 @@ namespace sim{
 
         //-------------------------------------------------------------------//
         Action * Graph::get_action_ptr(std::string const name) {
+            if (name == DEFAULT_ACTION_NAME) return get_default_action_ptr();
             for (auto &it: actions) {
                 if (it.get()->name == name) return it.get();
             }
@@ -209,8 +178,46 @@ namespace sim{
 
 
         //-------------------------------------------------------------------//
+        void Graph::init_defaults (){
+
+            // default node
+            default_node = std::unique_ptr<Node>{
+                new Node(*this, DEFAULT_NODE_NAME)
+            };
+            
+            // default edge
+            default_edge = std::unique_ptr<Edge>{
+                new Edge(
+                        *this,
+                        DEFAULT_EDGE_NAME, // edge name
+                        DEFAULT_NODE_NAME, // source name
+                        DEFAULT_NODE_NAME, // target name
+                        0, // lambda
+                        0 // seed
+                        )
+            };
+
+            // default action
+            default_action = std::unique_ptr<Action>{
+                new Action(*this, DEFAULT_ACTION_NAME) // TODO: Action factory
+            };
+
+            // link default loop
+            default_node->add_edge(DEFAULT_EDGE_NAME);
+            //default_node->set_action(DEFAULT_ACTION_NAME);
+            default_edge->set_action(DEFAULT_ACTION_NAME);
+
+            // !!! MAYBE DANGEROUS IN CTOR ? //
+            //default_node->init();
+            default_edge->init();
+            default_action->init();
+
+        }
+        
+        //-------------------------------------------------------------------//
         void Graph::init(){
 
+            init_defaults();
             for (auto &node: nodes) node.init();
             for (auto &edge: edges) edge.init();
             for (auto &action: actions) action->init();
@@ -229,6 +236,7 @@ namespace sim{
                 current->traverse(); 
                 next_path = current->get_next();
 
+                // event handling loop
                 while(
                         !events.empty() 
                         && 
@@ -316,7 +324,7 @@ namespace sim{
         }
 
 
-        /*void Graph::print_actions(size_t indent) const {
+        void Graph::print_actions(size_t indent) const {
             std::string ind(indent, ' ');
             for (auto it=actions.begin(); it!= actions.end(); ++it){
                 Action *a = it->get();
@@ -343,7 +351,7 @@ namespace sim{
                 std::cerr << *it << std::endl;
                 it->print_edges(std::cerr);
             }
-        } */ 
+        }  
 
 
         //-------------------------------------------------------------------//

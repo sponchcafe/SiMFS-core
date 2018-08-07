@@ -1,5 +1,4 @@
-#ifndef SIM_CLI_H
-#define SIM_CLI_H
+#pragma once
 
 #include <iostream>
 #include <sstream>
@@ -73,4 +72,3 @@ namespace sim{
     }
 }
 
-#endif

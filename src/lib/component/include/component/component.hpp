@@ -1,10 +1,11 @@
-#ifndef SIM_BASE_COMPONENT_H
-#define SIM_BASE_COMPONENT_H
+#pragma once
 
 #include <type_traits>
 #include <thread>
 #include <iostream>
 #include <json/json.hpp>
+#include <initializer_list>
+#include <functional>
 
 #include "io/buffer.hpp"
 
@@ -46,14 +47,17 @@ namespace sim{
         template <typename T> std::thread run_component(T &comp){
             std::thread thr{ [&] () { 
                 T _comp = std::move(comp); // stealing the component object
-                _comp.init();
                 _comp.run(); 
             } };
             return thr;
         }
 
+        //-JSON-filters------------------------------------------------------//
+        using json_filter_t = std::function<bool(json const &)>;
+        bool filter_json(json const &j, json_filter_t filter);
+        bool filter_json_all(json const &j, std::initializer_list<json_filter_t> filters);
+        bool filter_json_any(json const &j, std::initializer_list<json_filter_t> filters);
+
     }
 }
-
-#endif
 

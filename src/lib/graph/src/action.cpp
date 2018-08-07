@@ -18,13 +18,14 @@ namespace sim{
         {}
 
         //-------------------------------------------------------------------//
-        void Action::init(){}
+        void Action::init(){
+        }
 
         //-------------------------------------------------------------------//
         void Action::fire(){
             graph.set_done(true);
             std::cerr << name;
-            std::cerr << " called from " << graph.get_current_ptr()->name;
+            std::cerr << " called from " << *graph.get_current_ptr();
             std::cerr << " at " << graph.get_clock() << std::endl;
         }
 

@@ -30,7 +30,6 @@ namespace sim{
             for (auto &id: target_edge_ids){
                 targets.push_back(graph.get_edge_ptr(id));
             }
-            //scaling = absorption_coefficient * 100.0/1000 * log(10) / CONST_NA;
             input_ptr->get(current);
             fire();
         }
