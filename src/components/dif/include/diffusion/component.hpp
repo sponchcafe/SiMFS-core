@@ -15,7 +15,6 @@ namespace sim{
                 //-----------------------------------------------------------//
                 Diffusion ();
 
-
                 //-----------------------------------------------------------//
                 // Component interface 
                 //-----------------------------------------------------------//
@@ -30,7 +29,6 @@ namespace sim{
                 //-----------------------------------------------------------//
                 void run() override;
                 //-----------------------------------------------------------//
-
 
                 //-----------------------------------------------------------//
                 // Parameter setters
@@ -66,8 +64,8 @@ namespace sim{
                 double experiment_time = 1;                 // s
                 double increment = 1e-7;                    // s
                 unsigned seed = 0;
-                std::string coordinate_output_id = "./coords";
-                std::string collision_output_id = "/dev/null";
+                std::string coordinate_output_id = "__coordinates__";
+                std::string collision_output_id = "__collisions__";
 
                 //-----------------------------------------------------------//
                 double sigma = 0;
@@ -82,7 +80,7 @@ namespace sim{
 
                 //-----------------------------------------------------------//
                 std::unique_ptr<io::BufferOutput<Coordinate>> coordinate_output_ptr;
-                std::unique_ptr<io::BufferOutput<Coordinate>> collision_output_ptr;
+                std::unique_ptr<io::BufferOutput<realtime_t>> collision_output_ptr;
 
         };
 

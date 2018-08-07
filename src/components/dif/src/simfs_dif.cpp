@@ -25,9 +25,12 @@ int main(int argc, char *argv[]) {
     //-Run-------------------------------------------------------------------//
     if (!cli::check_list(opts)){
 
+        //-Init--------------------------------------------------------------//
+        dif.init();
+
         //-Threads-----------------------------------------------------------//
         std::thread coord_thr = io::buffer2file_thread<Coordinate>(log["coordinate_output"]);
-        std::thread collision_thr = io::buffer2file_thread<Coordinate>(log["collision_output"]);
+        std::thread collision_thr = io::buffer2file_thread<realtime_t>(log["collision_output"]);
         std::thread dif_thr = comp::run_component<comp::Diffusion>(dif);
         //-------------------------------------------------------------------//
 

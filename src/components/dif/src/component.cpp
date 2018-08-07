@@ -83,7 +83,7 @@ namespace sim{
 
             // IO initialization
             coordinate_output_ptr = std::make_unique< io::BufferOutput<Coordinate> >(coordinate_output_id);
-            collision_output_ptr = std::make_unique< io::BufferOutput<Coordinate> >(collision_output_id);
+            collision_output_ptr = std::make_unique< io::BufferOutput<realtime_t> >(collision_output_id);
 
         }
 
@@ -105,7 +105,7 @@ namespace sim{
                 }
                 else{
                     if (c0.t != last_reset){
-                        collision_output_ptr->put(c0);
+                        collision_output_ptr->put(c0.t);
                         last_reset = c0.t;
                     }
                 }
