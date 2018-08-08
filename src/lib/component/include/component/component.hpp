@@ -44,19 +44,14 @@ namespace sim{
         };
 
         //-Thread-helper-----------------------------------------------------//
-        template <typename T> std::thread run_component(T &comp){
+        template <typename T> std::thread run_component(T &comp, bool init=false){
             std::thread thr{ [&] () { 
                 T _comp = std::move(comp); // stealing the component object
+                if (init) _comp.init();
                 _comp.run(); 
             } };
             return thr;
         }
-
-        //-JSON-filters------------------------------------------------------//
-        using json_filter_t = std::function<bool(json const &)>;
-        bool filter_json(json const &j, json_filter_t filter);
-        bool filter_json_all(json const &j, std::initializer_list<json_filter_t> filters);
-        bool filter_json_any(json const &j, std::initializer_list<json_filter_t> filters);
 
     }
 }

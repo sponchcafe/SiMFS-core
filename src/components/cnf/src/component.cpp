@@ -8,8 +8,7 @@ namespace sim{
     namespace comp{
 
         //-------------------------------------------------------------------//
-        Conformation::Conformation() : 
-            graph(sim::graph::Graph(0)) { 
+        Conformation::Conformation() { 
             set_seed(random::get_new_seed());
         }
 
@@ -21,6 +20,7 @@ namespace sim{
 
             set_seed(params.at("seed"));
             set_states(params.at("states"));
+            set_initial_state_id(params.at("start_at"));
             set_values(params.at("values"));
             set_experiment_time(params.at("experiment_time"));
             set_value_output_id(params.at("output"));
@@ -34,6 +34,7 @@ namespace sim{
 
             j["seed"] = seed;
             j["experiment_time"] = experiment_time;
+            j["start_at"] = initial_state_id;
             j["states"] = states;
             j["values"] = values;
             j["output"] = value_output_id;
@@ -68,12 +69,12 @@ namespace sim{
         void Conformation::init() {
 
             // create new graph
-            graph = sim::graph::Graph(seed);
+            graph = std::make_unique<sim::graph::Graph>(seed);
 
             // add end action
             std::unique_ptr<Action> terminate_action_ptr = 
-                std::make_unique<TerminateAction>("terminate", graph);
-            graph.add_action(terminate_action_ptr);
+                std::make_unique<TerminateAction>("terminate", *graph);
+            graph->add_action(terminate_action_ptr);
 
             // add graph
             for (json::iterator it=states.begin(); it!=states.end(); ++it){
@@ -90,35 +91,35 @@ namespace sim{
                 std::string node_name = it.key();
 
                 std::unique_ptr<OutputTimedValueAction> otval_act_uptr =
-                    std::make_unique<OutputTimedValueAction>(node_name, graph, value_output_ptr);
+                    std::make_unique<OutputTimedValueAction>(node_name, *graph, value_output_ptr);
                 
                 otval_act_uptr->set_value(it.value());
                 std::unique_ptr<Action> act_uptr = std::move(otval_act_uptr);
 
-                graph.add_action(act_uptr);
-                graph.link_node_action(node_name, node_name); // trigger node name, action name
+                graph->add_action(act_uptr);
+                graph->link_node_action(node_name, node_name); // trigger node name, action name
                 
             }
 
-            graph.init();
+            graph->init();
 
             // Set initial node
-            graph.set_current(graph.get_node_ptr(initial_state_id));
+            graph->set_current(graph->get_node_ptr(initial_state_id));
 
             // bootstrap termination
-            graph.push_event(Event(graph.get_action_ptr("terminate"), experiment_time));
+            graph->push_event(Event(graph->get_action_ptr("terminate"), experiment_time));
         }
 
         //-------------------------------------------------------------------//
         void Conformation::run(){
-            graph.traverse();
+            graph->traverse();
         }
 
         //-------------------------------------------------------------------//
         void Conformation::add_edge(std::string id, json j){
-            graph.add_node(j["from"]);
-            graph.add_node(j["to"]);
-            graph.add_edge(id, j["from"], j["to"], j["rate"]);
+            graph->add_node(j["from"]);
+            graph->add_node(j["to"]);
+            graph->add_edge(id, j["from"], j["to"], j["rate"]);
         }
 
     }

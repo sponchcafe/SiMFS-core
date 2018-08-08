@@ -68,7 +68,7 @@ namespace sim{
 
                 //-----------------------------------------------------------//
                 std::unique_ptr<io::BufferOutput<TimedValue>> value_output_ptr;
-                graph::Graph graph;
+                std::unique_ptr<graph::Graph> graph;
 
 
         };

@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> opts = cli::parse_argv_vector(argc, argv);
 
     //-Create----------------------------------------------------------------//
-    comp::Conformation cnf;
+    comp::Conformation cnf{};
 
     //-Configure-------------------------------------------------------------//
     cnf.set_json(params);
@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
     //-Run-------------------------------------------------------------------//
     if (!cli::check_list(opts)){
         auto output_thr = io::buffer2file_thread<TimedValue>(log["output"]);
-        auto cnf_thr = comp::run_component(cnf);
+        auto cnf_thr = comp::run_component(cnf, true);
         output_thr.join();
         cnf_thr.join();
     }
