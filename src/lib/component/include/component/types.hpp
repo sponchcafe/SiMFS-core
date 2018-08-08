@@ -1,5 +1,8 @@
-#ifndef SIM_TYPES_H
-#define SIM_TYPES_H
+#pragma once
+#include "json/json.hpp"
+#include <functional>
+
+using json = nlohmann::json;
 
 namespace sim{
 
@@ -23,6 +26,7 @@ namespace sim{
         realtime_t t;
     } Coordinate;
 
-}
+    using json_filter_t = std::function<bool(json const &)>;
 
-#endif
+
+}

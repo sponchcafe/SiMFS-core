@@ -29,7 +29,7 @@ namespace sim{
                 void fire() override;
 
                 //-----------------------------------------------------------//
-                void add_pseudo_edge(std::string from, std::string to);
+                void add_node_edge_pair(std::string if_node, std::string then_edge);
                 //-----------------------------------------------------------//
                 
                 sim::graph::Graph &get_graph();
@@ -41,8 +41,8 @@ namespace sim{
                 std::unique_ptr<io::BufferInput<realtime_t>> &input_ptr;
 
                 //-----------------------------------------------------------//
-                std::vector<std::pair<std::string, std::string>> pseudo_edge_ids;
-                std::vector<std::pair<Node *, Node *>> pseudo_edge_ptrs;
+                std::vector<std::pair<std::string, std::string>> node_edge_ids;
+                std::vector<std::pair<Node *, Edge *>> node_edge_ptrs;
 
                 realtime_t current; 
 

@@ -51,7 +51,7 @@ namespace sim{
                     {"isc",         {{"from", "S1"}, {"to", "T1"}, {"rate", 1e+7}}},
                     {"risc",        {{"from", "T1"}, {"to", "S0"}, {"rate", 1e+7}}},
                     {"bleach",      {{"from", "T1"}, {"to", "X0"}, {"rate", 1e+5}}},
-                    {"unbleach",    {{"from", "X0"}, {"to", "S0"}, {"input", "__collision__"}}}                        
+                    {"unbleach",    {{"from", "X0"}, {"to", "S0"}, {"input", "__collisions__"}}}                        
                 };
 
                 std::string initial_state_id = "S0";

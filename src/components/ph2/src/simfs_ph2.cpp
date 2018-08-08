@@ -32,6 +32,9 @@ int main(int argc, char *argv[]) {
         for (auto &id: ph2.get_timetag_output_ids()){
             io_threads.push_back(io::buffer2file_thread<realtime_t>(id));
         }
+        for (auto &id: ph2.get_transition_input_ids()){
+            io_threads.push_back(io::file2buffer_thread<realtime_t>(id));
+        }
         for (auto &id: ph2.get_flux_input_ids()){
             io_threads.push_back(io::file2buffer_thread<TimedValue>(id));
         }

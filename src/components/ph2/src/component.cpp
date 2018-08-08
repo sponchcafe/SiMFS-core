@@ -93,6 +93,9 @@ namespace sim{
             for (auto &it: time_output_map){
                 it.second.reset(new io::BufferOutput<realtime_t>(it.first));
             }
+            for (auto &it: transition_input_map){
+                it.second.reset(new io::BufferInput<realtime_t>(it.first));
+            }
             for (auto &it: flux_input_map){
                 it.second.reset(new io::BufferInput<TimedValue>(it.first));
             }
@@ -112,7 +115,7 @@ namespace sim{
                 json e = it.value();
 
                 double rate = 0;
-                if(filter_json_all(e, {has_rate, has_constant_rate})){
+                if(has_rate(e) && has_constant_rate(e)){
                     rate = e["rate"];
                 }
 
@@ -158,6 +161,50 @@ namespace sim{
 
         //-------------------------------------------------------------------//
         void Photophysics::make_transition_input_actions(){
+
+            // collect all inputs
+            for (json::iterator it = jablonsky.begin(); it != jablonsky.end(); ++it){
+
+                auto id = it.key();
+                json e = it.value();
+
+                if (!(has_input(e))) continue;
+
+                std::string input_id = e["input"];
+
+                if (transition_input_map.find(input_id) == transition_input_map.end()){
+                    // no output named "output" -> create a new empty entry
+                    transition_input_map.emplace(input_id, nullptr);
+                }
+            }
+
+            // for each input collect all 
+            for (auto &input: transition_input_map){
+
+                std::string input_id = input.first;
+
+                // create 1 action for each input
+                auto ssi_action_ptr = std::make_unique<SetStateIfAction>(
+                        input_id+".input",
+                        *graph, 
+                        input.second
+                        );
+
+                // collect targets
+                for (json::iterator it = jablonsky.begin(); it != jablonsky.end(); ++it){
+                    std::string edge_id = it.key();
+                    json e = it.value();
+                    if (has_input(e) && e["input"] == input_id){
+                        ssi_action_ptr->add_node_edge_pair(e["from"], edge_id);
+                    }
+                }
+
+                // add action
+                std::unique_ptr<Action> act_ptr = std::move(ssi_action_ptr);
+                graph->add_action(act_ptr);
+
+            }
+
         }
 
         //-------------------------------------------------------------------//
