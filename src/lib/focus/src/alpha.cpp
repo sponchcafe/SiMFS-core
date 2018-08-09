@@ -7,15 +7,6 @@ namespace sim{
         Alpha::Alpha(){ } 
 
         //------------------------------------------------------------------//
-        Alpha::Alpha(double w_xy, double w_z) : waist_xy(w_xy), waist_z(w_z) {
-        }
-
-        //------------------------------------------------------------------//
-        std::string Alpha::get_type() const  {
-            return type;
-        }
-
-        //------------------------------------------------------------------//
         void Alpha::set_waist_xy (double wxy) {
             waist_xy = wxy;
         }
@@ -34,27 +25,5 @@ namespace sim{
             return x1 * exp(-2*(x2+(x3*x4)));
         }
 
-        //------------------------------------------------------------------//
-        void Alpha::set_json(json j) {
-
-            json params = get_json();
-            params.merge_patch(j);
-            set_waist_xy(params.at("waist_xy"));
-            set_waist_z(params.at("waist_z"));
-
-        }
-
-        //------------------------------------------------------------------//
-        json Alpha::get_json() {
-
-            json j;
-
-            j["waist_xy"] = waist_xy;
-            j["waist_z"] = waist_z;
-            j["type"] = get_type();
-
-            return j;
-
-        }
     }
 }

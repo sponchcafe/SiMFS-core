@@ -1,14 +1,6 @@
-#ifndef SIM_FOCUS_BASE_H
-#define SIM_FOCUS_BASE_H
-
-/* Focus library of the FCS simulater package.
- * Till Zickmantel 18.1.2018
- */
+#pragma once
 
 #include <cmath>
-#include "json/json.hpp"
-
-using json = nlohmann::json;
 
 namespace sim{
 
@@ -27,20 +19,9 @@ namespace sim{
                 //-----------------------------------------------------------//
                 virtual double evaluate(double x, double y, double z) const = 0;
 
-                //-----------------------------------------------------------//
-                virtual void set_json(json j) = 0;
-
-                //-----------------------------------------------------------//
-                virtual json get_json() = 0;
-                
-                //-----------------------------------------------------------//
-                virtual std::string get_type() const = 0;
-
             private:
 
         };
 
     }
 }
-
-#endif
