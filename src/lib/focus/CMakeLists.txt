@@ -11,3 +11,8 @@ add_executable(alpha_gauss_test tests/alpha_gauss_test.cpp)
 target_link_libraries(alpha_gauss_test sim_focus)
 target_link_libraries(alpha_gauss_test gtest_main)
 add_test(alpha_gauss_test alpha_gauss_test)
+
+add_executable(efield_test tests/efield_test.cpp)
+target_link_libraries(efield_test sim_focus)
+target_link_libraries(efield_test gtest_main)
+add_test(efield_test efield_test)

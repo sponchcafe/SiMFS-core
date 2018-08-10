@@ -32,13 +32,17 @@ namespace sim{
                 //-----------------------------------------------------------//
                 double evaluate(double x, double y, double z) const override;
 
-            private:
+                //-----------------------------------------------------------//
+                FieldComponents evaluate_components(double x, double y, double z, int i_phi, int i_theta) const;
+
+                //-----------------------------------------------------------//
+                FieldComponents integrate_components(double x, double y, double z) const;
 
                 //-----------------------------------------------------------//
                 void init();
-               
-                //-----------------------------------------------------------//
-                FieldComponents evaluate_components(double x, double y, double z, int i_phi, int i_theta) const;
+
+            private:
+
 
                 //-----------------------------------------------------------//
                 std::vector<double> sin_theta;
@@ -58,12 +62,12 @@ namespace sim{
                 double dipole_z = 1.0;
 
                 double theta_min = 0;
-                double theta_max = 32/360*2*CONST_PI;
+                double theta_max = 32.0/360.0*2*CONST_PI;
                 size_t theta_n = 32;
                 double d_theta;
 
                 double phi_min = 0;
-                double phi_max = 360/360*2*CONST_PI;
+                double phi_max = 360.0/360.0*2*CONST_PI;
                 size_t phi_n = 360;
                 double d_phi;
 

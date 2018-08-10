@@ -1,4 +1,5 @@
 #include "focus/efield.hpp"
+#include <iostream>
 
 namespace sim{
     namespace focus{
@@ -76,16 +77,17 @@ namespace sim{
             double a3 = k * (-st * cp * x - st * sp * y + ct * z);
             std::complex<double> a4 = st * sqrt(ct) * e_zero * ( cos(a3) + imag_unit * sin(a3));
 
-            field.x = -sp * a1 + ct * cp * a2 * a4;
-            field.y =  cp * a1 + ct * sp * a2 * a4;
-            field.z =            st      * a2 * a4;
+            field.x = (-sp * a1 + ct * cp * a2) * a4;
+            field.y = ( cp * a1 + ct * sp * a2) * a4;
+            field.z = (           st      * a2) * a4;
+
             
             return field;
 
         }
 
         //------------------------------------------------------------------//
-        double EField::evaluate(double x, double y, double z) const {
+        FieldComponents EField::integrate_components(double x, double y, double z) const {
 
             FieldComponents field{};
 
@@ -99,7 +101,16 @@ namespace sim{
                     
                 }
             }
+
+            return field;
             
+        }
+
+        //------------------------------------------------------------------//
+        double EField::evaluate(double x, double y, double z) const {
+
+            FieldComponents field = integrate_components(x, y, z);
+
             double res = 0.0;
 
             res += dipole_x * std::norm(field.x);
