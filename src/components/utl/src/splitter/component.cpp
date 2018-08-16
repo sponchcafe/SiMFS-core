@@ -57,6 +57,11 @@ namespace sim{
 
         //-------------------------------------------------------------------//
         void Splitter::init() {
+            efficiency_input_ptr = std::make_unique<io::BufferInput<TimedValue>> (efficiency_input_id);
+            photon_input_ptr = std::make_unique<io::BufferInput<realtime_t>> (photon_input_id);
+            accepted_photon_output_ptr = std::make_unique<io::BufferOutput<realtime_t>> (accepted_photon_output_id);
+            rejected_photon_output_ptr = std::make_unique<io::BufferOutput<realtime_t>> (rejected_photon_output_id);
+
         }
 
         //-------------------------------------------------------------------//
