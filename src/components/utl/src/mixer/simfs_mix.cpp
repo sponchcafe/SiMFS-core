@@ -16,8 +16,6 @@ int main(int argc, char *argv[]) {
     //-Configure-------------------------------------------------------------//
     mix.set_json(params);
 
-    //-Initialize------------------------------------------------------------//
-
     //-Log-------------------------------------------------------------------//
     json log = mix.get_json();
     cli::log_parameters(log);
@@ -35,7 +33,7 @@ int main(int argc, char *argv[]) {
             in_threads.emplace_back(io::file2buffer_thread<realtime_t>(*it));
         }
 
-        auto mix_thread = comp::run_component<comp::Mixer> (mix);
+        auto mix_thread = comp::run_component<comp::Mixer> (mix, true);
         mix_thread.join();
         out_thread.join();
         for (auto &th: in_threads) th.join();

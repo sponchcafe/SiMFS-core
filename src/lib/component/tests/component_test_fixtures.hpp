@@ -90,8 +90,8 @@ class ComponentIO : public ::testing::Test {
             trans.set_input(p1);
             trans.set_output(p2);
             
-            std::thread prod_thr = run_component<ProducerComponent>(prod);
-            std::thread trans_thr = run_component<TransformComponent>(trans);
+            std::thread prod_thr = run_component<ProducerComponent>(prod, true);
+            std::thread trans_thr = run_component<TransformComponent>(trans, true);
             std::thread cons_thr = std::thread{
                 [&] () {
                     ConsumerComponent cons{};
