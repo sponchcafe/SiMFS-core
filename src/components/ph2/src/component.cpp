@@ -1,5 +1,4 @@
 #include "photophysics/component.hpp"
-#include "focus/base.hpp" // constants NA
 #include "io/buffer.hpp"
 
 using namespace sim::graph;
@@ -53,6 +52,13 @@ namespace sim{
         }
 
         //-------------------------------------------------------------------//
+        std::set<std::string> Photophysics::get_transition_output_ids(){
+            std::set<std::string> ids;
+            for (auto &it: transition_output_map) ids.insert(it.first);
+            return ids;
+        }
+
+        //-------------------------------------------------------------------//
         std::set<std::string> Photophysics::get_flux_input_ids(){
             std::set<std::string> ids;
             for (auto &it: flux_input_map) ids.insert(it.first);
@@ -95,6 +101,9 @@ namespace sim{
             }
             for (auto &it: transition_input_map){
                 it.second.reset(new io::BufferInput<realtime_t>(it.first));
+            }
+            for (auto &it: transition_output_map){
+                it.second.reset(new io::BufferOutput<realtime_t>(it.first));
             }
             for (auto &it: flux_input_map){
                 it.second.reset(new io::BufferInput<TimedValue>(it.first));
@@ -168,13 +177,20 @@ namespace sim{
                 auto id = it.key();
                 json e = it.value();
 
-                if (!(has_input(e))) continue;
+                if (!(has_trigger(e))) continue;
 
-                std::string input_id = e["input"];
+                json trigger = e["trigger"];
+                std::string input_id = trigger["input"];
+                std::string output_id = trigger["output"];
 
                 if (transition_input_map.find(input_id) == transition_input_map.end()){
-                    // no output named "output" -> create a new empty entry
+                    // no input named "input" -> create a new empty entry
                     transition_input_map.emplace(input_id, nullptr);
+                    transition_io_map.emplace(input_id, output_id);
+                }
+                if (transition_output_map.find(output_id) == transition_output_map.end()){
+                    // no output named "output" -> create a new empty entry
+                    transition_output_map.emplace(output_id, nullptr);
                 }
             }
 
@@ -187,15 +203,18 @@ namespace sim{
                 auto ssi_action_ptr = std::make_unique<SetStateIfAction>(
                         input_id+".input",
                         *graph, 
-                        input.second
+                        input.second,
+                        transition_output_map[transition_io_map[input_id]]
                         );
 
                 // collect targets
                 for (json::iterator it = jablonsky.begin(); it != jablonsky.end(); ++it){
                     std::string edge_id = it.key();
                     json e = it.value();
-                    if (has_input(e) && e["input"] == input_id){
-                        ssi_action_ptr->add_node_edge_pair(e["from"], edge_id);
+                    if (!has_trigger(e)) continue;
+                    json trigger = e["trigger"];
+                    if (trigger["input"] == input_id){
+                        ssi_action_ptr->add_node_edge_pair(e["from"], edge_id, trigger["efficiency"]);
                     }
                 }
 

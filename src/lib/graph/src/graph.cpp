@@ -11,7 +11,8 @@ namespace sim{
         //-------------------------------------------------------------------//
         //-CONSTRUCTOR-------------------------------------------------------//
         //-------------------------------------------------------------------//
-        Graph::Graph(unsigned seed) : seed(seed) { }
+        Graph::Graph(unsigned seed) : seed(seed) {
+        }
 
         /*---Representation---------------*/
         void Graph::print_state() {
@@ -199,16 +200,15 @@ namespace sim{
 
             // default action
             default_action = std::unique_ptr<Action>{
-                new Action(*this, DEFAULT_ACTION_NAME) // TODO: Action factory
+                new Action(*this, DEFAULT_ACTION_NAME)
             };
 
             // link default loop
             default_node->add_edge(DEFAULT_EDGE_NAME);
-            //default_node->set_action(DEFAULT_ACTION_NAME);
             default_edge->set_action(DEFAULT_ACTION_NAME);
 
             // !!! MAYBE DANGEROUS IN CTOR ? //
-            //default_node->init();
+            default_node->init();
             default_edge->init();
             default_action->init();
 

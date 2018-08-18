@@ -10,15 +10,18 @@ namespace sim{
         SetStateIfAction::SetStateIfAction(
                 std::string const name,
                 sim::graph::Graph &graph,
-                std::unique_ptr<io::BufferInput<realtime_t>> &input) :
+                std::unique_ptr<io::BufferInput<realtime_t>> &input,
+                std::unique_ptr<io::BufferOutput<realtime_t>> &output) :
             Action(graph, name),
-            input_ptr(input){
+            input_ptr(input),
+            output_ptr(output),
+            uni(graph.get_new_seed()){
             }
 
         //-------------------------------------------------------------------//
-        void SetStateIfAction::add_node_edge_pair(std::string if_node, std::string then_edge){
-            auto node_edge_id = std::pair<std::string, std::string>{if_node, then_edge};
-            node_edge_ids.push_back(node_edge_id);
+        void SetStateIfAction::add_node_edge_pair(std::string if_node, std::string then_edge, double efficiency=1.0){
+            auto ne_id = node_edge_id{if_node, then_edge, efficiency};
+            node_edge_ids.push_back(ne_id);
         }
         //-------------------------------------------------------------------//
 
@@ -27,10 +30,11 @@ namespace sim{
         void SetStateIfAction::init() {
 
             for (auto &ids: node_edge_ids){
-                auto node_edge_ptr = std::pair<Node*, Edge*>{};
-                node_edge_ptr.first = graph.get_node_ptr(ids.first);
-                node_edge_ptr.second = graph.get_edge_ptr(ids.second);
-                node_edge_ptrs.push_back(node_edge_ptr);
+                node_edge_ptr ne_ptr{};
+                ne_ptr.node= graph.get_node_ptr(ids.node);
+                ne_ptr.edge = graph.get_edge_ptr(ids.edge);
+                ne_ptr.efficiency = ids.efficiency;
+                node_edge_ptrs.push_back(ne_ptr);
             }
 
             input_ptr->get(current);
@@ -42,12 +46,20 @@ namespace sim{
         void SetStateIfAction::fire() {
 
             Node * current_node = graph.get_current_ptr();
-            for (auto &node_edge_ptr: node_edge_ptrs){
-                if (current_node == node_edge_ptr.first){
-                    node_edge_ptr.second->traverse();
-                    graph.set_current(node_edge_ptr.second->get_target_node_ptr());
-                    break;
+            bool accepted = false;
+            for (auto &ne_ptr: node_edge_ptrs){
+                if (current_node == ne_ptr.node){
+                    if (uni() < ne_ptr.efficiency){
+                        ne_ptr.edge->traverse();
+                        graph.set_current(ne_ptr.edge->get_target_node_ptr());
+                        accepted=true;
+                        break;
+                    }
                 }
+            }
+
+            if (!accepted){
+                output_ptr->put(current);
             }
 
             if (input_ptr->get(current)){

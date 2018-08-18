@@ -4,6 +4,7 @@
 //---------------------------------------------------------------------------//
 TEST_F(GraphBuildTest, AddNode){
     g.add_node("S0");
+    g.init();
     ASSERT_EQ(g.get_node_count(), 1);
 }
 
@@ -11,6 +12,7 @@ TEST_F(GraphBuildTest, AddNode){
 //---------------------------------------------------------------------------//
 TEST_F(GraphBuildTest, DefaultNode){
     g.add_node("S0");
+    g.init();
     ASSERT_NE(g.get_node_ptr("nothere"), nullptr);
     ASSERT_EQ(g.get_node_ptr("nothere"), g.get_default_node_ptr());
 }
@@ -19,6 +21,7 @@ TEST_F(GraphBuildTest, DefaultNode){
 //---------------------------------------------------------------------------//
 TEST_F(GraphBuildTest, GetNodePointer){
     g.add_node("S0");
+    g.init();
     ASSERT_NE(g.get_node_ptr("S0"), g.get_default_node_ptr());
     ASSERT_NE(g.get_node_ptr("S0"), nullptr);
     ASSERT_EQ(g.get_node_ptr("S0")->name, "S0");
@@ -29,6 +32,7 @@ TEST_F(GraphBuildTest, GetNodePointer){
 TEST_F(GraphBuildTest, AddDuplicateNode){
     g.add_node("S0");
     g.add_node("S0");
+    g.init();
     ASSERT_EQ(g.get_node_count(), 1);
 }
 
@@ -39,6 +43,7 @@ TEST_F(GraphBuildTest, AddManyNodes){
     g.add_node("S1");
     g.add_node("S2");
     g.add_node("T0");
+    g.init();
     ASSERT_EQ(g.get_node_count(), 4);
 }
 
@@ -48,6 +53,7 @@ TEST_F(GraphBuildTest, GetNodeList){
     g.add_node("S0");
     g.add_node("S1");
     g.add_node("T1");
+    g.init();
     std::string result = "";
     for(auto &node : g.get_nodes()){
         result += node.name;
@@ -60,6 +66,7 @@ TEST_F(GraphBuildTest, GetNodeList){
 //---------------------------------------------------------------------------//
 TEST_F(GraphBuildTest, AddEdge){
     g.add_edge("exi", "", "", 0);
+    g.init();
     ASSERT_EQ(g.get_edge_count(), 1);
 }
 
@@ -67,6 +74,7 @@ TEST_F(GraphBuildTest, AddEdge){
 //---------------------------------------------------------------------------//
 TEST_F(GraphBuildTest, DefaultEdge){
     g.add_edge("exi", "", "", 0);
+    g.init();
     ASSERT_NE(g.get_edge_ptr("nothere"), nullptr);
     ASSERT_EQ(g.get_edge_ptr("nothere"), g.get_default_edge_ptr());
 }
@@ -75,6 +83,7 @@ TEST_F(GraphBuildTest, DefaultEdge){
 //---------------------------------------------------------------------------//
 TEST_F(GraphBuildTest, GetEdgePointer){
     g.add_edge("exi", "", "", 0);
+    g.init();
     ASSERT_NE(g.get_edge_ptr("exi"), g.get_default_edge_ptr());
     ASSERT_NE(g.get_edge_ptr("exi"), nullptr);
     ASSERT_EQ(g.get_edge_ptr("exi")->name, "exi");
@@ -85,6 +94,7 @@ TEST_F(GraphBuildTest, GetEdgePointer){
 TEST_F(GraphBuildTest, AddDuplicateEdge){
     g.add_edge("exi", "", "", 0);
     g.add_edge("exi", "", "", 0);
+    g.init();
     ASSERT_EQ(g.get_edge_count(), 1);
 }
 
@@ -95,6 +105,7 @@ TEST_F(GraphBuildTest, AddManyEdges){
     g.add_edge("emi", "", "", 0);
     g.add_edge("isc", "", "", 0);
     g.add_edge("risc", "", "", 0);
+    g.init();
     ASSERT_EQ(g.get_edge_count(), 4);
 }
 
@@ -105,6 +116,7 @@ TEST_F(GraphBuildTest, GetEdgeList){
     g.add_edge("emi", "", "", 0);
     g.add_edge("isc", "", "", 0);
     g.add_edge("risc", "", "", 0);
+    g.init();
     std::string result = "";
     for(auto &edge : g.get_edges()){
         result += edge.name;
@@ -117,6 +129,7 @@ TEST_F(GraphBuildTest, GetEdgeList){
 //---------------------------------------------------------------------------//
 TEST_F(GraphBuildTest, AddAction){
     g.add_action(echo_action);
+    g.init();
     ASSERT_EQ(g.get_action_count(), 1);
     ASSERT_EQ(echo_action.get(), nullptr);
 }
@@ -124,6 +137,7 @@ TEST_F(GraphBuildTest, AddAction){
 
 //---------------------------------------------------------------------------//
 TEST_F(GraphBuildTest, DefaultAction){
+    g.init();
     ASSERT_NE(g.get_action_ptr("nothere"), nullptr);
     ASSERT_EQ(g.get_action_ptr("nothere"), g.get_default_action_ptr());
 }
@@ -132,6 +146,7 @@ TEST_F(GraphBuildTest, DefaultAction){
 //---------------------------------------------------------------------------//
 TEST_F(GraphBuildTest, GetActioPointer){
     g.add_action(echo_action);
+    g.init();
     ASSERT_NE(g.get_action_ptr("echo_action"), g.get_default_action_ptr());
     ASSERT_NE(g.get_action_ptr("echo_action"), nullptr);
     ASSERT_EQ(g.get_action_ptr("echo_action")->name, "echo_action");
@@ -143,6 +158,7 @@ TEST_F(GraphBuildTest, AddDuplicateAction){
     g.add_action(echo_action);
     std::unique_ptr<Action> a{new EchoAction(g, "echo_action", "y")};
     g.add_action(a);
+    g.init();
     ASSERT_EQ(g.get_action_count(), 1);
 }
 
@@ -152,6 +168,7 @@ TEST_F(GraphBuildTest, AddManyActions){
     g.add_action(echo_action);
     std::unique_ptr<Action> a{new EchoAction(g, "echo_action2", "y")};
     g.add_action(a);
+    g.init();
     ASSERT_EQ(g.get_action_count(), 2);
 }
 
@@ -161,6 +178,7 @@ TEST_F(GraphBuildTest, GetActionList){
     g.add_action(echo_action);
     std::unique_ptr<Action> a{new EchoAction(g, "echo_action2", "y")};
     g.add_action(a);
+    g.init();
     std::string result = "";
     for(auto &action : g.get_actions()){
         result += action->name;
@@ -234,10 +252,10 @@ TEST_F(GraphTraversalTest, RunSimulation){
 TEST_F(GraphTraversalTest, EqualPaths){
     g.link_edge_action("emi", "echo_action");
     g.link_edge_action("ic", "echo_action2");
+    g.init();
     g.set_current(g.get_node_ptr("S0"));
     Event e{g.get_default_action_ptr(), 1e-3};
     g.push_event(e);
-    g.init();
     testing::internal::CaptureStderr();
     g.traverse();
     std::string output = testing::internal::GetCapturedStderr();

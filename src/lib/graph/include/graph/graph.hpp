@@ -148,12 +148,10 @@ namespace sim{
                 double get_clock() const;
                 bool is_done() const;
 
-
-
-            private:
-
                 //-Get-new-seed-based-on-the-graph-seed----------------------//
                 unsigned get_new_seed();
+
+            private:
 
                 void init_defaults();
 
