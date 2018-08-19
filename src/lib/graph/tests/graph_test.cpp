@@ -1,4 +1,5 @@
 #include "fixtures.hpp"
+#include <sstream>
 
 
 //---------------------------------------------------------------------------//
@@ -226,10 +227,13 @@ TEST_F(GraphTraversalTest, RunSingleStep){
     g.link_edge_action("exi", "echo_action");
     g.set_current(g.get_node_ptr("S0"));
     g.init();
+    std::stringstream ss;
     testing::internal::CaptureStderr();
     g.traverse();
     std::string output = testing::internal::GetCapturedStderr();
-    ASSERT_EQ(output.substr(0, 34), "e__default_action__ called from S1");
+    ss << "e__default_action__ called from " << *g.get_node_ptr("S1") << " at ";
+    std::string res = ss.str();
+    ASSERT_EQ(output.substr(0, res.length()), res); 
 }
 
 
@@ -240,12 +244,13 @@ TEST_F(GraphTraversalTest, RunSimulation){
     Event e{g.get_default_action_ptr(), 0.1};
     g.push_event(e);
     g.init();
+    std::stringstream ss;
     testing::internal::CaptureStderr();
     g.traverse();
     std::string output = testing::internal::GetCapturedStderr();
-    ASSERT_EQ(output.substr(output.size()-41, 40), 
-            "__default_action__ called from " + g.get_current_ptr()->name +
-            " at 0.1");
+    ss << "__default_action__ called from " << *g.get_current_ptr() << " at 0.1\n";
+    std::string res = ss.str();
+    ASSERT_EQ(output.substr(output.length()-res.length(), output.length()), ss.str());
 }
 
 //---------------------------------------------------------------------------//
