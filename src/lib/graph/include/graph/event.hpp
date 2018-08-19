@@ -1,5 +1,4 @@
-#ifndef SIM_GRAPH_EVENT_H
-#define SIM_GRAPH_EVENT_H
+#pragma once
 
 #include "graph/action.hpp"
 
@@ -79,5 +78,3 @@ namespace sim{
         std::ostream &operator<<(std::ostream &os, const Event &event);
     }
 }
-
-#endif

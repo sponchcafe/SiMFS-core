@@ -33,6 +33,10 @@ namespace sim{
                 double evaluate(double x, double y, double z) const override;
 
                 //-----------------------------------------------------------//
+                double get_max() const override;
+                double get_min() const override;
+
+                //-----------------------------------------------------------//
                 FieldComponents evaluate_components(double x, double y, double z, int i_phi, int i_theta) const;
 
                 //-----------------------------------------------------------//

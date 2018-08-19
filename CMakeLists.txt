@@ -8,7 +8,7 @@ enable_testing()
 # RANDOM LIB defined in this library folder CMakeLists.txt
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/lib/)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/components)
-add_subdirectory(${CMAKE_SOURCE_DIR}/src/modules)
+#add_subdirectory(${CMAKE_SOURCE_DIR}/src/modules)
 
 # ========== GOOGLE TEST INTEGRATION =========== #
 # Download and unpack googletest at configure time

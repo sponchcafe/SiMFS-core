@@ -1,5 +1,4 @@
-#ifndef SIM_GRAPH_EDGE_H
-#define SIM_GRAPH_EDGE_H
+#pragma once
 
 #include "graph/definitions.hpp"
 #include "graph/graph.hpp"
@@ -131,5 +130,3 @@ namespace sim{
 
     }
 }
-
-#endif
