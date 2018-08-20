@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include "focus/base.hpp"
 #include <vector>
 #include <complex>
@@ -10,24 +11,24 @@ namespace sim{
         enum class Interpolation {NEAREST, LINEAR};
 
         //-------------------------------------------------------------------//
-        struct FieldComponents{
+        struct EFieldComponents{
             std::complex<double> x;
             std::complex<double> y;
             std::complex<double> z;
         };
 
         //-------------------------------------------------------------------//
-        struct StorageDimension {
+        struct EFieldDimension {
             double min;
             double max;
             size_t n;
         };
 
         //-------------------------------------------------------------------//
-        struct StorageHeader {
-            StorageDimension x;
-            StorageDimension y;
-            StorageDimension z;
+        struct EFieldGridSpec {
+            EFieldDimension x;
+            EFieldDimension y;
+            EFieldDimension z;
         };
 
         //-------------------------------------------------------------------//
@@ -37,12 +38,12 @@ namespace sim{
 
                 EFieldStorage();
                 void set_storage_id(std::string id);
-                FieldComponents evaluate(double x, double y, double z);
+                EFieldComponents evaluate(double x, double y, double z);
 
             private:
 
-                StorageHeader header;
-                std::unique_ptr<std::vector<FieldComponents>> data;
+                EFieldGridSpec header;
+                std::unique_ptr<std::vector<EFieldComponents>> data;
                 Interpolation interpolation = Interpolation::NEAREST;
 
         };
@@ -68,10 +69,10 @@ namespace sim{
                 double evaluate(double x, double y, double z) const override;
 
                 //-----------------------------------------------------------//
-                FieldComponents evaluate_components(double x, double y, double z, int i_phi, int i_theta) const;
+                EFieldComponents evaluate_components(double x, double y, double z, size_t i_phi, size_t i_theta) const;
 
                 //-----------------------------------------------------------//
-                FieldComponents integrate_components(double x, double y, double z) const;
+                EFieldComponents integrate_components(double x, double y, double z) const;
 
                 //-----------------------------------------------------------//
                 void init();

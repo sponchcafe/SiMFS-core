@@ -49,13 +49,13 @@ namespace sim{
         void EField::init(){
 
             d_theta = (theta_max-theta_min) / theta_n;
-            for(int i = 0; i<theta_n; i++){
+            for(size_t i = 0; i<theta_n; i++){
                 sin_theta.push_back(sin(i*d_theta));
                 cos_theta.push_back(cos(i*d_theta));
             }
 
             d_phi = (phi_max-phi_min) / phi_n;
-            for(int i = 0; i<phi_n; i++){
+            for(size_t i = 0; i<phi_n; i++){
                 sin_phi.push_back(sin(i*d_phi));
                 cos_phi.push_back(cos(i*d_phi));
             }
@@ -63,14 +63,14 @@ namespace sim{
         }
 
         //------------------------------------------------------------------//
-        FieldComponents EField::evaluate_components(double x, double y, double z, int i_phi, int i_theta) const {
+        EFieldComponents EField::evaluate_components(double x, double y, double z, size_t i_phi, size_t i_theta) const {
 
             double sp = sin_phi[i_phi];
             double cp = cos_phi[i_phi];
             double st = sin_theta[i_theta];
             double ct = cos_theta[i_theta];
 
-            FieldComponents field{};
+            EFieldComponents field{};
 
             double a1 = -sp * pol_x + cp * pol_y;
             double a2 =  cp * pol_x + sp * pol_y;
@@ -87,14 +87,14 @@ namespace sim{
         }
 
         //------------------------------------------------------------------//
-        FieldComponents EField::integrate_components(double x, double y, double z) const {
+        EFieldComponents EField::integrate_components(double x, double y, double z) const {
 
-            FieldComponents field{};
+            EFieldComponents field{};
 
-            for (int p=0; p<phi_n; p++){
-                for (int t=0; t<theta_n; t++){
+            for (size_t p=0; p<phi_n; p++){
+                for (size_t t=0; t<theta_n; t++){
 
-                    FieldComponents _field = evaluate_components(x, y, z, p, t);
+                    EFieldComponents _field = evaluate_components(x, y, z, p, t);
                     field.x += _field.x * d_phi * d_theta;
                     field.y += _field.y * d_phi * d_theta;
                     field.z += _field.z * d_phi * d_theta;
@@ -109,7 +109,7 @@ namespace sim{
         //------------------------------------------------------------------//
         double EField::evaluate(double x, double y, double z) const {
 
-            FieldComponents field = integrate_components(x, y, z);
+            EFieldComponents field = integrate_components(x, y, z);
 
             double res = 0.0;
 

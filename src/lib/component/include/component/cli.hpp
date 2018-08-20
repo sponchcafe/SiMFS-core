@@ -44,11 +44,11 @@ namespace sim{
 
             std::stringstream ss; 
             std::string s;
-            json j;
+            json j{};
 
             if (isatty(fileno(stdin))){
                 std::cerr << "No parameters specified, using defaults only\n";
-                return json{json::object()};
+                return json::object();
             }
 
             while (std::getline(std::cin, s)){
@@ -59,7 +59,7 @@ namespace sim{
                 ss >> j;
             }catch(nlohmann::detail::parse_error &e){
                 std::cerr << "Error parsing json parameters.\n";
-                return json{json::object()};
+                return json::object();
             }
             return j;
         }
