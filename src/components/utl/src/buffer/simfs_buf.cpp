@@ -25,12 +25,11 @@ int main(int argc, char *argv[]) {
 
         auto in_thread = io::file2buffer_thread<char>(log["input"]);
 
-        buf.init();
-        auto buf_thread = comp::run_component<comp::Buffer>(buf);
+        auto buf_thread = comp::run_component<comp::Buffer>(buf, true);
         
         std::vector<std::thread> out_threads{};
         std::vector<std::string> outputs = log["outputs"];
-
+        
         for (auto it=outputs.begin(); it!=outputs.end(); ++it){
             out_threads.emplace_back(io::buffer2file_thread<char>(*it));
         }

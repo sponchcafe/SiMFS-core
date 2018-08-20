@@ -27,7 +27,7 @@ class ComponentIO : public ::testing::Test {
             prod.set_output("prod");
             prod.set_data(payload);
 
-            auto prod_thr = run_component<ProducerComponent>(prod);
+            auto prod_thr = run_component<ProducerComponent>(prod, true);
             auto out_thr = io::buffer2file_thread<int>("prod", p1);
             auto in_thr = io::file2buffer_thread<int>(p1, "cons");
            
@@ -55,7 +55,7 @@ class ComponentIO : public ::testing::Test {
             prod.set_output("prod");
             prod.set_data(payload);
 
-            auto prod_thr = run_component<ProducerComponent>(prod);
+            auto prod_thr = run_component<ProducerComponent>(prod, true);
             auto out_thr = io::buffer2file_thread<int>("prod", f1);
                
             prod_thr.join();
@@ -90,8 +90,8 @@ class ComponentIO : public ::testing::Test {
             trans.set_input(p1);
             trans.set_output(p2);
             
-            std::thread prod_thr = run_component<ProducerComponent>(prod);
-            std::thread trans_thr = run_component<TransformComponent>(trans);
+            std::thread prod_thr = run_component<ProducerComponent>(prod, true);
+            std::thread trans_thr = run_component<TransformComponent>(trans, true);
             std::thread cons_thr = std::thread{
                 [&] () {
                     ConsumerComponent cons{};
@@ -154,7 +154,7 @@ class ComponentIO : public ::testing::Test {
         std::vector<int> result{};
 
         //------------------------------------------------------------------//
-        size_t const payload_size = 1024*1024*10/sizeof(int); // 100MB payload
+        size_t const payload_size = 1024*1024*100/sizeof(int); // 100MB payload
 
 };
 

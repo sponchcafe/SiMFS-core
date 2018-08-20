@@ -1,5 +1,4 @@
-#ifndef SIM_QUEUE_FS_T
-#define SIM_QUEUE_FS_T
+#pragma once
 
 #include <unordered_map>
 #include <mutex>
@@ -79,7 +78,9 @@ namespace sim{
             //-------------------------------------------------------------------//
 
             try { fs<T>.at(id); }
-            catch (std::out_of_range &e){ create_new<T>(id); }
+            catch (std::out_of_range &e){ 
+                create_new<T>(id);
+            }
             queue_handle_t<T> &queue = fs<T>.at(id);
             //queue.eof->store(false);
                     
@@ -124,5 +125,3 @@ namespace sim{
         
     }
 }
-
-#endif

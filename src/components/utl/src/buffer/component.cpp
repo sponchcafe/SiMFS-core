@@ -47,8 +47,7 @@ namespace sim{
             input_ptr = std::make_unique<io::BufferInput<char>> (input_id);
             output_ptrs.clear();
             for (auto &it: output_ids){
-                auto output_ptr = std::make_unique<io::BufferOutput<char>> (it);
-                output_ptrs.push_back(std::move(output_ptr));
+                output_ptrs.emplace_back(std::make_unique<io::BufferOutput<char>>(it));
             }
         }
 

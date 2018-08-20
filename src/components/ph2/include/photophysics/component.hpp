@@ -38,6 +38,7 @@ namespace sim{
                 std::set<std::string> get_timetag_output_ids();
                 std::set<std::string> get_flux_input_ids();
                 std::set<std::string> get_transition_input_ids();
+                std::set<std::string> get_transition_output_ids();
 
             private:
 
@@ -46,12 +47,12 @@ namespace sim{
                 //-----------------------------------------------------------//
                 unsigned seed = 0;
                 json jablonsky = {
-                    {"exi",         {{"from", "S0"}, {"to", "S1"}, {"rate", 1e+7},  {"input", "__fret__"}}},
+                    {"exi",         {{"from", "S0"}, {"to", "S1"}, {"rate", 1e+7}, {"trigger", {{"input", "__fret__"}, {"output", "__rejected__"}, {"efficiency", 1.0}}}}},
                     {"emi",         {{"from", "S1"}, {"to", "S0"}, {"rate", 1e+9}, {"output", "__emission__"}}},
                     {"isc",         {{"from", "S1"}, {"to", "T1"}, {"rate", 1e+7}}},
                     {"risc",        {{"from", "T1"}, {"to", "S0"}, {"rate", 1e+7}}},
                     {"bleach",      {{"from", "T1"}, {"to", "X0"}, {"rate", 1e+5}}},
-                    {"unbleach",    {{"from", "X0"}, {"to", "S0"}, {"input", "__collisions__"}}}                        
+                    {"unbleach",    {{"from", "X0"}, {"to", "S0"}, {"trigger", {{"input", "__collisions__"}, {"output", "/dev/null"}, {"efficiency", 1.0}}}}}
                 };
 
                 std::string initial_state_id = "S0";
@@ -68,8 +69,8 @@ namespace sim{
                 json_filter_t has_output = [] (json const &e) -> bool {
                     return (e.find("output") != e.end());
                 };
-                json_filter_t has_input = [] (json const &e) -> bool {
-                    return (e.find("input") != e.end());
+                json_filter_t has_trigger = [] (json const &e) -> bool {
+                    return (e.find("trigger") != e.end());
                 };
                 json_filter_t has_rate = [] (json const &e) -> bool {
                     return (e.find("rate") != e.end());
@@ -97,6 +98,15 @@ namespace sim{
                     std::unique_ptr<io::BufferInput<realtime_t>>
                         > transition_input_map;
 
+                std::unordered_map<
+                    std::string, 
+                    std::string
+                        > transition_io_map;
+
+                std::unordered_map<
+                    std::string, 
+                    std::unique_ptr<io::BufferOutput<realtime_t>>
+                        > transition_output_map;
         };
 
     }

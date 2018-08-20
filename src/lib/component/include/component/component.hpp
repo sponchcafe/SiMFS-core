@@ -45,9 +45,11 @@ namespace sim{
 
         //-Thread-helper-----------------------------------------------------//
         template <typename T> std::thread run_component(T &comp, bool init=false){
-            std::thread thr{ [&] () { 
+            std::thread thr{ [&comp, init] () { // copy init flag
                 T _comp = std::move(comp); // stealing the component object
-                if (init) _comp.init();
+                if (init) {
+                    _comp.init();
+                }
                 _comp.run(); 
             } };
             return thr;

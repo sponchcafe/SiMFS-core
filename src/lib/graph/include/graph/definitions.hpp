@@ -1,5 +1,4 @@
-#ifndef SIM_GRAPH_DEFINITIONS_H
-#define SIM_GRAPH_DEFINITIONS_H
+#pragma once
 
 #include <string>
 #include <memory>
@@ -20,5 +19,3 @@ namespace sim{
 
     }
 }
-
-#endif

@@ -63,18 +63,16 @@ namespace sim{
                 while (first->get()->peek() <= second->get()->peek()){
                     if(!first->get()->get(current)){
                         std::swap(
-                            *photon_input_ptrs.begin(), 
-                            *(photon_input_ptrs.end()-1)
-                        );
+                                *photon_input_ptrs.begin(),
+                                *(photon_input_ptrs.end()-1)
+                                );
                         photon_input_ptrs.pop_back();
-                        std::cerr << "Removing...\n";
                         break;
                     }
                     photon_output_ptr->put(current);
                 }
                 sort_inputs();
             }
-                std::cerr << "last run...\n";
             while(first->get()->get(current)){
                 photon_output_ptr->put(current);
             }

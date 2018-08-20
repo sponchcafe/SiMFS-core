@@ -11,7 +11,9 @@ namespace sim{
         //-------------------------------------------------------------------//
         //-CONSTRUCTOR-------------------------------------------------------//
         //-------------------------------------------------------------------//
-        Graph::Graph(unsigned seed) : seed(seed) { }
+        Graph::Graph(unsigned seed) : seed(seed) {
+            init_defaults();
+        }
 
         /*---Representation---------------*/
         void Graph::print_state() {
@@ -181,34 +183,27 @@ namespace sim{
         void Graph::init_defaults (){
 
             // default node
-            default_node = std::unique_ptr<Node>{
-                new Node(*this, DEFAULT_NODE_NAME)
-            };
+            default_node = std::make_unique<Node>(*this, DEFAULT_NODE_NAME);
             
             // default edge
-            default_edge = std::unique_ptr<Edge>{
-                new Edge(
-                        *this,
-                        DEFAULT_EDGE_NAME, // edge name
-                        DEFAULT_NODE_NAME, // source name
-                        DEFAULT_NODE_NAME, // target name
-                        0, // lambda
-                        0 // seed
-                        )
-            };
+            default_edge = std::make_unique<Edge>(
+                    *this,
+                    DEFAULT_EDGE_NAME, // edge name
+                    DEFAULT_NODE_NAME, // source name
+                    DEFAULT_NODE_NAME, // target name
+                    0, // lambda
+                    0 // seed
+            );
 
             // default action
-            default_action = std::unique_ptr<Action>{
-                new Action(*this, DEFAULT_ACTION_NAME) // TODO: Action factory
-            };
+            default_action = std::make_unique<Action>(*this, DEFAULT_ACTION_NAME);
 
             // link default loop
             default_node->add_edge(DEFAULT_EDGE_NAME);
-            //default_node->set_action(DEFAULT_ACTION_NAME);
             default_edge->set_action(DEFAULT_ACTION_NAME);
 
-            // !!! MAYBE DANGEROUS IN CTOR ? //
-            //default_node->init();
+            // init defaults
+            default_node->init();
             default_edge->init();
             default_action->init();
 
@@ -217,7 +212,6 @@ namespace sim{
         //-------------------------------------------------------------------//
         void Graph::init(){
 
-            init_defaults();
             for (auto &node: nodes) node.init();
             for (auto &edge: edges) edge.init();
             for (auto &action: actions) action->init();
