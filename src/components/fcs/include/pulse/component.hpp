@@ -1,7 +1,7 @@
 #pragma once
 
 #include "component/component.hpp"
-#include "component/types.hpp"
+#include "definitions/types.hpp"
 
 namespace sim{
     namespace comp{
@@ -29,8 +29,8 @@ namespace sim{
                 //-----------------------------------------------------------//
                 // Parameter setters
                 //-----------------------------------------------------------//
-                void set_flux_input_id(std::string id);
-                void set_flux_output_id(std::string id);
+                void set_input_id(std::string id);
+                void set_output_id(std::string id);
                 void set_pulse(double rep, std::vector<double> t, std::vector<double> a);
                 //-----------------------------------------------------------//
                  
@@ -46,16 +46,21 @@ namespace sim{
                 double repetition_time = 1e-7;                          // s
                 std::vector<double> pulse_time{0.0};                    // s
                 std::vector<double> pulse_power{1.0};               // rel
-                std::string flux_input_id = "__flux_cw__";
-                std::string flux_output_id = "__flux_pulses__";
+                std::string input_id = "__flux_cw__";
+                std::string output_id = "__flux_pulse__";
                 //-----------------------------------------------------------//
+                
+                static constexpr double DELTA_T = 1e-12;
+                static constexpr double DELTA_F = 1e-12;
 
                 //-----------------------------------------------------------//
-                TimedValue flux{0.0, 0.0};
+                TimedValue flux_in{0.0, 0.0};
+                TimedValue flux_current{0.0, 0.0};
+                TimedValue flux_out{0.0, 0.0};
                                
                 //-----------------------------------------------------------//
-                std::unique_ptr<io::BufferInput<TimedValue>> flux_input_ptr;
-                std::unique_ptr<io::BufferOutput<TimedValue>> flux_output_ptr;
+                std::unique_ptr<io::BufferInput<TimedValue>> input_ptr;
+                std::unique_ptr<io::BufferOutput<TimedValue>> output_ptr;
 
         };
     }

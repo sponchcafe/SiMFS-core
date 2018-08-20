@@ -1,39 +1,38 @@
-#include "gauss/component.hpp"
+#include "alpha/component.hpp"
 #include "definitions/constants.hpp"
 
 namespace sim{
     namespace comp{
 
         //-------------------------------------------------------------------//
-        FCS_Gauss::FCS_Gauss() {
-            focus_ptr = std::make_unique<focus::Gauss>();
+        FCS_Alpha::FCS_Alpha() {
+            focus_ptr = std::make_unique<focus::Alpha>();
         }
 
         //-------------------------------------------------------------------//
-        void FCS_Gauss::set_output_id(std::string id){
+        void FCS_Alpha::set_output_id(std::string id){
             output_id = id;
         }
-        void FCS_Gauss::set_input_id(std::string id){
+        void FCS_Alpha::set_input_id(std::string id){
             input_id = id;
         }
-        void FCS_Gauss::set_wavelength(double w){
+        void FCS_Alpha::set_wavelength(double w){
             wavelength = w;
         }
-        void FCS_Gauss::set_power(double p){
+        void FCS_Alpha::set_power(double p){
             power = p;
         }
-        void FCS_Gauss::set_waists(double w_x, double w_y, double w_z){
-            waist_x = w_x;
-            waist_y = w_y;
+        void FCS_Alpha::set_waists(double w_xy, double w_z){
+            waist_xy = w_xy;
             waist_z = w_z;
         }
-        void FCS_Gauss::set_mode(FocusMode m){
+        void FCS_Alpha::set_mode(FocusMode m){
             mode = m;
         }       
         //-------------------------------------------------------------------//
 
         //-------------------------------------------------------------------//
-        void FCS_Gauss::set_json(json j) {
+        void FCS_Alpha::set_json(json j) {
 
             json params = get_json();
             params.merge_patch(j);
@@ -45,15 +44,14 @@ namespace sim{
             set_input_id(params.at("input"));
             set_output_id(params.at("output"));
             set_waists(
-                    params.at("waist_x"),
-                    params.at("waist_y"),
+                    params.at("waist_xy"),
                     params.at("waist_z")
                     );
                 
         }
 
         //-------------------------------------------------------------------//
-        json FCS_Gauss::get_json() {
+        json FCS_Alpha::get_json() {
             json j;
 
             if (mode == FocusMode::EXCITATION){
@@ -62,21 +60,20 @@ namespace sim{
             }
             j["input"] = input_id;
             j["output"] = output_id;
-            j["waist_x"] = waist_x;
-            j["waist_y"] = waist_y;
+            j["waist_xy"] = waist_xy;
             j["waist_z"] = waist_z;
 
             return j;
         }
 
         //-------------------------------------------------------------------//
-        void FCS_Gauss::init() {
+        void FCS_Alpha::init() {
             input_ptr = std::make_unique<io::BufferInput<Coordinate>>(input_id);
             output_ptr = std::make_unique<io::BufferOutput<TimedValue>>(output_id);
         }
 
         //-------------------------------------------------------------------//
-        void FCS_Gauss::run() {
+        void FCS_Alpha::run() {
 
             if (mode == FocusMode::EXCITATION) {
                 focus_ptr->set_prefactor(focus_ptr->get_flux_prefactor(power, wavelength));

@@ -19,6 +19,8 @@ namespace sim{
 
                 //-----------------------------------------------------------//
                 double evaluate(double x, double y, double z) const override;
+                double get_flux_prefactor(double power, double wavelength);
+                double get_efficiency_prefactor();
 
             private:
 

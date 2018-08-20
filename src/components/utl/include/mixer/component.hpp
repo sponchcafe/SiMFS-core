@@ -1,5 +1,6 @@
+#pragma once
+
 #include "component/component.hpp"
-#include "component/types.hpp"
 #include "io/buffer.hpp"
 #include <vector>
 

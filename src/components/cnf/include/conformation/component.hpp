@@ -1,7 +1,6 @@
 #pragma once
 
 #include "component/component.hpp"
-#include "component/types.hpp"
 #include "graph/main.hpp"
 #include "io/buffer.hpp"
 #include <cmath>

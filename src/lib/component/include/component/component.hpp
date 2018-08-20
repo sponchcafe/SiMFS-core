@@ -8,6 +8,7 @@
 #include <functional>
 
 #include "io/buffer.hpp"
+#include "definitions/types.hpp"
 
 //---------------------------------------------------------------------------//
 // Abstract base definition of the component interface.
@@ -55,6 +56,7 @@ namespace sim{
             return thr;
         }
 
+        using json_filter_t = std::function<bool(json const &)>;
     }
 }
 

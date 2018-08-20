@@ -1,5 +1,4 @@
-#ifndef SIM_BUFFER_H
-#define SIM_BUFFER_H
+#pragma once
 
 #include "component/component.hpp"
 #include <thread>
@@ -55,5 +54,3 @@ namespace sim{
 
     }
 }
-
-#endif

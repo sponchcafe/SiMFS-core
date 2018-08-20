@@ -1,5 +1,4 @@
 #include "component/component.hpp"
-#include "component/types.hpp"
 #include "graph/main.hpp"
 #include "actions/set_rates_action.hpp"
 #include "actions/output_time_action.hpp"

@@ -20,16 +20,15 @@ namespace sim{
 
                 //-----------------------------------------------------------//
                 double evaluate(double x, double y, double z) const override;
-                double get_max();
+                double get_flux_prefactor(double power, double wavelength);
+                double get_efficiency_prefactor();
 
             private:
 
                 //-----------------------------------------------------------//
                 double gauss(double x, double w) const;
-                void normalize();
 
                 //-----------------------------------------------------------//
-                double norm = 1;
                 double waist_x = 200e-9;
                 double waist_y = 200e-9;
                 double waist_z = 800e-9;

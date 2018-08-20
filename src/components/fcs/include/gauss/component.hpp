@@ -1,7 +1,6 @@
 #pragma once
 
 #include "component/component.hpp"
-#include "component/types.hpp"
 #include "focus/gauss.hpp"
 
 namespace sim{
@@ -30,12 +29,12 @@ namespace sim{
                 //-----------------------------------------------------------//
                 // Parameter setters
                 //-----------------------------------------------------------//
-                void set_flux_output_id(std::string id);
-                void set_coordinate_input_id(std::string id);
+                void set_output_id(std::string id);
+                void set_input_id(std::string id);
                 void set_wavelength(double w);
                 void set_power(double p);
                 void set_waists(double w_x, double w_y, double w_z);
-                void set_normalize(bool n);
+                void set_mode(FocusMode m);
                 //-----------------------------------------------------------//
                  
                 
@@ -49,9 +48,9 @@ namespace sim{
                 double waist_x = 200e-9;
                 double waist_y = 200e-9;
                 double waist_z = 600e-9;
-                bool normalize = false;
-                std::string coordinate_input_id = "__coordinates__";
-                std::string flux_output_id = "__flux__";
+                FocusMode mode = FocusMode::EXCITATION;
+                std::string input_id = "__coordinates__";
+                std::string output_id = "__flux__";
                 //-----------------------------------------------------------//
 
                 //-----------------------------------------------------------//
@@ -60,8 +59,8 @@ namespace sim{
                                
                 //-----------------------------------------------------------//
                 std::unique_ptr<focus::Gauss> focus_ptr;
-                std::unique_ptr<io::BufferInput<Coordinate>> coordinate_input_ptr;
-                std::unique_ptr<io::BufferOutput<TimedValue>> flux_output_ptr;
+                std::unique_ptr<io::BufferInput<Coordinate>> input_ptr;
+                std::unique_ptr<io::BufferOutput<TimedValue>> output_ptr;
 
         };
     }

@@ -3,7 +3,7 @@
 #include "graph/graph.hpp"
 #include "graph/definitions.hpp"
 #include "json/json.hpp"
-#include "component/types.hpp"
+#include "definitions/types.hpp"
 
 using json = nlohmann::json;
 

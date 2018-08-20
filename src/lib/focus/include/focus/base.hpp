@@ -1,19 +1,26 @@
 #pragma once 
 #include <cmath>
-#include "constants/constants.hpp"
+#include "definitions/constants.hpp"
+#include "definitions/types.hpp"
 
 namespace sim{
 
+    //-----------------------------------------------------------------------//
     namespace focus{
 
+        //-------------------------------------------------------------------//
         class Focus{
 
             public:  
 
                 //-----------------------------------------------------------//
-                // Evaluates flux value > 0
-                //-----------------------------------------------------------//
                 virtual double evaluate(double x, double y, double z) const = 0;
+                void set_prefactor(double p) { prefactor = p; }
+
+
+            protected:
+
+                double prefactor = 1.0;
 
         };
 
