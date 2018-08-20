@@ -56,7 +56,7 @@ namespace sim{
 
             std::vector<char> chunk{};
             while(input_ptr->get_chunk(chunk)){
-                for (int i=1; i<output_ptrs.size(); i++){
+                for (size_t i=1; i<output_ptrs.size(); i++){
                     std::vector<char> new_chunk{chunk};
                     output_ptrs[i]->put_chunk(new_chunk);
                 }
