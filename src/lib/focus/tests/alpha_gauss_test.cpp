@@ -13,7 +13,10 @@ constexpr double EPSILON = 1e-12;
 class AlphaGaussTest : public EvaluationTest{
     protected:
         void SetUp(){
-            focus = new Alpha(WAIST, WAIST);
+            Alpha alpha{};
+            alpha.set_waist_xy(WAIST);
+            alpha.set_waist_z(WAIST);
+            focus = &alpha;
         }
 };
 

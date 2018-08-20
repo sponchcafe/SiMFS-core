@@ -20,9 +20,6 @@ namespace sim{
                 //-----------------------------------------------------------//
                 double evaluate(double x, double y, double z) const override;
 
-                //-----------------------------------------------------------//
-                double get_max() const override;
-
             private:
 
                 double waist_xy = 200e-9;

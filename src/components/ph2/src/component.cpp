@@ -1,5 +1,6 @@
 #include "photophysics/component.hpp"
 #include "io/buffer.hpp"
+#include "constants/constants.hpp" // CONST_NA
 
 using namespace sim::graph;
 

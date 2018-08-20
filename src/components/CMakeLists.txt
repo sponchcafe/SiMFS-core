@@ -1,4 +1,5 @@
 add_subdirectory(./dif)
 add_subdirectory(./ph2)
 add_subdirectory(./cnf)
+add_subdirectory(./fcs)
 add_subdirectory(./utl)

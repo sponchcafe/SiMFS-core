@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "focus/gaussian.hpp"
+#include "focus/gauss.hpp"
 #include "fixtures.hpp"
 
 using namespace sim::focus;
@@ -10,7 +10,11 @@ constexpr double WAIST = 100e-9;
 class GaussTest : public EvaluationTest{
     protected:
         void SetUp(){
-            focus = new Gaussian(WAIST, WAIST, WAIST);
+            Gauss gauss{};
+            gauss.set_waist_x(WAIST);
+            gauss.set_waist_y(WAIST);
+            gauss.set_waist_z(WAIST);
+            focus = &gauss;
         }
 };
 

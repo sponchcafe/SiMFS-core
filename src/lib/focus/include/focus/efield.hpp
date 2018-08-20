@@ -7,13 +7,48 @@
 namespace sim{
     namespace focus{
 
+        enum class Interpolation {NEAREST, LINEAR};
+
         //-------------------------------------------------------------------//
-        typedef struct {
+        struct FieldComponents{
             std::complex<double> x;
             std::complex<double> y;
             std::complex<double> z;
-        } FieldComponents;
+        };
 
+        //-------------------------------------------------------------------//
+        struct StorageDimension {
+            double min;
+            double max;
+            size_t n;
+        };
+
+        //-------------------------------------------------------------------//
+        struct StorageHeader {
+            StorageDimension x;
+            StorageDimension y;
+            StorageDimension z;
+        };
+
+        //-------------------------------------------------------------------//
+        class EFieldStorage{
+
+            public:
+
+                EFieldStorage();
+                void set_storage_id(std::string id);
+                FieldComponents evaluate(double x, double y, double z);
+
+            private:
+
+                StorageHeader header;
+                std::unique_ptr<std::vector<FieldComponents>> data;
+                Interpolation interpolation = Interpolation::NEAREST;
+
+        };
+        
+
+        //-------------------------------------------------------------------//
         class EField : Focus{
 
             public:
@@ -31,10 +66,6 @@ namespace sim{
                 
                 //-----------------------------------------------------------//
                 double evaluate(double x, double y, double z) const override;
-
-                //-----------------------------------------------------------//
-                double get_max() const override;
-                double get_min() const override;
 
                 //-----------------------------------------------------------//
                 FieldComponents evaluate_components(double x, double y, double z, int i_phi, int i_theta) const;

@@ -6,12 +6,12 @@ namespace sim{
     namespace focus{
 
         //-------------------------------------------------------------------//
-        class Gaussian : public Focus{
+        class Gauss : public Focus{
 
             public:
 
                 //-----------------------------------------------------------//
-                Gaussian();
+                Gauss();
 
                 //-----------------------------------------------------------//
                 void set_waist_x (double wx);
@@ -20,16 +20,16 @@ namespace sim{
 
                 //-----------------------------------------------------------//
                 double evaluate(double x, double y, double z) const override;
-
-                //-----------------------------------------------------------//
-                double get_max() const override;
+                double get_max();
 
             private:
 
                 //-----------------------------------------------------------//
                 double gauss(double x, double w) const;
+                void normalize();
 
                 //-----------------------------------------------------------//
+                double norm = 1;
                 double waist_x = 200e-9;
                 double waist_y = 200e-9;
                 double waist_z = 800e-9;
