@@ -6,14 +6,12 @@ import os
 from named_pipe import NamedPipe
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.bind(('localhost', 0))
+sock.bind(('0.0.0.0', 0))
 
 class Diffusion:
 
-    exec_path = '/Users/tzickmantel/Entwicklung/sim/build/src/components/dif/simfs_dif'
+    exec_path = '../../build/src/components/dif/simfs_dif'
 
-
-    
     @staticmethod
     def validate(params):
         proc = Popen([Diffusion.exec_path, 'list'], stdin=PIPE, stdout=PIPE)
@@ -28,10 +26,8 @@ class Diffusion:
         NamedPipe.close_all()
         pipe = NamedPipe(params['coordinate_output'])
         log = Diffusion.validate(params)
-        t1 = threading.Thread(target=Diffusion._pipe2socket_, args=(params['coordinate_output'], ))
+        t1 = threading.Thread(target=Diffusion._pipe2socket_, args=(params,))
         t1.start()
-        t2 = threading.Thread(target=Diffusion._run_process_, args=(params,))
-        t2.start()
         log['coordinate_output'] = '{}:{}'.format(*sock.getsockname())
         return log
     
@@ -41,8 +37,11 @@ class Diffusion:
         proc.communicate(input=bytes(json.dumps(params), 'utf-8'))
 
     @staticmethod
-    def _pipe2socket_(pipe):
+    def _pipe2socket_(params):
         client_sock, addr = sock.accept()
+        t2 = threading.Thread(target=Diffusion._run_process_, args=(params,))
+        t2.start()
+        pipe = params['coordinate_output']
         with open(pipe, 'rb') as f:
             while True:
                 chunk = f.read(1024*1024)
