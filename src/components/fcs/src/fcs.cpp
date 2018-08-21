@@ -1,90 +1,97 @@
-#include "alpha/component.hpp"
+#include "fcs/component.hpp"
+#include "focus/gauss.hpp"
 #include "definitions/constants.hpp"
 
 namespace sim{
     namespace comp{
 
         //-------------------------------------------------------------------//
-        FCS_Alpha::FCS_Alpha() {
-            focus_ptr = std::make_unique<focus::Alpha>();
+        FCS::FCS(FocusMode m) {
+            mode = m;
+            focus_ptr = std::make_unique<focus::Gauss>();
         }
 
         //-------------------------------------------------------------------//
-        void FCS_Alpha::set_output_id(std::string id){
+        void FCS::set_output_id(std::string id){
             output_id = id;
         }
-        void FCS_Alpha::set_input_id(std::string id){
+        void FCS::set_input_id(std::string id){
             input_id = id;
         }
-        void FCS_Alpha::set_wavelength(double w){
+        void FCS::set_wavelength(double w){
             wavelength = w;
         }
-        void FCS_Alpha::set_power(double p){
+        void FCS::set_power(double p){
             power = p;
         }
-        void FCS_Alpha::set_waists(double w_xy, double w_z){
-            waist_xy = w_xy;
-            waist_z = w_z;
-        }
-        void FCS_Alpha::set_mode(FocusMode m){
-            mode = m;
-        }       
-        //-------------------------------------------------------------------//
 
         //-------------------------------------------------------------------//
-        void FCS_Alpha::set_json(json j) {
+        void FCS::set_json(json j){
 
             json params = get_json();
             params.merge_patch(j);
+
+            // configure focus function
+            focus_ptr->set_json(params.at("focus"));
 
             if (mode == FocusMode::EXCITATION){
                 set_wavelength(params.at("wavelength"));
                 set_power(params.at("power"));
             }
+
             set_input_id(params.at("input"));
             set_output_id(params.at("output"));
-            set_waists(
-                    params.at("waist_xy"),
-                    params.at("waist_z")
-                    );
-                
+
         }
 
         //-------------------------------------------------------------------//
-        json FCS_Alpha::get_json() {
+        json FCS::get_json() {
+
             json j;
 
             if (mode == FocusMode::EXCITATION){
                 j["wavelength"] = wavelength;
                 j["power"] = power;
             }
+
             j["input"] = input_id;
             j["output"] = output_id;
-            j["waist_xy"] = waist_xy;
-            j["waist_z"] = waist_z;
+
+            // get back focus config
+            j["focus"] = focus_ptr->get_json();
 
             return j;
         }
 
         //-------------------------------------------------------------------//
-        void FCS_Alpha::init() {
-            input_ptr = std::make_unique<io::BufferInput<Coordinate>>(input_id);
-            output_ptr = std::make_unique<io::BufferOutput<TimedValue>>(output_id);
+        void FCS::set_focus_ptr(std::unique_ptr<focus::Focus> &f){
+            focus_ptr = std::move(f);
         }
 
         //-------------------------------------------------------------------//
-        void FCS_Alpha::run() {
+        void FCS::init() {
+
+            input_ptr = std::make_unique<io::BufferInput<Coordinate>>(input_id);
+            output_ptr = std::make_unique<io::BufferOutput<TimedValue>>(output_id);
 
             if (mode == FocusMode::EXCITATION) {
-                focus_ptr->set_prefactor(focus_ptr->get_flux_prefactor(power, wavelength));
+                double quantization = power * wavelength / (CONST_H * CONST_C);
+                focus_ptr->set_prefactor(quantization * focus_ptr->get_flux_density_prefactor());
             } else if (mode == FocusMode::DETECTION) {
                 focus_ptr->set_prefactor(focus_ptr->get_efficiency_prefactor());
             }
+
+        }
+
+        //-------------------------------------------------------------------//
+        void FCS::run() {
+
             while(input_ptr->get(c)){
-                flux.time = c.t;
-                flux.value = focus_ptr->evaluate(c.x, c.y, c.z);
-                output_ptr->put(flux);
+                current.time = c.t;
+                current.value = focus_ptr->evaluate(c.x, c.y, c.z);
+                output_ptr->put(current);
             }
+
         }
 
 

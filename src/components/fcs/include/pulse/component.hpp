@@ -49,14 +49,7 @@ namespace sim{
                 std::string input_id = "__flux_cw__";
                 std::string output_id = "__flux_pulse__";
                 //-----------------------------------------------------------//
-                
-                static constexpr double DELTA_T = 1e-12;
-                static constexpr double DELTA_F = 1e-12;
 
-                //-----------------------------------------------------------//
-                TimedValue flux_in{0.0, 0.0};
-                TimedValue flux_current{0.0, 0.0};
-                TimedValue flux_out{0.0, 0.0};
                                
                 //-----------------------------------------------------------//
                 std::unique_ptr<io::BufferInput<TimedValue>> input_ptr;

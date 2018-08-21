@@ -1,17 +1,14 @@
 #include <iostream>
-#include "gauss/component.hpp"
-#include "alpha/component.hpp"
+#include "fcs/component.hpp"
+#include "focus/gauss.hpp"
+#include "focus/alpha.hpp"
 #include "component/cli.hpp"
 #include "io/buffer.hpp"
-#include "pulse/component.hpp"
 
 using namespace sim;
 
-struct Mode{
-    FocusMode mode;
-    FocusType type;
-};
-
+//--------------------------------------------------------------------------//
+struct Mode{ FocusMode mode; FocusType type; };
 //--------------------------------------------------------------------------//
 Mode get_mode(std::vector<std::string> opts){
 
@@ -29,7 +26,10 @@ Mode get_mode(std::vector<std::string> opts){
     return m;
 
 }
+//---------------------------------------------------------------------------//
 
+
+//---------------------------------------------------------------------------//
 int main(int argc, char *argv[]) {
 
     //-Get-parameters--------------------------------------------------------//
@@ -37,35 +37,31 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> opts = cli::parse_argv_vector(argc, argv);
 
     //-Create----------------------------------------------------------------//
-    // comp::FCS_Gauss fcs;
-    
     Mode mode = get_mode(opts);
+
+    comp::FCS fcs{mode.mode};
+    std::unique_ptr<focus::Focus> focus_function;
 
     switch (mode.type) {
         case FocusType::GAUSS : 
             std::cerr << "Using Gaussian focus funcion\n";
+            focus_function = std::make_unique<focus::Gauss>();
+            // CONFIGURE GAUSS
             break;
         case FocusType::ALPHA :
             std::cerr << "Using Alpha flux focus funcion\n";
+            focus_function = std::make_unique<focus::Alpha>();
+            // CONFIGURE ALPHA
             break;
         case FocusType::EFIELD :
             std::cerr << "Using E-field focus function\n";
+            // CONFIGURE EFIELD
             break;
     }
 
-    switch (mode.mode) {
-        case FocusMode::EXCITATION :
-            std::cerr << "Excitation mode\n";
-            break;
-        case FocusMode::DETECTION :
-            std::cerr << "Detection mode\n";
-            break;
-    }
-    
-//-Configure-------------------------------------------------------------//
+    fcs.set_focus_ptr(focus_function);
 
     //-Log-------------------------------------------------------------------//
-    /*
     fcs.set_json(params);
     json log = fcs.get_json();
     cli::log_parameters(log);
@@ -74,12 +70,10 @@ int main(int argc, char *argv[]) {
     if (!cli::check_list(opts)){
         auto input_thr = io::file2buffer_thread<Coordinate>(log["input"]);
         auto output_thr = io::buffer2file_thread<TimedValue>(log["output"]);
-        auto exi_thr = comp::run_component<comp::FCS_Gauss>(fcs, true);
+        auto fcs_thr = comp::run_component<comp::FCS>(fcs, true);
         input_thr.join();
-        exi_thr.join();
+        fcs_thr.join();
         output_thr.join();
     }
-    */
-
 
 }

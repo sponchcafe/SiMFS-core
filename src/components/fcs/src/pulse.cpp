@@ -73,41 +73,80 @@ namespace sim{
         }
 
         //-------------------------------------------------------------------//
+        void Pulse::normalize_pulse() {
+
+            pulse_time.push_back(repetition_time);
+
+            // x: [t0, t1, t2, ..., trep]
+            // y: [a0, a1, ..., a_N, a_N]
+            
+            // integration
+            double sum = 0;
+            auto it_x = pulse_time.begin();
+            for (auto it_y: pulse_power){
+                double delta = (*(it_x+1)-(*it_x));
+                sum += (it_y) * delta; 
+                ++it_x;
+                ++it_y;
+            } 
+
+            // scaling
+            std::transform (pulse_power.begin(), pulse_power.end(), pulse_power.begin(),
+                    [=](double a){ return a/sum*repetition_time; }
+                    );
+
+            pulse_time.pop_back();
+            
+        }
+
+        //-------------------------------------------------------------------//
         void Pulse::run() {
+
+            auto it_t = pulse_time.begin();
+            auto it_p = pulse_power.begin();
+
+            TimedValue flux_in{0.0, 0.0};
+            TimedValue flux_out{0.0, 0.0};
 
             input_ptr->get(flux_in);
             flux_out = flux_in;
-            auto it_t = pulse_time.begin();
-            auto it_p = pulse_power.begin();
+            flux_out.value = flux_in.value * *it_p;
+
             size_t count = 0;
+            bool done = false;
 
             while(true){
 
-                flux_current.time = count * repetition_time + *it_t;
+                flux_out.time = count * repetition_time + *it_t;
 
-                while (flux_out.time >= input_ptr->peek().time){
-                    if (!input_ptr->get(flux_in)) return;
+                while (flux_out.time >= input_ptr->peek().time && !done){
+
+                    // get_the previous power
+                    auto it_p_prev = it_p-1;
+                    if (it_p_prev < pulse_power.begin()){
+                        it_p_prev = pulse_power.end()-1;
+                    }
+
+                    done = !input_ptr->get(flux_in);
+                    TimedValue flux_intermediate = flux_in;
+                    flux_intermediate.value *= *it_p_prev;
+                    output_ptr->put(flux_intermediate);
+
                 }
 
-                flux_current.value = flux_in.value * *it_p;
-
-                if ( 
-                        abs(flux_out.time - flux_current.time) > DELTA_T &&
-                        abs(flux_out.value - flux_current.value) > DELTA_F
-                   ) {
-                } 
-
+                flux_out.value = flux_in.value * *it_p;
                 output_ptr->put(flux_out);
-                flux_out = flux_current;
 
                 ++it_t;
                 ++it_p;
 
                 if(it_t == pulse_time.end()) {
+                    if (done) return;
                     it_t = pulse_time.begin();
                     it_p = pulse_power.begin();
                     count++;
                 }
+
             }
         }
 
@@ -149,30 +188,10 @@ namespace sim{
             }
 
         }
-            */
+        */
 
-        //-------------------------------------------------------------------//
-        void Pulse::normalize_pulse() {
-            pulse_time.push_back(repetition_time);
-
-            // x: [t0, t1, t2, ..., trep]
-            // y: [a0, a1, ..., a_N, a_N]
-            
-            // integration
-            double sum = 0;
-            auto it_x = pulse_time.begin();
-            for (auto it_y: pulse_power){
-                double delta = (*(it_x+1)-(*it_x));
-                sum += (it_y) * delta; 
-                ++it_x;
-                ++it_y;
-            } 
-
-            pulse_time.pop_back();
-        }
 
     }
-
 }
 
 

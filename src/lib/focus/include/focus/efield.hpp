@@ -8,7 +8,6 @@
 namespace sim{
     namespace focus{
 
-
         //-------------------------------------------------------------------//
         class EFieldStorage{
 
@@ -44,6 +43,10 @@ namespace sim{
                 void set_phi(double min, double max, size_t n);
                 
                 //-----------------------------------------------------------//
+                void set_json(json j) override;
+                json get_json() override;
+
+                //-----------------------------------------------------------//
                 double evaluate(double x, double y, double z) const override;
 
                 //-----------------------------------------------------------//
@@ -56,7 +59,6 @@ namespace sim{
                 void init();
 
             private:
-
 
                 //-----------------------------------------------------------//
                 std::vector<double> sin_theta;

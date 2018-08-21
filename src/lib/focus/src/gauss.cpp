@@ -7,33 +7,48 @@ namespace sim{
         Gauss::Gauss(){ } 
 
         //------------------------------------------------------------------//
-        void Gauss::set_waist_x (double wx) {
-            waist_x = wx;
+        void Gauss::set_waists (double w_x, double w_y, double w_z) {
+            waist_x = w_x;
+            waist_y = w_y;
+            waist_z = w_z;
         }
 
         //------------------------------------------------------------------//
-        void Gauss::set_waist_y (double wy) {
-            waist_y = wy;
+        void Gauss::set_json(json j){
+
+            json params = get_json();
+            params.merge_patch(j);
+
+            set_waists(
+                    params.at("waist_x"), 
+                    params.at("waist_y"),
+                    params.at("waist_z")
+                    );
+
         }
 
         //------------------------------------------------------------------//
-        void Gauss::set_waist_z (double wz) {
-            waist_z = wz;
+        json Gauss::get_json() {
+
+            json j;
+
+            j["waist_x"] = waist_x;
+            j["waist_y"] = waist_y;
+            j["waist_z"] = waist_z;
+
+            return j;
+
         }
 
         //------------------------------------------------------------------//
-        double Gauss::get_flux_prefactor (double power, double wavelength) {
-            double normalization = 1.0/(CONST_PI/2*pow(waist_x*waist_y, 2));
-            double quantization = power * wavelength / (CONST_C * CONST_H);
-            return normalization * quantization;
+        double Gauss::get_flux_density_prefactor() const {
+            return 1.0/(CONST_PI/2*waist_x*waist_y);
         }
-
+        
         //------------------------------------------------------------------//
-        double Gauss::get_efficiency_prefactor () {
+        double Gauss::get_efficiency_prefactor() const {
             return 1.0;
         }
-        //------------------------------------------------------------------//
-        
 
         //------------------------------------------------------------------//
         double Gauss::evaluate(double x, double y, double z) const {

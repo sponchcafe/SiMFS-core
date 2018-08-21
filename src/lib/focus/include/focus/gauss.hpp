@@ -14,14 +14,16 @@ namespace sim{
                 Gauss();
 
                 //-----------------------------------------------------------//
-                void set_waist_x (double wx);
-                void set_waist_y (double wy);
-                void set_waist_z (double wz);
+                void set_waists (double w_x, double w_y, double w_z);
+
+                //-----------------------------------------------------------//
+                void set_json(json j) override;
+                json get_json() override;
 
                 //-----------------------------------------------------------//
                 double evaluate(double x, double y, double z) const override;
-                double get_flux_prefactor(double power, double wavelength);
-                double get_efficiency_prefactor();
+                double get_flux_density_prefactor() const override;
+                double get_efficiency_prefactor() const override;
 
             private:
 
