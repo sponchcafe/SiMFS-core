@@ -2,7 +2,7 @@
 #include <iostream>
 
 namespace sim{
-    namespace focus{
+    namespace field{
 
         //------------------------------------------------------------------//
         EField::EField(){ } 
@@ -26,6 +26,8 @@ namespace sim{
 
         //------------------------------------------------------------------//
         void EField::set_theta(double min, double max, size_t n){ 
+            theta_min_deg = min;
+            theta_max_deg = max;
             theta_min = min/360*2*CONST_PI;
             theta_max = max/360*2*CONST_PI;
             theta_n = n;
@@ -33,9 +35,51 @@ namespace sim{
 
         //------------------------------------------------------------------//
         void EField::set_phi(double min, double max, size_t n){ 
+            phi_min_deg = min;
+            phi_max_deg = max;
             phi_min = min/360*2*CONST_PI;
             phi_max = max/360*2*CONST_PI;
             phi_n = n;
+        }
+
+        //------------------------------------------------------------------//
+        void EField::set_json(json j){
+
+            json params = get_json();
+            params.merge_patch(j);
+
+            set_lambda(params.at("wavelength"));
+            json pol = params.at("polarization");
+            set_pol(pol.at("x"), pol.at("y"));
+            json theta = params.at("theta");
+            set_theta(theta.at("min"), theta.at("max"), theta.at("n"));
+            json phi = params.at("phi");
+            set_phi(phi.at("min"), phi.at("max"), phi.at("n"));
+
+        }
+
+        //------------------------------------------------------------------//
+        json EField::get_json(){
+
+            json j;
+
+            j["wavelength"] = 2*CONST_PI/k;
+            j["polarization"] = json{
+                {"x", pol_x},
+                {"y", pol_y}
+            };
+            j["theta"] = json{
+                {"min", theta_min_deg},
+                {"max", theta_max_deg},
+                {"n", theta_n}
+            };
+            j["phi"] = json{
+                {"min", phi_min_deg},
+                {"max", phi_max_deg},
+                {"n", phi_n}
+            };
+
+            return j;
         }
 
         //------------------------------------------------------------------//

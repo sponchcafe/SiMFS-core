@@ -7,9 +7,8 @@
 #include "json/json.hpp"
 
 namespace sim{
-    namespace focus{
+    namespace field{
 
-        using namespace field;
         using json = nlohmann::json;
         
         //-------------------------------------------------------------------//
@@ -28,8 +27,8 @@ namespace sim{
                 void set_phi(double min, double max, size_t n);
                 
                 //-----------------------------------------------------------//
-                void set_json(json j) ;
-                json get_json() ;
+                void set_json(json j);
+                json get_json();
 
                 //-----------------------------------------------------------//
                 EFieldComponents evaluate_angle(double x, double y, double z, size_t i_phi, size_t i_theta) const;
@@ -56,12 +55,16 @@ namespace sim{
                 bool pol_y = 0;
 
                 double theta_min = 0;
-                double theta_max = 32.0/360.0*2*CONST_PI;
-                size_t theta_n = 32;
+                double theta_min_deg = 0;
+                double theta_max = 64.0/360.0*2*CONST_PI;
+                double theta_max_deg= 64.0;
+                size_t theta_n = 64;
                 double d_theta;
 
                 double phi_min = 0;
+                double phi_min_deg = 0;
                 double phi_max = 360.0/360.0*2*CONST_PI;
+                double phi_max_deg = 360.0;
                 size_t phi_n = 360;
                 double d_phi;
 

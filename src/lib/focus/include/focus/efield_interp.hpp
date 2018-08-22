@@ -8,6 +8,12 @@ namespace sim{
     namespace focus{
 
         //-------------------------------------------------------------------//
+        enum class Interpolation{NEAREST, LINEAR};
+        Interpolation interpolation_from_str(std::string s);
+        std::string interpolation_to_str(Interpolation type);
+
+
+        //-------------------------------------------------------------------//
         class FieldInterpolator : public Focus{
 
             public:
@@ -17,7 +23,7 @@ namespace sim{
 
                 //-----------------------------------------------------------//
                 void set_field_file(std::string fname);
-                void set_interpolation(field::Interpolation type);
+                void set_interpolation(Interpolation type);
                 void set_rotation(double x, double y, double z);
 
                 //-----------------------------------------------------------//
