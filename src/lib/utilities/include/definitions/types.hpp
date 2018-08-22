@@ -27,27 +27,5 @@ namespace sim{
     //-Enums-------------------------------------------------------------//
     enum class FocusMode {EXCITATION, DETECTION};
     enum class FocusType {GAUSS, ALPHA, EFIELD};
-    enum class Interpolation {NEAREST, LINEAR};
-
-    //-------------------------------------------------------------------//
-    struct EFieldComponents{
-        std::complex<double> x;
-        std::complex<double> y;
-        std::complex<double> z;
-    };
-
-    //-------------------------------------------------------------------//
-    struct EFieldDimension {
-        double min;
-        double max;
-        size_t n;
-    };
-
-    //-------------------------------------------------------------------//
-    struct EFieldGridSpec {
-        EFieldDimension x;
-        EFieldDimension y;
-        EFieldDimension z;
-    };
 
 }

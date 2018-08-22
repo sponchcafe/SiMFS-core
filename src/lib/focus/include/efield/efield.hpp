@@ -1,33 +1,19 @@
 #pragma once
 
 #include <memory>
-#include "focus/base.hpp"
 #include <vector>
-#include <complex>
+#include "efield/types.hpp"
+#include "definitions/constants.hpp"
+#include "json/json.hpp"
 
 namespace sim{
     namespace focus{
 
-        //-------------------------------------------------------------------//
-        class EFieldStorage{
-
-            public:
-
-                EFieldStorage();
-                void set_storage_id(std::string id);
-                EFieldComponents evaluate(double x, double y, double z);
-
-            private:
-
-                EFieldGridSpec header;
-                std::unique_ptr<std::vector<EFieldComponents>> data;
-                Interpolation interpolation = Interpolation::NEAREST;
-
-        };
+        using namespace field;
+        using json = nlohmann::json;
         
-
         //-------------------------------------------------------------------//
-        class EField : Focus{
+        class EField {
 
             public:
 
@@ -37,28 +23,24 @@ namespace sim{
                 //-----------------------------------------------------------//
                 void set_lambda(double l);
                 void set_pol(bool px, bool py);
-                void set_dipole(double x, double y, double z);
                 void set_amplitude(double e0);
                 void set_theta(double min, double max, size_t n);
                 void set_phi(double min, double max, size_t n);
                 
                 //-----------------------------------------------------------//
-                void set_json(json j) override;
-                json get_json() override;
+                void set_json(json j) ;
+                json get_json() ;
 
                 //-----------------------------------------------------------//
-                double evaluate(double x, double y, double z) const override;
-
-                //-----------------------------------------------------------//
-                EFieldComponents evaluate_components(double x, double y, double z, size_t i_phi, size_t i_theta) const;
-
-                //-----------------------------------------------------------//
-                EFieldComponents integrate_components(double x, double y, double z) const;
+                EFieldComponents evaluate_angle(double x, double y, double z, size_t i_phi, size_t i_theta) const;
+                EFieldComponents evaluate_field(double x, double y, double z) const;
 
                 //-----------------------------------------------------------//
                 void init();
 
             private:
+
+                //-----------------------------------------------------------//
 
                 //-----------------------------------------------------------//
                 std::vector<double> sin_theta;
@@ -72,10 +54,6 @@ namespace sim{
                 double e_zero = 1;
                 bool pol_x = 1;
                 bool pol_y = 0;
-
-                double dipole_x = 1.0;
-                double dipole_y = 1.0;
-                double dipole_z = 1.0;
 
                 double theta_min = 0;
                 double theta_max = 32.0/360.0*2*CONST_PI;

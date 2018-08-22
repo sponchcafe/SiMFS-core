@@ -1,4 +1,4 @@
-#include "focus/efield.hpp"
+#include "efield/efield.hpp"
 #include <iostream>
 
 namespace sim{
@@ -21,13 +21,6 @@ namespace sim{
         //------------------------------------------------------------------//
         void EField::set_amplitude(double e0){ 
             e_zero = e0;
-        }
-
-        //------------------------------------------------------------------//
-        void EField::set_dipole(double dx, double dy, double dz){ 
-            dipole_x = abs(dx) > 1.0 ? 1.0 : abs(dx);
-            dipole_y = abs(dy) > 1.0 ? 1.0 : abs(dy);
-            dipole_z = abs(dz) > 1.0 ? 1.0 : abs(dz);
         }
 
 
@@ -63,7 +56,7 @@ namespace sim{
         }
 
         //------------------------------------------------------------------//
-        EFieldComponents EField::evaluate_components(double x, double y, double z, size_t i_phi, size_t i_theta) const {
+        EFieldComponents EField::evaluate_angle(double x, double y, double z, size_t i_phi, size_t i_theta) const {
 
             double sp = sin_phi[i_phi];
             double cp = cos_phi[i_phi];
@@ -87,14 +80,14 @@ namespace sim{
         }
 
         //------------------------------------------------------------------//
-        EFieldComponents EField::integrate_components(double x, double y, double z) const {
+        EFieldComponents EField::evaluate_field(double x, double y, double z) const {
 
             EFieldComponents field{};
 
             for (size_t p=0; p<phi_n; p++){
                 for (size_t t=0; t<theta_n; t++){
 
-                    EFieldComponents _field = evaluate_components(x, y, z, p, t);
+                    EFieldComponents _field = evaluate_angle(x, y, z, p, t);
                     field.x += _field.x * d_phi * d_theta;
                     field.y += _field.y * d_phi * d_theta;
                     field.z += _field.z * d_phi * d_theta;
@@ -107,6 +100,7 @@ namespace sim{
         }
 
         //------------------------------------------------------------------//
+        /*
         double EField::evaluate(double x, double y, double z) const {
 
             EFieldComponents field = integrate_components(x, y, z);
@@ -120,6 +114,7 @@ namespace sim{
             return res;
 
         }
+        */
 
 
     }
