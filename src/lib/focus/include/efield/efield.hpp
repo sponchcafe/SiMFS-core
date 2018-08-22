@@ -33,6 +33,7 @@ namespace sim{
                 //-----------------------------------------------------------//
                 EFieldComponents evaluate_angle(double x, double y, double z, size_t i_phi, size_t i_theta) const;
                 EFieldComponents evaluate_field(double x, double y, double z) const;
+                double evaluate_intensity(double x, double y, double z) const;
 
                 //-----------------------------------------------------------//
                 void init();

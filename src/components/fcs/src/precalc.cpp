@@ -74,6 +74,11 @@ namespace sim{
         void EFieldPrecalculator::run(){
             std::vector<field::EFieldCoordinate> c{};
             std::vector<field::EFieldComponents> f{};
+            if (field::check_file_exists(fname)) {
+                std::cerr << "File " << fname << " exists, aborting.\n";
+                return;
+            }
+            field::evaluate_prefactors(field_function, spec);
             field::make_grid_coordinates(spec, c);
             field::evaluate_efield_grid(field_function, c, f);
             field::save_field_file(fname, spec, f);

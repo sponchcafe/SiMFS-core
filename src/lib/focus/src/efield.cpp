@@ -144,21 +144,19 @@ namespace sim{
         }
 
         //------------------------------------------------------------------//
-        /*
-        double EField::evaluate(double x, double y, double z) const {
+        double EField::evaluate_intensity(double x, double y, double z) const {
 
-            EFieldComponents field = integrate_components(x, y, z);
+            EFieldComponents field = evaluate_field(x, y, z);
 
             double res = 0.0;
 
-            res += dipole_x * std::norm(field.x);
-            res += dipole_y * std::norm(field.y);
-            res += dipole_z * std::norm(field.z);
+            res += std::norm(field.x);
+            res += std::norm(field.y);
+            res += std::norm(field.z);
 
             return res;
 
         }
-        */
 
 
     }
