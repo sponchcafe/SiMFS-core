@@ -50,25 +50,20 @@ possible.
 
 Features
 ^^^^^^^^
-
 - Free isotropic diffusion and immobilized settings
 - Three different focus functions
-
     - 3D-Gaussian
     - Normalized flux pseudo-Gaussian
     - Ideal lens E-field function
-
 - Independent excitation and detection foci
 - Arbitrary pulse definition to model µs and ns ALEX, PIE, POE and other pulse shemes
 - State based photophysics for flexible modeling of fluorophores
-
     - Lifetime interval simulation to bridge short (ps) and long (minutes) timescales
     - Complete output of events in the rate graph (e.g. ISC and RISC events)
     - Event system to react to external factors (molecule movement, laser power, FRET photons, collision with simulation box, ...) 
-
 - Utilities for splitting, mixing and buffering photon timetags
 - Highly parallel execution and low memroy usage due to pipeline design
-
+   
 
 Who is it for?
 --------------
@@ -85,7 +80,9 @@ To get started checkout the getting started section and the quickstart tutorial.
 .. toctree::
    :maxdepth: 2
 
-   introduction
+   installation
+   quickstart
+   tutorial
    architecture
    components
    api

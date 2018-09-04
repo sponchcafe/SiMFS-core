@@ -98,6 +98,8 @@ multiple components in parallel that read and write to named pipes.
 
 UNIX named pipes are created using ``mkfifo``.
 
+.. image:: _static/flow.png
+
 Data
 ----
 
@@ -122,3 +124,13 @@ Timetag       1 x 8 byte (time)
    Throughout *SiMFS-Tk* parameters and data streams, **prefixless SI base
    units** like meters, seconds, and Watts are used to make these values least
    ambiguous.
+
+Python driver
+-------------
+
+Due to the simple command line interface it is simple to call *SiMFS-Tk*
+components from other software. This is what the python driver that is included
+in the repository does. It provides a python interface to configure and start
+subprocesses running the *SiMFS-Tk* component excecutables. In addition it
+handles the required named pipes to connect components and starts the processes
+asynchronously preventing deadlocks.
