@@ -27,11 +27,21 @@ ctest
 
 ## Architecture
 
-SiMFSTk is organized into components that solve individual tasks in the simulation process, for example generation of a diffusion trajectory or evaluation of a focus function. Each component is defined as a `C++` class and has a UNIX-shell command line interface for testing and building simulation scripts. Components can be parametrized via a parameter json document. Data flows into and out of components via the input and output interface. In case of the CLI, in- and outputs map directly to filestreams. To tackle complex simulation problems, components are chained together and form complex pipelines using UNIX named pipes.  
+SiMFSTk is organized into components that solve individual tasks in the
+simulation process, for example generation of a diffusion trajectory or
+evaluation of a focus function. Each component is defined as a `C++` class and
+has a UNIX-shell command line interface for testing and building simulation
+scripts. Components can be parametrized via a parameter json document. Data
+flows into and out of components via the input and output interface. In case of
+the CLI, in- and outputs map directly to filestreams. To tackle complex
+simulation problems, components are chained together and form complex pipelines
+using UNIX named pipes.  
 
 ### Data types
 
-SiMFSTk data types rely on double precision floating point numbers to represent most simulation data. As a general rule physical quantities should be represented in SI units without prefix. 
+SiMFSTk data types rely on double precision floating point numbers to represent
+most simulation data. As a general rule physical quantities should be
+represented in SI units without prefix. 
 
 ```cpp
 #ifndef SIMFS_TYPES_H
@@ -64,12 +74,18 @@ namespace simfs{
 #endif
 ```
     
-The CLI component binaries read and write these types in binary format. Compressed storage can be achieved by zipping. Inspection of binary streams is readily done by the standard UNIX `od` utility.
+The CLI component binaries read and write these types in binary format.
+Compressed storage can be achieved by zipping. Inspection of binary streams is
+readily done by the standard UNIX `od` utility.
 
 
 ### CLI binaries
 
-CLI binaries wrap a component's class into a executable program that can be configured via a parameter json file. The binaries are prefixed `simfs_` followed by a three letter name. Example: `simfs_dif` - the diffusion component. Data is read from input files or streams (pipes) and written to output files or streams.  
+CLI binaries wrap a component's class into a executable program that can be
+configured via a parameter json file. The binaries are prefixed `simfs_`
+followed by a three letter name. Example: `simfs_dif` - the diffusion
+component. Data is read from input files or streams (pipes) and written to
+output files or streams.  
 
 #### General options
 
@@ -98,7 +114,18 @@ Checkout [`jq`](https://stedolan.github.io/jq/) for parameter file manipulation 
 > Binary: `simfs_dif`  
 > Class: `Diffusion` in `src/components/dif/include/dif.hpp`  
 
-Generates a diffusion trajectory of a single molecule within a cylindrical experimental box. The trajectory is a series of $(x, y, z, t)$ coordinates with a fixed time increment. Diffusion steps are calculated according to the same normal distribution in all three dimensions (isotropic) and written to the primary output. On collision with the experimental box boundaries, a collision coordiante with time and location is generated and written to a secondary output. The collision is handled via a trial and error procedure: When a coorindate outside the box is generated, it is discarded and a collision coordinate with the currently valid molecule postition and time is written to the collision output. The diffusion step is repeated until a valid coordinate is generated. Only the first failed attempt will cause a collsion coordiante to be written. Failed attempts do not progress the experiment time.
+Generates a diffusion trajectory of a single molecule within a cylindrical
+experimental box. The trajectory is a series of $(x, y, z, t)$ coordinates with
+a fixed time increment. Diffusion steps are calculated according to the same
+normal distribution in all three dimensions (isotropic) and written to the
+primary output. On collision with the experimental box boundaries, a collision
+coordiante with time and location is generated and written to a secondary
+output. The collision is handled via a trial and error procedure: When a
+coorindate outside the box is generated, it is discarded and a collision
+coordinate with the currently valid molecule postition and time is written to
+the collision output. The diffusion step is repeated until a valid coordinate
+is generated. Only the first failed attempt will cause a collsion coordiante to
+be written. Failed attempts do not progress the experiment time.
 
 
 #### CLI parameters:  
@@ -120,7 +147,10 @@ Generates a diffusion trajectory of a single molecule within a cylindrical exper
 
 ###### diffusion_coefficient
 
-The molecules diffusion coefficient $D$ in $\rm{m\cdot s}^{-2}$. Will be converted to the standard deviation of the internal normal distribution according to $\sigma^2 = 2\cdot D \Delta t$ with $\Delta t$ being the time increment of the diffusion step.
+The molecules diffusion coefficient $D$ in $\rm{m\cdot s}^{-2}$. Will be
+converted to the standard deviation of the internal normal distribution
+according to $\sigma^2 = 2\cdot D \Delta t$ with $\Delta t$ being the time
+increment of the diffusion step.
 
 ###### experiment_time
 
@@ -128,27 +158,37 @@ Experimental time $t_\rm{max}$ in $\rm{s}$. For all coordinates $(x, y, z, t)_\r
 
 ###### increment
   
-Time increment $\Delta t$ in $\rm{s}$. For all coordinates $t_{\rm{n}} - t_{\rm{n}-1} = \Delta t$.
+Time increment $\Delta t$ in $\rm{s}$. For all coordinates $t_{\rm{n}} -
+t_{\rm{n}-1} = \Delta t$.
 
 ###### half_height
 
-z-Dimension of the simulation box $z_{\rm{max}}$ in $\rm{m}$. For all coordinates $|z_{\rm{n}}| \leq z_{\rm{max}}$
+z-Dimension of the simulation box $z_{\rm{max}}$ in $\rm{m}$. For all
+coordinates $|z_{\rm{n}}| \leq z_{\rm{max}}$
 
 ###### radius
 
-xy-Dimension of the simulation box $r_{\rm{max}}$ in $\rm{m}$. For all coordinates $r_{\rm{n}} \leq r_{\rm{max}}$ with $r_{\rm{n}}(x, y, z, t) = \sqrt{x^2+y^2}$
+xy-Dimension of the simulation box $r_{\rm{max}}$ in $\rm{m}$. For all
+coordinates $r_{\rm{n}} \leq r_{\rm{max}}$ with $r_{\rm{n}}(x, y, z, t) =
+\sqrt{x^2+y^2}$
 
 ###### seed
 
-Random seed for the random number generator as unsignd integer. The default special value 0 instructs the component to generate a new seed itself.
+Random seed for the random number generator as unsignd integer. The default
+special value 0 instructs the component to generate a new seed itself.
 
 ###### trajectory_output
   
-Output identifier for the trajectory coordinate data. In the CLI context, this is a filepath. Coordinates $(x, y, z, t)$ will be written to the filestream as binary stream data.
+Output identifier for the trajectory coordinate data. In the CLI context, this
+is a filepath. Coordinates $(x, y, z, t)$ will be written to the filestream as
+binary stream data.
 
 ###### collision_output
 
-Output identifier for the collision coordinate data. In the CLI context, this is a filepath. Coordinates $(x, y, z, t)$ will be written to the filestream as binary stream data. By default data is written to `/dev/null` and will be discarded.
+Output identifier for the collision coordinate data. In the CLI context, this
+is a filepath. Coordinates $(x, y, z, t)$ will be written to the filestream as
+binary stream data. By default data is written to `/dev/null` and will be
+discarded.
 
 
 ## Component: Excitation
@@ -156,7 +196,8 @@ Output identifier for the collision coordinate data. In the CLI context, this is
 > Binary: `simfs_exi`  
 > Class: `Excitation` in `src/components/exi.cpp`  
 
-Evaluates an excitation focus function at a coordinate $(x, y, z, t)$ and produces a stream of timed photon flux density values $(F, t)$. 
+Evaluates an excitation focus function at a coordinate $(x, y, z, t)$ and
+produces a stream of timed photon flux density values $(F, t)$. 
 
 
 #### CLI parameters:  
@@ -182,7 +223,9 @@ Evaluates an excitation focus function at a coordinate $(x, y, z, t)$ and produc
 ###### focus_function
 *available:* `"alpha"`, `"gauss"`
 
-Type specifier for the focus function to be used for evaluation. Each focus function can require arbitrary shape parameters. See the documentation of available excitation focus funcitons below.
+Type specifier for the focus function to be used for evaluation. Each focus
+function can require arbitrary shape parameters. See the documentation of
+available excitation focus funcitons below.
 
 ###### power
   
