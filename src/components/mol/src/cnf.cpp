@@ -16,6 +16,8 @@ namespace sim{
         void Conformation::set_json(json j){
 
             json params = get_json();
+            if (j.find("states") != j.end()) params.erase("states");
+            if (j.find("values") != j.end()) params.erase("values");
             params.merge_patch(j);
 
             set_seed(params.at("seed"));
