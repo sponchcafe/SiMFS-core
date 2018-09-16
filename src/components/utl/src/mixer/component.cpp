@@ -23,8 +23,8 @@ namespace sim{
             json params = get_json();
             params.merge_patch(j);
 
-            set_photon_output_id(params.at("photon_output"));
-            set_photon_input_ids(params.at("photon_inputs"));
+            set_photon_output_id(params.at("output"));
+            set_photon_input_ids(params.at("inputs"));
 
         }
 
@@ -33,8 +33,8 @@ namespace sim{
 
             json j;
 
-            j["photon_output"] = photon_output_id;
-            j["photon_inputs"] = photon_input_ids;
+            j["output"] = photon_output_id;
+            j["inputs"] = photon_input_ids;
 
             return j;
 

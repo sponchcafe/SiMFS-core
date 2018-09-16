@@ -24,9 +24,9 @@ int main(int argc, char *argv[]) {
     //-Run-------------------------------------------------------------------//
     if (!cli::check_list(opts)){
 
-        auto out_thread = io::buffer2file_thread<realtime_t>(log["photon_output"]);
+        auto out_thread = io::buffer2file_thread<realtime_t>(log["output"]);
 
-        std::vector<std::string> inputs = log["photon_inputs"];
+        std::vector<std::string> inputs = log["inputs"];
         std::vector<std::thread> in_threads{};
 
         for (auto it=inputs.begin(); it!=inputs.end(); ++it){

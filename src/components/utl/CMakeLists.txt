@@ -1,23 +1,32 @@
-FILE(GLOB sim_buffer_src src/buffer/*.cpp)
-add_library(sim_buffer ${sim_buffer_src})
-target_include_directories(sim_buffer PUBLIC ./include)
-target_link_libraries(sim_buffer sim_component)
+###############################################################################
+# Buffer Component
+###############################################################################
+
+add_library(sim_buf src/buffer/component.cpp)
+target_include_directories(sim_buf PUBLIC ./include)
+target_link_libraries(sim_buf sim_component)
 
 add_executable(simfs_buf src/buffer/simfs_buf.cpp)
-target_link_libraries(simfs_buf sim_buffer)
+target_link_libraries(simfs_buf sim_buf)
 
-FILE(GLOB sim_mixer_src src/mixer/*.cpp)
-add_library(sim_mixer ${sim_mixer_src})
-target_include_directories(sim_mixer PUBLIC ./include)
-target_link_libraries(sim_mixer sim_util sim_component)
+###############################################################################
+# Mixer Component
+###############################################################################
+
+add_library(sim_mix src/mixer/component.cpp)
+target_include_directories(sim_mix PUBLIC ./include)
+target_link_libraries(sim_mix sim_component)
 
 add_executable(simfs_mix src/mixer/simfs_mix.cpp)
-target_link_libraries(simfs_mix sim_mixer sim_component)
+target_link_libraries(simfs_mix sim_mix)
 
-FILE(GLOB sim_splitter_src src/splitter/*.cpp)
-add_library(sim_splitter ${sim_splitter_src})
-target_include_directories(sim_splitter PUBLIC ./include)
-target_link_libraries(sim_splitter sim_util sim_component)
+###############################################################################
+# Mixer Component
+###############################################################################
+
+add_library(sim_spl src/splitter/component.cpp)
+target_include_directories(sim_spl PUBLIC ./include)
+target_link_libraries(sim_spl sim_util sim_component)
 
 add_executable(simfs_spl src/splitter/simfs_spl.cpp)
-target_link_libraries(simfs_spl sim_splitter sim_component)
+target_link_libraries(simfs_spl sim_spl)

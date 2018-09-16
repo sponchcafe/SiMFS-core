@@ -2,31 +2,31 @@
 # FCS Component
 ###############################################################################
 
-add_library(sim_fcs src/fcs.cpp)
+add_library(sim_fcs src/focus/component.cpp)
 target_include_directories(sim_fcs PUBLIC ./include)
 target_link_libraries(sim_fcs sim_focus sim_component)
 
-add_executable(simfs_fcs src/simfs_fcs.cpp)
+add_executable(simfs_fcs src/focus/simfs_fcs.cpp)
 target_link_libraries(simfs_fcs sim_fcs)
 
 ###############################################################################
 # Pulse Component
 ###############################################################################
 
-add_library(sim_pls src/pulse.cpp)
+add_library(sim_pls src/pulse/component.cpp)
 target_include_directories(sim_pls PUBLIC ./include)
 target_link_libraries(sim_pls sim_component)
 
-add_executable(simfs_pls src/simfs_pls.cpp)
+add_executable(simfs_pls src/pulse/simfs_pls.cpp)
 target_link_libraries(simfs_pls sim_pls)
 
 ###############################################################################
-# Precalc Component
+# Efield Component
 ###############################################################################
 
-add_library(sim_pre src/precalc.cpp)
-target_include_directories(sim_pre PUBLIC ./include)
-target_link_libraries(sim_pre sim_component sim_focus)
+add_library(sim_efi src/efield/component.cpp)
+target_include_directories(sim_efi PUBLIC ./include)
+target_link_libraries(sim_efi sim_component sim_focus)
 
-add_executable(simfs_pre src/simfs_pre.cpp)
-target_link_libraries(simfs_pre sim_pre)
+add_executable(simfs_efi src/efield/simfs_efi.cpp)
+target_link_libraries(simfs_efi sim_efi)

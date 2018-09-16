@@ -1,7 +1,10 @@
-FILE(GLOB sim_photophysics_src src/*.cpp)
-add_library(sim_photophysics ${sim_photophysics_src})
-target_include_directories(sim_photophysics PUBLIC ./include)
-target_link_libraries(sim_photophysics sim_util sim_graph sim_component)
+###############################################################################
+# Photophysikcs Component
+###############################################################################
 
-add_executable(simfs_ph2 src/simfs_ph2.cpp)
-target_link_libraries(simfs_ph2 sim_photophysics sim_component)
+add_library(sim_ph2 src/photophysics/component.cpp)
+target_include_directories(sim_ph2 PUBLIC ./include)
+target_link_libraries(sim_ph2 sim_util sim_graph sim_component)
+
+add_executable(simfs_ph2 src/photophysics/simfs_ph2.cpp)
+target_link_libraries(simfs_ph2 sim_ph2)
