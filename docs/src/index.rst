@@ -7,9 +7,14 @@ Welcome to SiMFS-Tk's documentation!
 ====================================
 
 You found the documentation of **SiMFS-Tk** - the Single Molecule Flourescence
-Simulation Toolkit. Check out what we have to offer in the next paragraphs or
-jump right into the Quickstart. For a deepdive checkout the architecture and
-api documentation. 
+Simulation Toolkit. It is still under active development, so some pats are not
+yet complete. For now, check out the installation section to get started.
+
+.. Warning::
+
+   SiMFS-Tk is still under heavy development. Although the core implementation
+   is pretty robust, this documentation will still grow during the next weeks.
+
 
 What is it?
 ------------
@@ -22,31 +27,11 @@ experiments can be simulated. The modular architecture allows easy and quick
 iteration of parameters, parallel execution of simulations as well as
 inspection of intermediate results and interfacing to third party software.
 
-The project is developed in portable C++11 and build with CMake. Although fully
+The project is developed in portable C++11 and built with CMake. Although fully
 functional on Linux, MacOS and Windows platforms, some features are not
 available under Windows. For Windows users we recommend using Cygwin_.
 
 .. _Cygwin: https://www.cygwin.org
-
-What can it do?
----------------
-
-The toolkit supports many different use cases from simple to complex. For
-example, the diffusion component can be used on its own to generate a diffusion
-trajectory of a single molecule governed by brownian motion and parametrized by
-a diffusion coefficient.  
-
-The photophysics component can be parametrized to simulate a static immobilized
-fluorophore with arbitrary states, ranging from simple 3-state (S0, S1, T1) to
-higher excited states including long-lived dark states and bleaching.
-
-Combining diffusion with focus components and photophysics, simple FCS
-experiments can be investigated, with independent excitation and detection
-foci.
-
-Joining it all together, diffusion experiments with complex photophysics,
-excitation and detection patterns, as well as pulsed experiments and FRET are
-possible.
 
 Features
 ^^^^^^^^
@@ -74,7 +59,9 @@ for demonstrative purposes.
 
 How to get started?
 -------------------
-To get started checkout the getting started section and the quickstart tutorial.
+
+Clone the repository and run the installation commands. Detailed tutorials will
+be available soon.
 
 
 .. toctree::

@@ -1,6 +1,8 @@
 Focus
 -----
 
+:code:`simfs_fcs` evaluates a foucs function on a stream of molecular coordinates.
+
 Signature
 ^^^^^^^^^
 
@@ -15,19 +17,42 @@ Signature
 Parameters
 ^^^^^^^^^^
 
-.. json:object:: fcs.json
+**Mode:**
 
-   Parameters of simfs_dif
+.. json:object:: excitation.json
 
-   :property string coordinate_output: Output filename for coordinates
-   :property string collision_output: Output filename for collision times
-   :property float experiment_time: Experiment time in seconds
-   :property float increment: Time increment per diffusion step in seconds
-   :property float diffusion_coefficient: Diffusion :math:`D` in :math:`\rm{m \cdot s}^{-2}`
-   :property float half_height: Half height of diffusion cylinder in meter
-   :property float radius: Radius of cylinder in meter
-   :property int seed: Random seed
+   Parameters of simfs_fcs exi
 
+   :property string input: Coordinate input filename
+   :property string output: Flux density output filename 
+   :property float power: Excitation power in Watt
+   :property float wavelength: Excitation wavelength in m
+   :property object focus: Focus function parameters
+
+.. json:object:: detection.json
+
+   Parameters of simfs_fcs det
+
+   :property string input: Coordinate input filename
+   :property string output: Detection efficiency output filename 
+   :property object focus: Focus function parameters
+
+**Kind:**
+
+.. json:object:: gauss.json
+
+   Additional foucus parameters of simfs_fcs gauss 
+
+   :property float waist_x: :math:`\frac{1}{e^2}` waist in x of gauss focus.
+   :property float waist_y: :math:`\frac{1}{e^2}` waist in y of gauss focus.
+   :property float waist_z: :math:`\frac{1}{e^2}` waist in z of gauss focus.
+
+.. json:object:: alpha.json
+
+   Additional foucus parameters of simfs_fcs alpha 
+
+   :property float waist_xy: :math:`\frac{1}{e^2}` waist in xy of alpha focus.
+   :property float waist_z: :math:`\frac{1}{e^2}` waist in z of alpha ocus.
 
 Example params.json
 ^^^^^^^^^^^^^^^^^^^
@@ -94,14 +119,6 @@ Alpha detection: ``simfs_fcs alpha det < params.json``
 Notes
 ^^^^^
 
-Diffusion is simulated in a cylinder defined by a radius and a half height. The
-"molecule" is placed somewhere random within the cylinder and moved
-incrementally for every time increment in x, y and z. The stepsize in all
-dimension follows the same normal distrubution. Each step is recorded as an (x,
-y, z, t) record in the coordinate output. When the molecule hits the wall, the
-time (t) is recorded in the collision output.
-
-The diffusion coefficient will be converted to the standard deviation of the
-internal normal distribution according to :math:`\sigma^2 = 2\cdot D \Delta t`
-with :math:`\Delta t` being the increment of the diffusion step.
+Excitation focus function evaluate a photon flux density, according to a total
+power level. Detection functions are normalized to values between 0 and 1.
 

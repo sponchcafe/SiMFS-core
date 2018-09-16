@@ -10,11 +10,12 @@ Components
 *SiMFS-Tk* is a collection of components, which are basically individual pieces
 of sotware that perform one step of a single molecule simulation.  They read
 and write one or more plain binary data streams and can be configured with
-short json documents (see :ref:`json_label`). Each component has a small command line program to
-control it. The executables read configuration form ``stdin``, open the
-necessary files and / or pipes and write a complete parameter log to ``stdout``
-before running the actual task. A component either produces or transforms data
-streams. Data streams are in the simplest case plain binary files on disk.
+short json documents (see :ref:`json_label`). Each component has a small
+command line program to control it. The executables read configuration form
+``stdin``, open the necessary files and / or pipes and write a complete
+parameter log to ``stdout`` before running the actual task. A component either
+produces or transforms data streams. Data streams are in the simplest case
+plain binary files on disk.
 
 .. code-block:: bash
    
@@ -25,14 +26,9 @@ Dumb by choice
 
 The component interface is intentionally kept simple. They will do their best
 not to crash due to erroneus input, but won't do any parameter checking or
-input validation. This is (in part) due to the decoupled nature of the
-component architecture: A FCS component which evaluated a focus function on a
-stream of cooridnates can not now the length (or experiment time) of its input
-or even if the byte stream is meant to be coordinates. All it can do is read a
-set of bytes, evaluate a function and stream out the result. The origin and
-destination and everything associated with them is up to the user. Components
-work in isolation.
-
+input validation. All a component can do is read, process and write data
+streams regardless of their origin and destination. Size, start, end or any
+other information about the stream data is no known to the components.
 
 .. _json_label:
 
@@ -98,8 +94,6 @@ multiple components in parallel that read and write to named pipes.
 
 UNIX named pipes are created using ``mkfifo``.
 
-.. image:: _static/flow.png
-
 Data
 ----
 
@@ -134,3 +128,9 @@ in the repository does. It provides a python interface to configure and start
 subprocesses running the *SiMFS-Tk* component excecutables. In addition it
 handles the required named pipes to connect components and starts the processes
 asynchronously preventing deadlocks.
+
+.. Warning::
+
+   The python driver will be released soon.
+
+

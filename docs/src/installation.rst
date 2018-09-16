@@ -53,6 +53,9 @@ SiMFS-Tk repository and invoking cmake:
    $ make
    $ ctest
 
+The executables are found in :code:`build/src/components/<group>/<name>`, e.g.
+:code:`build/src/components/mol/simfs_dif`.
+
 
 .. _Cygwin: https://www.cygwin.org
 .. _homebrew: https://www.brew.sh
