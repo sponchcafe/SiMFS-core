@@ -2,5 +2,5 @@
 
 SiMFS-Tk is a collection of tools to simulate single molecule fluorescence experiments.
 
-- [Documentation](http://www.sonchcafe.github.io/simfs-tk/)
+- [Documentation](https://sponchcafe.github.io/SiMFS-Tk/)
 
