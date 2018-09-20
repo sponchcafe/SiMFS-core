@@ -5,7 +5,6 @@ Diffusion
 cylindrical box. In addition to the random walk coordinates, it outputs a
 timetag stream containing timetags for every collision with the simulation box.
 
-
 Signature
 ^^^^^^^^^
 
@@ -50,12 +49,12 @@ Parameters
 Data streams
 ^^^^^^^^^^^^
 
-================= ============ ========== =============== ====================
-Name              Datatype     Size       Layout          Description
-================= ============ ========== =============== ====================
-coordinate_output Coordinate   4 x 8 byte (x, y, z, time) Molecular trajectory
-collision_output  Timetag      1 x 8 byte (time)          Collision events
-================= ============ ========== =============== ====================
+==== ================= ============ ========== =============== ====================
+Type Name              Datatype     Size       Layout          Description
+==== ================= ============ ========== =============== ====================
+out  coordinate_output Coordinate   4 x 8 byte (x, y, z, time) Molecular trajectory
+out  collision_output  Timetag      1 x 8 byte (time)          Collision events
+==== ================= ============ ========== =============== ====================
 
 Notes
 ^^^^^
@@ -69,11 +68,11 @@ in the coordinate output.
 When a coordinate is outside the box (i.e. the molecule would hit the wall of
 the box), a collision event is written to the collision output and the
 coordinate is discarded. A new attempt to generate a valid coordinate is
-calculated until a valid step is acquired.  However, when a second collision
+calculated until a valid step is acquired. However, when a second collision
 follows the first immediatly, no collision event is outputted.  The event times
 in the collision output are thereby guaranteed to be unique.
 
 The diffusion coefficient will be converted to the standard deviation of the
 internal normal distribution according to :math:`\sigma^2 = 2\cdot D \Delta t`
 with :math:`\Delta t` being the increment of the diffusion step.
-
+ 
