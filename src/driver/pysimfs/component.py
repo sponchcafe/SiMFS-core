@@ -149,13 +149,33 @@ class Fluorophore(Component):
     ]
 
 ###############################################################################
-class Buffer(Component):
+class CoordinateBuffer(Component):
     cmd = 'utl/simfs_buf'
     input_paths = [
         IO('input', coordinate_t),
     ]
     output_paths = [
         IO('outputs', coordinate_t),
+    ]
+
+###############################################################################
+class TimedValueBuffer(Component):
+    cmd = 'utl/simfs_buf'
+    input_paths = [
+        IO('input', timed_value_t),
+    ]
+    output_paths = [
+        IO('outputs', timed_value_t),
+    ]
+
+###############################################################################
+class TimetagBuffer(Component):
+    cmd = 'utl/simfs_buf'
+    input_paths = [
+        IO('input', timetag_t),
+    ]
+    output_paths = [
+        IO('outputs', timetag_t),
     ]
 
 ###############################################################################

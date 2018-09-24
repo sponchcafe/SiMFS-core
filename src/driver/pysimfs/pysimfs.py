@@ -12,9 +12,8 @@ from . import IO
 class Simulation:
 
     ########################################################################### 
-    def __init__(self, name=None, tmpdir='./pysimfs_tmp', resdir='./results'):
+    def __init__(self, name=None, tmpdir='./pysimfs_tmp'):
         self.tmpdir = tmpdir
-        self.resdir = resdir
         self.matched = set()
         self.components = []
         self.unmatched_in = set()
@@ -24,10 +23,6 @@ class Simulation:
             os.mkdir(self.tmpdir)
         except FileExistsError:
             print(f'Temporary folder {self.tmpdir} exists.')
-        try:
-            os.mkdir(self.resdir)
-        except FileExistsError:
-            print(f'Results folder {self.resdir} exists.')
 
     ########################################################################### 
     def __enter__(self):
@@ -39,6 +34,7 @@ class Simulation:
 
     ########################################################################### 
     def add(self, comp):
+
         self.components.append(comp)
         new_in = comp.inputs
         new_out = comp.outputs
@@ -75,8 +71,11 @@ class Simulation:
 
     ########################################################################### 
     def run(self):
+
         for f in self.unmatched_in:
             assert os.path.exists(f.name), f'File "{f.name}" does not exist.'
+        for f in self.unmatched_out:
+            print(f)
         self.make_pipes()
 
         loop = asyncio.get_event_loop()
