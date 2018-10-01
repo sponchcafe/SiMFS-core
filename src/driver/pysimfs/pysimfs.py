@@ -1,12 +1,15 @@
 import subprocess
+
 import asyncio
+import threading
+
 import os
 import json
 import time
 import uuid
 import numpy as np
 
-from . import IO
+from . import IO, ComponentLog
 
 ###############################################################################
 class Simulation:
@@ -74,21 +77,29 @@ class Simulation:
 
         for f in self.unmatched_in:
             assert os.path.exists(f.name), f'File "{f.name}" does not exist.'
-        for f in self.unmatched_out:
-            print(f)
+     
         self.make_pipes()
 
-        loop = asyncio.get_event_loop()
+        # new event loop in a thread (to run 2 loops in case the environment is already runnign asyncio -> jupyterhub)
+        loop = asyncio.new_event_loop()
+        asyncio.get_child_watcher().attach_loop(loop) # register loop (?)
+        
         commands = asyncio.gather(
-                *(Simulation.call_simfs_async(c.call, *c.opts, **c.params) for c in self.components)
-                )
-                                                    
+                *(Simulation.call_simfs_async(c.call, *c.opts, **c.params) for c in self.components), loop=loop
+        )                  
+        
         #Run the commands
         start = time.time()
-        results = loop.run_until_complete(commands)
+        t = threading.Thread(target=self.run_loop, args=(loop, commands))
+        t.start()
+        t.join()
         end = time.time()
         print(f'Simulation completed after {round(end-start, 2)} seconds.')
-        return results
+        return [ComponentLog(p, e) for (p, e) in self.results]
+    
+    ########################################################################### 
+    def run_loop(self, loop, commands):
+        self.results = loop.run_until_complete(commands)
 
     ########################################################################### 
     def clear(self):
