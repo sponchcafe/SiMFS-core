@@ -17,7 +17,8 @@ class SimfsDefaultMagics(Magics):
             'ph2': os.path.join('ph2', 'simfs_ph2'),
             'spl': os.path.join('utl', 'simfs_spl'),
             'mix': os.path.join('utl', 'simfs_mix'),
-            'buf': os.path.join('utl', 'simfs_buf')
+            'buf': os.path.join('utl', 'simfs_buf'),
+            'img': os.path.join('utl', 'simfs_img')
             }
 
     @line_magic

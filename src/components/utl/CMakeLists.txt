@@ -21,7 +21,7 @@ add_executable(simfs_mix src/mixer/simfs_mix.cpp)
 target_link_libraries(simfs_mix sim_mix)
 
 ###############################################################################
-# Mixer Component
+# Splitter Component
 ###############################################################################
 
 add_library(sim_spl src/splitter/component.cpp)
@@ -30,3 +30,14 @@ target_link_libraries(sim_spl sim_util sim_component)
 
 add_executable(simfs_spl src/splitter/simfs_spl.cpp)
 target_link_libraries(simfs_spl sim_spl)
+
+###############################################################################
+# Imaging Component
+###############################################################################
+
+add_library(sim_img src/imager/component.cpp)
+target_include_directories(sim_img PUBLIC ./include)
+target_link_libraries(sim_img sim_component)
+
+add_executable(simfs_img src/imager/simfs_img.cpp)
+target_link_libraries(simfs_img sim_img)

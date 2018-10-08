@@ -230,3 +230,12 @@ class Pulse(Component):
     output_paths=[
         IO('output', timed_value_t),
     ]
+
+###############################################################################
+class Imager(Component):
+    cmd = 'utl/simfs_img'
+    input_paths=[
+        IO('coordinate_inputs', coordinate_t),
+        IO('time_inputs', timetag_t)
+    ]
+            
