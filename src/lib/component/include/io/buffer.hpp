@@ -12,6 +12,11 @@ namespace sim{
         // producer thread is done (eof == true)
         //-----------------------------------------------------------------------//
         constexpr size_t CHUNK_SIZE_BYTES = 1<<14; // 16kB chunks
+        constexpr unsigned int LOW_WATERMARK = 64;
+        constexpr unsigned int HIGH_WATERMARK = 1024;
+        constexpr unsigned int BASE_DELAY_NS = 1;
+        constexpr unsigned int TOP_DELAY_NS = 1024*1024;
+
 
         //-----------------------------------------------------------------------//
         // Template for lock-free queue based input.
@@ -121,11 +126,8 @@ namespace sim{
 
                 //---------------------------------------------------------------//
                 ~BufferOutput<T>(){
-                    // notify the user that the output is done.
                     push_chunk();
-                    //std::this_thread::sleep_for(std::chrono::milliseconds(SHUTDOWN_DELAY_MILLIS));
-                    //queue_handle.eof->store(true);
-                    push_empty_end_chunk();
+                    push_empty_end_chunk(); // end of stream
                 }
 
                 //-Copy-ctor:-DELETED--------------------------------------------//
@@ -158,12 +160,33 @@ namespace sim{
             private:
 
                 //---------------------------------------------------------------//
+                void apply_delay(){
+
+                    size_t s = queue_handle.queue->size_approx();
+
+                    if (s < LOW_WATERMARK) {
+                        delay = BASE_DELAY_NS;
+                        return;
+                    }
+
+                    else if(s >= HIGH_WATERMARK) {
+                        delay *= 2;
+                    }
+                    else {
+                        delay = delay > TOP_DELAY_NS ? TOP_DELAY_NS : delay;
+                        delay = delay/2 < BASE_DELAY_NS ? BASE_DELAY_NS : delay/2;
+                    }
+                    std::this_thread::sleep_for(std::chrono::nanoseconds(delay));
+
+                }
+
                 void make_new_chunk(size_t const size=chunk_size){
                     chunk = std::vector<T>();
                     chunk.reserve(size);
                 }
 
                 void push_chunk(){
+                    apply_delay();
                     if (chunk.size() > 0) {
                         queue_handle.queue->enqueue(std::move(chunk));
                     }
@@ -179,6 +202,7 @@ namespace sim{
                 queue_handle_t<std::vector<T>> &queue_handle;
                 static size_t const chunk_size = CHUNK_SIZE_BYTES/sizeof(T);
                 std::vector<T> chunk;
+                unsigned int delay = BASE_DELAY_NS;
                 
 
         };
