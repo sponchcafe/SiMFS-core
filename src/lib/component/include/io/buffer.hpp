@@ -145,7 +145,7 @@ namespace sim{
                 //---------------------------------------------------------------//
                 void put(T &item) {
                     chunk.push_back(item);
-                    if (chunk.size() >= chunk_size){
+                    if (queue_handle.queue->size_approx() == 0 || chunk.size() >= chunk_size){
                         push_chunk();
                         make_new_chunk();
                     }
