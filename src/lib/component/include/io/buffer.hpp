@@ -3,19 +3,19 @@
 #include <fstream> 
 #include <thread>
 #include "buffer_fs.hpp"
+#include "env/env.hpp"
 
 namespace sim{
     namespace io{
 
         //-----------------------------------------------------------------------//
-        // Time an input thread waits on an empty queue until it rechecks if the 
-        // producer thread is done (eof == true)
+        // Control parameters for buffer delays
         //-----------------------------------------------------------------------//
-        constexpr size_t CHUNK_SIZE_BYTES = 1<<14; // 16kB chunks
-        constexpr unsigned int LOW_WATERMARK = 64;
-        constexpr unsigned int HIGH_WATERMARK = 1024;
-        constexpr unsigned int BASE_DELAY_NS = 1;
-        constexpr unsigned int TOP_DELAY_NS = 1024*1024;
+        size_t        CHUNK_SIZE_BYTES    = get_env("SIMFS_CHUNK_SIZE", 1<<14); // 16kB chunks
+        unsigned int  LOW_WATERMARK       = get_env("SIMFS_LOW_MARK", 1<<6);
+        unsigned int  HIGH_WATERMARK      = get_env("SIMFS_HIGH_MARK", 1<<10);
+        unsigned int  BASE_DELAY_NS       = get_env("SIMFS_BASE_DELAY_NS", 1);
+        unsigned int  TOP_DELAY_NS        = get_env("SIMFS_TOP_DELAY_NS", 1<<20);
 
 
         //-----------------------------------------------------------------------//
@@ -101,7 +101,6 @@ namespace sim{
                 std::string const buffer_id;
                 queue_handle_t<std::vector<T>> &queue_handle;
                 std::vector<T> current_chunk{};
-                static size_t const chunk_size = CHUNK_SIZE_BYTES/sizeof(T);
                 typename std::vector<T>::iterator current;
                 bool done = false;
 
@@ -121,7 +120,8 @@ namespace sim{
                 //---------------------------------------------------------------//
                 BufferOutput<T>(std::string id) :
                     queue_handle(open<std::vector<T>>(id)) { 
-                        make_new_chunk();
+                        chunk_size = CHUNK_SIZE_BYTES/sizeof(T);
+                        make_new_chunk(chunk_size);
                     }
 
                 //---------------------------------------------------------------//
@@ -147,7 +147,7 @@ namespace sim{
                     chunk.push_back(item);
                     if (queue_handle.queue->size_approx() == 0 || chunk.size() >= chunk_size){
                         push_chunk();
-                        make_new_chunk();
+                        make_new_chunk(chunk_size);
                     }
                 }
 
@@ -176,11 +176,12 @@ namespace sim{
                         delay = delay > TOP_DELAY_NS ? TOP_DELAY_NS : delay;
                         delay = delay/2 < BASE_DELAY_NS ? BASE_DELAY_NS : delay/2;
                     }
+
                     std::this_thread::sleep_for(std::chrono::nanoseconds(delay));
 
                 }
 
-                void make_new_chunk(size_t const size=chunk_size){
+                void make_new_chunk(size_t size){
                     chunk = std::vector<T>();
                     chunk.reserve(size);
                 }
@@ -200,7 +201,7 @@ namespace sim{
                 
                 //---------------------------------------------------------------//
                 queue_handle_t<std::vector<T>> &queue_handle;
-                static size_t const chunk_size = CHUNK_SIZE_BYTES/sizeof(T);
+                size_t chunk_size; //= CHUNK_SIZE_BYTES/sizeof(T);
                 std::vector<T> chunk;
                 unsigned int delay = BASE_DELAY_NS;
                 
