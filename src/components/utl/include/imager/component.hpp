@@ -96,19 +96,16 @@ namespace sim{
                 // private functions
                 //-----------------------------------------------------------//
                 GridValue coordinate_to_grid(Coordinate c);
+                bool image_chunk(
+                        io::BufferInput<Coordinate> &coords, 
+                        io::BufferInput<realtime_t> &tags);
                 void add_to_grid(GridValue gridv);
                 void write_file();
-                void image_timetags(
-                        std::string coords_id,
-                        std::string tags_id
-                        );
-                void image_timed_values(
-                        std::string coords_id,
-                        std::string tvals_id
-                        );
-                void collect_image(); 
+
+                const static unsigned int CHUNK_SIZE = 1024*1024;
                 
         };
+
 
     }
 }

@@ -28,7 +28,6 @@ int main(int argc, char *argv[]) {
         std::vector<std::string> time_inputs = log["time_inputs"];
         
         for (auto it=coord_inputs.begin(); it!=coord_inputs.end(); ++it){
-            std::cerr << "--> " << *it << '\n';
             threads.emplace_back(io::file2buffer_thread<Coordinate>(*it));
         }
         for (auto it=time_inputs.begin(); it!=time_inputs.end(); ++it){

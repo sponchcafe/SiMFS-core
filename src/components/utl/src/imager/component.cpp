@@ -3,7 +3,6 @@
 #include "io/buffer.hpp"
 #include <algorithm>
 #include <iterator>
-#include <thread>
 
 namespace sim{
     namespace comp{
@@ -92,37 +91,69 @@ namespace sim{
         //-------------------------------------------------------------------//
         void Imager::run(){
 
-            // start reading
-            std::vector<std::thread> threads;
+            std::vector<std::unique_ptr<io::BufferInput<Coordinate>>> coord_ptrs;
+            std::vector<std::unique_ptr<io::BufferInput<realtime_t>>> time_ptrs;
 
-            auto coords_id_it = coordinate_input_ids.begin();
-            auto time_id_it = time_input_ids.begin();
+            for (auto &id: coordinate_input_ids) coord_ptrs.emplace_back(std::make_unique<io::BufferInput<Coordinate>>(id));
+            for (auto &id: time_input_ids) time_ptrs.emplace_back(std::make_unique<io::BufferInput<realtime_t>>(id));
 
-            while(coords_id_it != coordinate_input_ids.end()){
+            auto coords_it = coord_ptrs.begin();
+            auto time_it = time_ptrs.begin();
 
-                if (!value_mode){
-                    threads.emplace_back(
-                        [=] () {
-                            this->image_timetags(*coords_id_it, *time_id_it);
-                        }
-                    );
-                }else{
+            while(time_ptrs.size() > 0){
+
+                if (!image_chunk(**coords_it, **time_it)){
+                    // finished coord, tag pair -> remove
+                    std::swap(*coords_it, *(coord_ptrs.end()-1));
+                    std::swap(*time_it, *(time_ptrs.end()-1));
+                    coord_ptrs.pop_back();
+                    time_ptrs.pop_back();
                 }
 
-                ++coords_id_it;
-                ++time_id_it;
-
+                ++coords_it;
+                ++time_it;
+                if (coords_it >= coord_ptrs.end()) coords_it = coord_ptrs.begin();
+                if (time_it >= time_ptrs.end()) time_it = time_ptrs.begin();
             }
-
-            // start collection
-            std::thread t([=] () {this->collect_image();});
-
-            // wait all
-            for (auto &t: threads) t.join();
-            t.join();
 
             // write result
             write_file();
+
+        }
+
+        //-------------------------------------------------------------------//
+        bool Imager::image_chunk(
+                io::BufferInput<Coordinate> &coords, 
+                io::BufferInput<realtime_t> &tags){
+
+            Coordinate c{0.0,0.0,0.0,0.0};
+            realtime_t tag{0.0};
+            GridValue gridv{0,0,0,0.0};
+
+            for (unsigned int i = 0; i < CHUNK_SIZE; i++){
+
+                if(!coords.get(c)){
+                    // last coord -> empty tags
+                    while(tags.get(tag));
+                    return false;
+                }
+                int count = 0;
+                while(tag < c.t){
+                    if (!tags.get(tag)) {
+                        // last tag -> empty coords
+                        while(coords.get(c));
+                        return false;
+                    }
+                    ++count;
+                }
+                if (count <= 0) continue;
+
+                gridv = coordinate_to_grid(c);
+                gridv.v = (double) count;
+                add_to_grid(gridv);
+
+            }
+            return true;
 
         }
 
@@ -138,37 +169,6 @@ namespace sim{
         }
 
 
-        //-------------------------------------------------------------------//
-        void Imager::image_timetags(std::string coords_id, std::string tags_id){
-
-            auto coords = std::make_unique<io::BufferInput<Coordinate>>(coords_id);
-            auto tags = std::make_unique<io::BufferInput<realtime_t>>(tags_id);
-            auto out = std::make_unique<io::BufferOutput<Imager::GridValue>>(coords_id);
-
-            Coordinate c{0,0,0,0.0};
-            realtime_t tag{0};
-
-            Imager::GridValue gridv{0,0,0,0.0};
-            size_t count = 0;
-
-            while(coords->get(c)){
-                count = 0;
-                while(tag < c.t){
-                    if (!tags->get(tag)) break;
-                    count++;
-                }
-                if (count <= 0) continue;
-                gridv = coordinate_to_grid(c);
-                gridv.v = (double) count;
-                out->put(gridv);
-            }
-
-        }
-
-        //-------------------------------------------------------------------//
-        void Imager::image_timed_values(std::string coords_id, std::string tvals_id){
-            std::cerr << "Value mode not implemented!\n";
-        }
         
         //-------------------------------------------------------------------//
         void Imager::add_to_grid(Imager::GridValue gridv){
@@ -181,42 +181,6 @@ namespace sim{
             if (index < 0 || index > (int) grid.size()) return;
 
             grid[index] += gridv.v;
-
-        }
-
-        //-------------------------------------------------------------------//
-        void Imager::collect_image(){
-
-            Imager::GridValue gridv;
-            std::vector<std::unique_ptr<io::BufferInput<Imager::GridValue>>> grid_value_input_ptrs;
-            for (auto &id: coordinate_input_ids){
-                grid_value_input_ptrs.emplace_back(std::make_unique<io::BufferInput<Imager::GridValue>>(id));
-            }
-            auto current = grid_value_input_ptrs.begin();
-            auto last = grid_value_input_ptrs.end();
-
-            while(grid_value_input_ptrs.size() > 1){
-
-                if(!current->get()->get(gridv)){
-                    std::swap(current, last);
-                    grid_value_input_ptrs.pop_back();
-                    last = grid_value_input_ptrs.end();
-                    current = grid_value_input_ptrs.begin();
-                    continue;
-                }
-
-                add_to_grid(gridv);
-                current++;
-
-                if (current == grid_value_input_ptrs.end()){
-                    current = grid_value_input_ptrs.begin();
-                }
-
-            }
-
-            while(current->get()->get(gridv)){
-                add_to_grid(gridv);
-            }
 
         }
 
