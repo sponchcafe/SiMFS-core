@@ -3,7 +3,7 @@ import os
 from collections import namedtuple
 
 here = os.path.dirname(__file__)
-basepath = os.path.abspath(os.path.join(here, '../../../build/src/components'))
+basepath = os.path.abspath(os.path.join(here, '/opt/SiMFS-Tk/build/src/components')) # SiMFS-Tk installation path
 
 for comp in ['simfs_dif', 'simfs_sft', 'simfs_cnf']:
     assert os.path.exists(os.path.join(basepath, f'mol/{comp}')), f'mol/{comp} not found in {basepath}'
