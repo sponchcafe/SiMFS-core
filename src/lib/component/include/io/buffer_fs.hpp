@@ -4,6 +4,8 @@
 #include <mutex>
 #include <atomic>
 #include <string>
+#include <vector>
+#include <iostream>
 
 #include "queue/readerwriterqueue.h"
 #include "queue/atomicops.h"
