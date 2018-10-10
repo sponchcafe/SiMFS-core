@@ -2,19 +2,11 @@
 
 #include <fstream> 
 #include <thread>
+#include <cmath>
 #include "buffer_fs.hpp"
 
 namespace sim{
     namespace io{
-
-        //-----------------------------------------------------------------------//
-        // Control parameters for buffer delays
-        //-----------------------------------------------------------------------//
-        extern size_t        CHUNK_SIZE_BYTES;
-        extern unsigned int  LOW_WATERMARK;
-        extern unsigned int  HIGH_WATERMARK;
-        extern unsigned int  BASE_DELAY_NS;
-        extern unsigned int  TOP_DELAY_NS;
 
         //-----------------------------------------------------------------------//
         // Template for lock-free queue based input.
@@ -109,6 +101,15 @@ namespace sim{
         //-----------------------------------------------------------------------//
         
         //-----------------------------------------------------------------------//
+        // Control parameters for buffer delays
+        //-----------------------------------------------------------------------//
+        
+        extern bool SIMFS_BUFFER_CONTROL;
+        extern unsigned long int SIMFS_DELAY_MS;
+        extern unsigned long int SIMFS_CHUNK_SIZE_BYTES;
+        extern unsigned long int SIMFS_BUFFER_SIZE_BYTES;
+
+        //-----------------------------------------------------------------------//
         // Template for lock-free queue based output.
         //-----------------------------------------------------------------------//
         template <typename T> class BufferOutput { 
@@ -118,8 +119,7 @@ namespace sim{
                 //---------------------------------------------------------------//
                 BufferOutput<T>(std::string id) :
                     queue_handle(open<std::vector<T>>(id)) { 
-                        chunk_size = CHUNK_SIZE_BYTES/sizeof(T);
-                        make_new_chunk(chunk_size);
+                        make_new_chunk(chunk_size_n);
                     }
 
                 //---------------------------------------------------------------//
@@ -143,9 +143,9 @@ namespace sim{
                 //---------------------------------------------------------------//
                 void put(T &item) {
                     chunk.push_back(item);
-                    if (queue_handle.queue->size_approx() == 0 || chunk.size() >= chunk_size){
+                    if (queue_handle.queue->size_approx() == 0 || chunk.size() >= chunk_size_n){
                         push_chunk();
-                        make_new_chunk(chunk_size);
+                        make_new_chunk(chunk_size_n);
                     }
                 }
 
@@ -162,18 +162,22 @@ namespace sim{
 
                     size_t s = queue_handle.queue->size_approx();
 
-                    if (s < LOW_WATERMARK) {
-                        delay = BASE_DELAY_NS;
+                    if (s < max_chunks_n/2) {
+                        //std::cerr << " -- no delay\n";
                         return;
                     }
 
-                    else if(s >= HIGH_WATERMARK) {
-                        delay *= 2;
-                    }
-                    else {
-                        delay = delay > TOP_DELAY_NS ? TOP_DELAY_NS : delay;
-                        delay = delay/2 < BASE_DELAY_NS ? BASE_DELAY_NS : delay/2;
-                    }
+
+                    double fill_ratio = ((double) s) / max_chunks_n;
+                    unsigned long int delay = (unsigned long int) (delay_ns * pow(2, -2*(1-fill_ratio)*log2_delay_ns));
+
+                    /*
+                    std::cerr << "d: " << delay << '\n';
+                    std::cerr << "D: " << delay_ns << '\n';
+                    std::cerr << "s: " << s << '\n';
+                    std::cerr << "M: " << max_chunks_n << '\n';
+                    std::cerr << "f: " << fill_ratio << '\n';
+                    */
 
                     std::this_thread::sleep_for(std::chrono::nanoseconds(delay));
 
@@ -185,7 +189,7 @@ namespace sim{
                 }
 
                 void push_chunk(){
-                    apply_delay();
+                    if (SIMFS_BUFFER_CONTROL) apply_delay();
                     if (chunk.size() > 0) {
                         queue_handle.queue->enqueue(std::move(chunk));
                     }
@@ -199,10 +203,13 @@ namespace sim{
                 
                 //---------------------------------------------------------------//
                 queue_handle_t<std::vector<T>> &queue_handle;
-                size_t chunk_size; //= CHUNK_SIZE_BYTES/sizeof(T);
                 std::vector<T> chunk;
-                unsigned int delay = BASE_DELAY_NS;
-                
+
+                //-Buffer-control------------------------------------------------//
+                size_t chunk_size_n = SIMFS_CHUNK_SIZE_BYTES / sizeof(T);
+                size_t max_chunks_n = SIMFS_BUFFER_SIZE_BYTES / SIMFS_CHUNK_SIZE_BYTES;
+                unsigned long int delay_ns = SIMFS_DELAY_MS * 1000000; // ms to ns
+                double log2_delay_ns = log2(SIMFS_DELAY_MS * 1000000); // ms to ns
 
         };
 
@@ -260,8 +267,8 @@ namespace sim{
 
             while (!is.eof()){
                 std::vector<T> chunk{};
-                chunk.resize(CHUNK_SIZE_BYTES/sizeof(T));
-                is.read(reinterpret_cast<char *>(chunk.data()), CHUNK_SIZE_BYTES);
+                chunk.resize(SIMFS_CHUNK_SIZE_BYTES/sizeof(T));
+                is.read(reinterpret_cast<char *>(chunk.data()), SIMFS_CHUNK_SIZE_BYTES);
                 chunk.resize(is.gcount()/sizeof(T));
                 queue.put_chunk(chunk);
             }
