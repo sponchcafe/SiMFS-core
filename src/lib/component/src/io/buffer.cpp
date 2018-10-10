@@ -3,11 +3,12 @@
 
 namespace sim{
     namespace io{
-        size_t CHUNK_SIZE_BYTES     = get_env("SIMFS_CHUNK_SIZE", 1<<14); // 16kB chunks
-        unsigned int LOW_WATERMARK  = get_env("SIMFS_LOW_MARK", 1<<6);
-        unsigned int HIGH_WATERMARK = get_env("SIMFS_HIGH_MARK", 1<<10);
-        unsigned int BASE_DELAY_NS  = get_env("SIMFS_BASE_DELAY_NS", 1);
-        unsigned int TOP_DELAY_NS   = get_env("SIMFS_TOP_DELAY_NS", 1<<20);
+
+        bool SIMFS_BUFFER_CONTROL = get_env("SIMFS_BUFFER_CONTROL", 0);
+        unsigned long int SIMFS_DELAY_MS = get_env("SIMFS_DELAY_MS", 1);
+        unsigned long int SIMFS_CHUNK_SIZE_BYTES = get_env_bytes("SIMFS_CHUNK_SIZE_BYTES", 1<<14);   // 16kB
+        unsigned long int SIMFS_BUFFER_SIZE_BYTES = get_env_bytes("SIMFS_BUFFER_SIZE_BYTES", 1<<20); //  1MB
+
     }
   
 }
