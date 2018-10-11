@@ -23,12 +23,13 @@ namespace sim{
 
     //-------------------------------------------------------------------//
     unsigned long int get_env_bytes(std::string name, unsigned long int def){
+
         char const *value = std::getenv(name.c_str());
         if (value == nullptr) return def;
         std::string s = std::string(value);
         unsigned int num = std::stoi(value);
-        //std::string suffix = s.substr(s.find_first_not_of("0123456789"));
         unsigned long int factor = 1;
+
         if (!std::isdigit(s.back())) {
             switch (s.back()){
                 case 'k' : factor = 1<<10; break;
@@ -39,6 +40,28 @@ namespace sim{
         }
 
         std::cerr << name << " set to " << value << " [" << num*factor << " bytes]" << '\n';
+        return num*factor;
+    }
+
+    //-------------------------------------------------------------------//
+    unsigned long int get_env_nanos(std::string name, unsigned long int def){
+
+        char const *value = std::getenv(name.c_str());
+        if (value == nullptr) return def;
+        std::string s = std::string(value);
+        unsigned int num = std::stoi(value);
+        unsigned long int factor = 1;
+
+        if (!std::isdigit(s.back())) {
+            switch (s.back()){
+                case 'n' : factor = 1;          break;
+                case 'u' : factor = 1000;       break;
+                case 'm' : factor = 1000000;    break;
+                default  : factor = 1000000000; break;
+            }
+        }
+
+        std::cerr << name << " set to " << value << " [" << num*factor << " nanoseconds]" << '\n';
         return num*factor;
     }
 

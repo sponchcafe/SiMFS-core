@@ -105,7 +105,7 @@ namespace sim{
         //-----------------------------------------------------------------------//
         
         extern bool SIMFS_BUFFER_CONTROL;
-        extern unsigned long int SIMFS_DELAY_MS;
+        extern unsigned long int SIMFS_DELAY_NS;
         extern unsigned long int SIMFS_CHUNK_SIZE_BYTES;
         extern unsigned long int SIMFS_BUFFER_SIZE_BYTES;
 
@@ -208,8 +208,8 @@ namespace sim{
                 //-Buffer-control------------------------------------------------//
                 size_t chunk_size_n = SIMFS_CHUNK_SIZE_BYTES / sizeof(T);
                 size_t max_chunks_n = SIMFS_BUFFER_SIZE_BYTES / SIMFS_CHUNK_SIZE_BYTES;
-                unsigned long int delay_ns = SIMFS_DELAY_MS * 1000000; // ms to ns
-                double log2_delay_ns = log2(SIMFS_DELAY_MS * 1000000); // ms to ns
+                unsigned long int delay_ns = SIMFS_DELAY_NS;
+                double log2_delay_ns = log2(SIMFS_DELAY_NS);
 
         };
 
