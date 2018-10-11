@@ -1,25 +1,27 @@
 #pragma once
 
-#include "graph/main.hpp" 
+#include "graph/main.hpp"
 #include "io/buffer.hpp"
 
 namespace sim{
     namespace graph{
 
-        class SetRatesAction : public Action{
+        class HeartbeatAction : public Action{
 
             //---------------------------------------------------------------//
             //---------------------------------------------------------------//
 
-            public:
+            public: 
 
+                //-----------------------------------------------------------//
                 static std::string type;
 
                 //-----------------------------------------------------------//
-                SetRatesAction(
+                HeartbeatAction(
                         std::string const name,
                         sim::graph::Graph &graph,
-                        std::unique_ptr<io::BufferInput<TimedValue>> &input
+                        double interval,
+                        std::unique_ptr<io::BufferOutput<realtime_t>> &output
                         );
 
                 //-----------------------------------------------------------//
@@ -28,21 +30,12 @@ namespace sim{
                 //-----------------------------------------------------------//
                 void fire() override;
 
-                //-----------------------------------------------------------//
-                void set_target_edge_ids(std::vector<std::string> &ids);
-                void set_scalings(std::vector<double> &scalings);
-                //-----------------------------------------------------------//
-
             private:
 
                 //-----------------------------------------------------------//
-                std::unique_ptr<io::BufferInput<TimedValue>> &input_ptr;
-                std::vector<std::string> target_edge_ids{};
-                std::vector<double> scalings{};
-                std::vector<sim::graph::Edge *> targets;
-                sim::TimedValue current{0.0, 0.0};
+                double interval = 1;
+                std::unique_ptr<io::BufferOutput<realtime_t>> &output_ptr;
 
         };
-
     }
 }

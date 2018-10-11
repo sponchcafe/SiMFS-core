@@ -2,6 +2,11 @@
 #include "io/buffer.hpp"
 #include "definitions/constants.hpp" // CONST_NA
 
+#include "actions/set_rates_action.hpp"
+#include "actions/output_time_action.hpp"
+#include "actions/set_state_if_action.hpp"
+#include "actions/heartbeat_action.hpp"
+
 using namespace sim::graph;
 
 namespace sim{
@@ -164,6 +169,20 @@ namespace sim{
                 std::unique_ptr<Action> act_ptr = std::move(ot_action_ptr);
                 graph->add_action(act_ptr);
                 graph->link_edge_action(id, action_id);
+
+                // heartbeat
+                if (e.find("heartbeat") != e.end() && e["heartbeat"] != 0){
+                    std::string hb_action_id = id+".heartbeat";
+                    auto hb_action_ptr = std::make_unique<HeartbeatAction>(
+                            hb_action_id,
+                            *graph, 
+                            e["heartbeat"],
+                            time_output_map.at(output_id)
+                            );
+                    std::unique_ptr<Action> hb_act_ptr = std::move(hb_action_ptr);
+                    graph->add_action(hb_act_ptr);
+
+                }
 
             }
 

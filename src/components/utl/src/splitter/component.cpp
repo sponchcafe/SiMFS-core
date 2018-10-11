@@ -70,9 +70,22 @@ namespace sim{
             efficiency_input_ptr->get(efficiency);
 
             while(photon_input_ptr->get(timetag)){
-                while(timetag > efficiency_input_ptr->peek().time){
+
+                if (timetag < 0) { // heartbeat
+                    while(-timetag > efficiency_input_ptr->peek().time){
+                        if (!efficiency_input_ptr->get(efficiency)) break;
+                    }
+                    continue;
+                }
+
+                while(
+                        !efficiency_input_ptr->is_done() 
+                        && timetag > efficiency_input_ptr->peek().time
+                     ){
                     if (!efficiency_input_ptr->get(efficiency)) break;
                 }
+
+                // detect
                 if (uni() < efficiency.value){
                     accepted_photon_output_ptr->put(timetag);
                 }
@@ -80,6 +93,9 @@ namespace sim{
                     rejected_photon_output_ptr->put(timetag);
                 }
             }
+
+            // tags are done,
+            // empty efficiency
             while(efficiency_input_ptr->get(efficiency));
         }
 
