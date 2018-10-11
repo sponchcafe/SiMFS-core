@@ -90,6 +90,9 @@ namespace sim{
                 }        
             }
 
+            // early done setting to prevent indefinite heartbeat
+            if (next == graph.get_default_edge_ptr()) graph.set_done(true);
+
             // Return next path or the graphs default edge when edge is null.
             // When the node has no outgoing edges, the default edge is 
             // returned.

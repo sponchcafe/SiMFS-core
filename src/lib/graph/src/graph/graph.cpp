@@ -201,6 +201,7 @@ namespace sim{
             // link default loop
             default_node->add_edge(DEFAULT_EDGE_NAME);
             default_edge->set_action(DEFAULT_ACTION_NAME);
+            default_node->set_action(DEFAULT_ACTION_NAME);
 
             // init defaults
             default_node->init();
