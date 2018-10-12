@@ -165,5 +165,6 @@ class Simulation:
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
+        print(f"started {cmd}")
         out, err = await proc.communicate(input=json.dumps(params).encode('utf-8'))
         return json.loads(out.decode().strip()), err.decode().strip()

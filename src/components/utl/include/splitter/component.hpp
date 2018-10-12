@@ -35,6 +35,7 @@ namespace sim{
                 // Parameter setters
                 //-----------------------------------------------------------//
                 void set_seed(unsigned s);
+                void set_heartbeat(bool hb);
                 void set_photon_input_id(std::string id);
                 void set_efficiency_input_id(std::string id);
                 void set_accepted_photon_output_id(std::string id);
@@ -46,6 +47,7 @@ namespace sim{
                 //-----------------------------------------------------------//
                 // Simulation parameters + defaults
                 //-----------------------------------------------------------//
+                bool heartbeat = false;
                 unsigned seed = 0;
                 std::string efficiency_input_id = "./efficiency";
                 std::string photon_input_id = "./emission";

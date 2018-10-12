@@ -50,7 +50,7 @@ namespace sim{
         if (value == nullptr) return def;
         std::string s = std::string(value);
         unsigned int num = std::stoi(value);
-        unsigned long int factor = 1;
+        unsigned long int factor = 1000000000;
 
         if (!std::isdigit(s.back())) {
             switch (s.back()){

@@ -34,6 +34,7 @@ namespace sim{
                 //-----------------------------------------------------------//
                 // Parameter setters
                 //-----------------------------------------------------------//
+                void set_heartbeat(bool hb);
                 void set_photon_output_id(std::string id);
                 void set_photon_input_ids(std::vector<std::string> ids);
                 //-----------------------------------------------------------//
@@ -46,8 +47,9 @@ namespace sim{
                 //-----------------------------------------------------------//
                 // Simulation parameters + defaults
                 //-----------------------------------------------------------//
-                std::string photon_output_id = "./mixed";
-                std::vector<std::string> photon_input_ids{"./photons"};
+                bool heartbeat = false;
+                std::string photon_output_id = "__mixed__";
+                std::vector<std::string> photon_input_ids{"__tags1__"};
 
                 //-----------------------------------------------------------//
                 realtime_t current{0.0}; 

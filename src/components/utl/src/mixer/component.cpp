@@ -8,6 +8,9 @@ namespace sim{
         Mixer::Mixer(){ }
 
         //-------------------------------------------------------------------//
+        void Mixer::set_heartbeat(bool hb){
+            heartbeat = hb;
+        }
         void Mixer::set_photon_output_id(std::string id){
             photon_output_id = id;
 
@@ -23,6 +26,7 @@ namespace sim{
             json params = get_json();
             params.merge_patch(j);
 
+            set_heartbeat(params.at("heartbeat"));
             set_photon_output_id(params.at("output"));
             set_photon_input_ids(params.at("inputs"));
 
@@ -33,6 +37,7 @@ namespace sim{
 
             json j;
 
+            j["heartbeat"] = heartbeat;
             j["output"] = photon_output_id;
             j["inputs"] = photon_input_ids;
 
@@ -60,7 +65,7 @@ namespace sim{
             auto second = first+1;
 
             while(photon_input_ptrs.size() > 1){
-                while (first->get()->peek() <= second->get()->peek()){
+                while (fabs(first->get()->peek()) <= fabs(second->get()->peek())){
                     if(!first->get()->get(current)){
                         std::swap(
                                 *photon_input_ptrs.begin(),
@@ -69,11 +74,15 @@ namespace sim{
                         photon_input_ptrs.pop_back();
                         break;
                     }
+                    // heartbeat handling
+                    if (!heartbeat && std::signbit(current)) continue;
                     photon_output_ptr->put(current);
                 }
                 sort_inputs();
             }
             while(first->get()->get(current)){
+                // heartbeat handling
+                if (!heartbeat && std::signbit(current)) continue;
                 photon_output_ptr->put(current);
             }
 
@@ -88,7 +97,7 @@ namespace sim{
                     std::unique_ptr<io::BufferInput<realtime_t>> &lhs, 
                     std::unique_ptr<io::BufferInput<realtime_t>> &rhs
                   ) {
-                    return *lhs < *rhs;
+                    return fabs(lhs->peek()) < fabs(rhs->peek()); // fabs for heartbeat
                 }
             );
         }

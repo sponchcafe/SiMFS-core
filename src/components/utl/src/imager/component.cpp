@@ -3,6 +3,7 @@
 #include "io/buffer.hpp"
 #include <algorithm>
 #include <iterator>
+#include <cmath>
 
 namespace sim{
     namespace comp{
@@ -99,13 +100,19 @@ namespace sim{
 
             auto coords_it = coord_ptrs.begin();
             auto time_it = time_ptrs.begin();
-
+            
             while(time_ptrs.size() > 0){
 
                 if (!image_chunk(**coords_it, **time_it)){
                     // finished coord, tag pair -> remove
                     std::swap(*coords_it, *(coord_ptrs.end()-1));
                     std::swap(*time_it, *(time_ptrs.end()-1));
+                    Coordinate c;
+                    realtime_t t;
+                    while((*(coord_ptrs.end()-1))->get(c)); // safety drain
+                    while((*(time_ptrs.end()-1))->get(t)){ // safety drain
+                        std::cerr << "DISCARDING t=" << t <<'\n';
+                    }
                     coord_ptrs.pop_back();
                     time_ptrs.pop_back();
                 }
@@ -114,6 +121,7 @@ namespace sim{
                 ++time_it;
                 if (coords_it >= coord_ptrs.end()) coords_it = coord_ptrs.begin();
                 if (time_it >= time_ptrs.end()) time_it = time_ptrs.begin();
+
             }
 
             // write result
@@ -128,92 +136,93 @@ namespace sim{
 
             Coordinate c{0.0,0.0,0.0,0.0};
             realtime_t tag{0.0};
-            GridValue gridv{0,0,0,0.0};
 
-            for (unsigned int i = 0; i < CHUNK_SIZE; i++){
+            unsigned int count = 0;
 
-                if(!coords.get(c)){
-                    // last coord -> empty tags
-                    while(tags.get(tag));
+            while( fabs(tags.peek()) >= coords.peek().t) {
+                if(!coords.get(c)) {
+                    add_to_grid(c, (double) count);
                     return false;
                 }
-                int count = 0;
-                while(tag < c.t){
-                    if (!tags.get(tag)) {
-                        // last tag -> empty coords
-                        while(coords.get(c));
-                        return false;
-                    }
-                    ++count;
-                }
-                if (count <= 0) continue;
-
-                gridv = coordinate_to_grid(c);
-                gridv.v = (double) count;
-                add_to_grid(gridv);
-
-            }
-            return true;
-
-        }
-
-
-        //-------------------------------------------------------------------//
-        Imager::GridValue Imager::coordinate_to_grid(Coordinate c){
-
-            int ix = (int) ((c.x-grid_spec.x.min) / x_step);
-            int iy = (int) ((c.y-grid_spec.y.min) / y_step);
-            int iz = (int) ((c.z-grid_spec.z.min) / z_step);
-
-            return GridValue{ix, iy, iz, 1.0};
-        }
-
-
-        
-        //-------------------------------------------------------------------//
-        void Imager::add_to_grid(Imager::GridValue gridv){
-
-            int index = 
-                gridv.x*grid_spec.y.n*grid_spec.z.n + 
-                gridv.y*grid_spec.z.n+ 
-                gridv.z;
-
-            if (index < 0 || index > (int) grid.size()) return;
-
-            grid[index] += gridv.v;
-
-        }
-
-        //-------------------------------------------------------------------//
-        void Imager::write_file(){
-
-            auto ifs = std::ifstream(fname, std::ifstream::binary);
-            if (ifs.good()){
-                std::cerr << "Image file " << fname << " already exists.\n";
-                ifs.close();
-                return;
-            } 
-
-            auto fs = std::ofstream(fname, std::ofstream::binary);
-            if (!fs.good()){
-                fs.close();
-                std::cerr << "Failed to open image file: " << fname << "\n";
-                return;
             }
 
-            fs.write(reinterpret_cast<char *>(&grid_spec), sizeof(GridSpec));
-            fs.write(reinterpret_cast<char *>(grid.data()), grid.size()*sizeof(double));
 
-            fs.close();
-
-            std::cerr << "Image written to " << fname << "\n";
-        }
-
-        //-------------------------------------------------------------------//
-        bool Imager::in_value_mode(){
-            return value_mode;
-        }
-
+            while( !tags.is_done() && fabs(tags.peek()) < coords.peek().t) {
+                if (!std::signbit(tags.peek())) count++;
+                tags.get(tag);
+            }
+            
+            add_to_grid(c, (double) count);
+            return !tags.is_done();
 
     }
+
+
+
+
+    //-------------------------------------------------------------------//
+    Imager::GridValue Imager::coordinate_to_grid(Coordinate c){
+
+        int ix = (int) ((c.x-grid_spec.x.min) / x_step);
+        int iy = (int) ((c.y-grid_spec.y.min) / y_step);
+        int iz = (int) ((c.z-grid_spec.z.min) / z_step);
+
+        return GridValue{ix, iy, iz, 1.0};
+    }
+
+    //-------------------------------------------------------------------//
+    void Imager::add_to_grid(Coordinate c, double value){
+        if (value <= 0) return; 
+        Imager::GridValue gridv = coordinate_to_grid(c);
+        gridv.v = value;
+        add_to_grid(gridv);
+    }
+
+
+    //-------------------------------------------------------------------//
+    void Imager::add_to_grid(Imager::GridValue gridv){
+
+        int index = 
+            gridv.x*grid_spec.y.n*grid_spec.z.n + 
+            gridv.y*grid_spec.z.n+ 
+            gridv.z;
+
+        if (index < 0 || index > (int) grid.size()) return;
+
+        grid[index] += gridv.v;
+
+    }
+
+    //-------------------------------------------------------------------//
+    void Imager::write_file(){
+
+        auto ifs = std::ifstream(fname, std::ifstream::binary);
+        if (ifs.good()){
+            std::cerr << "Image file " << fname << " already exists.\n";
+            ifs.close();
+            return;
+        } 
+
+        auto fs = std::ofstream(fname, std::ofstream::binary);
+        if (!fs.good()){
+            fs.close();
+            std::cerr << "Failed to open image file: " << fname << "\n";
+            return;
+        }
+
+        fs.write(reinterpret_cast<char *>(&grid_spec), sizeof(GridSpec));
+        fs.write(reinterpret_cast<char *>(grid.data()), grid.size()*sizeof(double));
+
+        fs.close();
+
+        std::cerr << "Image written to " << fname << "\n";
+    }
+
+    //-------------------------------------------------------------------//
+    bool Imager::in_value_mode(){
+        return value_mode;
+    }
+
+
+}
 }

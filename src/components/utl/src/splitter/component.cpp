@@ -1,4 +1,5 @@
 #include "splitter/component.hpp"
+#include <cmath>
 
 namespace sim{
     namespace comp{
@@ -9,6 +10,9 @@ namespace sim{
         }
 
         //-------------------------------------------------------------------//
+        void Splitter::set_heartbeat(bool hb){
+            heartbeat = hb;
+        }
         void Splitter::set_seed(unsigned s){
             seed = s;
         }
@@ -32,6 +36,7 @@ namespace sim{
             json params = get_json();
             params.merge_patch(j);
 
+            set_heartbeat(params.at("heartbeat"));
             set_seed(params.at("seed"));
             set_photon_input_id(params.at("photon_input"));
             set_efficiency_input_id(params.at("efficiency_input"));
@@ -45,6 +50,7 @@ namespace sim{
 
             json j;
 
+            j["heartbeat"] = heartbeat;
             j["seed"] = seed;
             j["photon_input"] = photon_input_id;
             j["efficiency_input"] = efficiency_input_id;
@@ -67,36 +73,31 @@ namespace sim{
         //-------------------------------------------------------------------//
         void Splitter::run(){
             
-            efficiency_input_ptr->get(efficiency);
-
             while(photon_input_ptr->get(timetag)){
 
-                if (timetag < 0) { // heartbeat
-                    while(-timetag > efficiency_input_ptr->peek().time){
-                        if (!efficiency_input_ptr->get(efficiency)) break;
-                    }
-                    continue;
-                }
-
-                while(
-                        !efficiency_input_ptr->is_done() 
-                        && timetag > efficiency_input_ptr->peek().time
-                     ){
+                while(fabs(timetag) >= efficiency_input_ptr->peek().time){
                     if (!efficiency_input_ptr->get(efficiency)) break;
                 }
 
-                // detect
+                // heartbeat handling
+                if (heartbeat && std::signbit(timetag)) {
+                    accepted_photon_output_ptr->put(timetag);
+                    rejected_photon_output_ptr->put(timetag);
+                    continue;
+                }
+
                 if (uni() < efficiency.value){
                     accepted_photon_output_ptr->put(timetag);
                 }
                 else {
                     rejected_photon_output_ptr->put(timetag);
                 }
+
             }
 
-            // tags are done,
-            // empty efficiency
+            // tags are done, empty efficiency
             while(efficiency_input_ptr->get(efficiency));
+
         }
 
     }

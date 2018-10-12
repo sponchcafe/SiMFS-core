@@ -78,6 +78,7 @@ namespace sim{
                 //-----------------------------------------------------------//
                 // Simulation parameters + defaults
                 //-----------------------------------------------------------//
+
                 std::string fname = "__image__";
                 std::vector<std::string> time_input_ids = {"__timetags__"};
                 std::vector<std::string> coordinate_input_ids = {"__coordinates__"};
@@ -100,9 +101,10 @@ namespace sim{
                         io::BufferInput<Coordinate> &coords, 
                         io::BufferInput<realtime_t> &tags);
                 void add_to_grid(GridValue gridv);
+                void add_to_grid(Coordinate c, double value);
                 void write_file();
 
-                const static unsigned int CHUNK_SIZE = 1024*1024;
+                const static unsigned int CHUNK_SIZE = 1;
                 
         };
 
