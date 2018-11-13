@@ -4,6 +4,8 @@ Architecture
 This section describes the overall design philosophy and archtitecture of
 *SiMFS-Tk*.
 
+.. image:: simfs_scheme.png
+
 Components
 ----------
 
