@@ -19,6 +19,8 @@ print(f'All simfs components found in {basepath}.')
 IO = namedtuple('IO', ['name', 'dtype'])
 ComponentLog = namedtuple('ComponentLog', ['params', 'error'])
 
+dimension_t = np.dtype([('min', 'f8'), ('max', 'f8'), ('n', 'i8')])
+gridspec = np.dtype([('x', dimension_t), ('y', dimension_t), ('z', dimension_t)])
 coordinate_t = np.dtype([('x', 'f8'), ('y', 'f8'),('z', 'f8'), ('t', 'f8')])
 timed_value_t = np.dtype([('v', 'f8'), ('t', 'f8')])
 timetag_t = np.dtype('f8')

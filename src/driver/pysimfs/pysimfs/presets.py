@@ -30,10 +30,10 @@ class SimfsDefaultMagics(Magics):
         call = os.path.join(basepath, SimfsDefaultMagics.shortcuts[line])
 
         params = Simulation.call_simfs(call, 'list')[0]
-        params = f'{line.split("/")[-1]}_params = '
-        params += json.dumps(params, indent=4).replace('"', "'")
+        varname = f'{line.split("/")[-1]}_params'
+        params = json.dumps(params, indent=4).replace('"', "'")
 
         self.shell.set_next_input(
-                f'# %simfs_default {line}\n{params}', 
+                f'# %simfs_default {line}\n{varname} = {params}', 
                 replace=True
                 )
