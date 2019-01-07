@@ -67,6 +67,10 @@ namespace sim{
                     return peek() < rhs.peek();
                 }
 
+                size_t get_size_approx() const {
+                    return queue_handle.queue->size_approx();
+                }
+
                 //---------------------------------------------------------------//
                 bool is_done(){
                     return done;
@@ -155,6 +159,7 @@ namespace sim{
                     chunk = std::move(c);
                 }
 
+
             private:
 
                 //---------------------------------------------------------------//
@@ -163,15 +168,15 @@ namespace sim{
                     size_t s = queue_handle.queue->size_approx();
 
                     if (s < max_chunks_n/2) {
-                        //std::cerr << " -- no delay\n";
+                        // std::cerr << " -- no delay\n";
                         return;
                     }
 
 
-                    double fill_ratio = ((double) s) / max_chunks_n;
-                    unsigned long int delay = (unsigned long int) (delay_ns * pow(2, -2*(1-fill_ratio)*log2_delay_ns));
+                    unsigned long int delay = calc_delay_ns(s);
 
                     /*
+                    std::cerr << "log2(D): " << log2_delay_ns << '\n';
                     std::cerr << "d: " << delay << '\n';
                     std::cerr << "D: " << delay_ns << '\n';
                     std::cerr << "s: " << s << '\n';
@@ -181,6 +186,11 @@ namespace sim{
 
                     std::this_thread::sleep_for(std::chrono::nanoseconds(delay));
 
+                }
+
+                unsigned long int calc_delay_ns(size_t chunk_count){
+                    double fill_ratio = ((double) chunk_count) / max_chunks_n;
+                    return (unsigned long int) (delay_ns * pow(2, -2*(1-fill_ratio)*log2_delay_ns));
                 }
 
                 void make_new_chunk(size_t size){
@@ -209,7 +219,7 @@ namespace sim{
                 size_t chunk_size_n = SIMFS_CHUNK_SIZE_BYTES / sizeof(T);
                 size_t max_chunks_n = SIMFS_BUFFER_SIZE_BYTES / SIMFS_CHUNK_SIZE_BYTES;
                 unsigned long int delay_ns = SIMFS_DELAY_NS;
-                double log2_delay_ns = log2(SIMFS_DELAY_NS);
+                double log2_delay_ns = log2((double) SIMFS_DELAY_NS);
 
         };
 
