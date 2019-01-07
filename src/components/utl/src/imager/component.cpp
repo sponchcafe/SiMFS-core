@@ -21,9 +21,6 @@ namespace sim{
         void Imager::set_output_file(std::string fn){
             fname = fn;
         }
-        void Imager::set_value_mode(bool v){
-            value_mode = v;
-        }
         void Imager::set_gridspec_x(double min, double max, size_t n){
             grid_spec.x.min = min;
             grid_spec.x.max = max;
@@ -83,6 +80,7 @@ namespace sim{
         void Imager::init() {
 
             grid.resize(grid_spec.x.n*grid_spec.y.n*grid_spec.z.n);
+            std::cerr << "Grid size is: " << grid.capacity()*sizeof(double) << " bytes\n";
             x_step = (grid_spec.x.n > 0) ? (grid_spec.x.max-grid_spec.x.min)/grid_spec.x.n : 0;
             y_step = (grid_spec.y.n > 0) ? (grid_spec.y.max-grid_spec.y.min)/grid_spec.y.n : 0;
             z_step = (grid_spec.z.n > 0) ? (grid_spec.z.max-grid_spec.z.min)/grid_spec.z.n : 0;
@@ -95,8 +93,12 @@ namespace sim{
             std::vector<std::unique_ptr<io::BufferInput<Coordinate>>> coord_ptrs;
             std::vector<std::unique_ptr<io::BufferInput<realtime_t>>> time_ptrs;
 
-            for (auto &id: coordinate_input_ids) coord_ptrs.emplace_back(std::make_unique<io::BufferInput<Coordinate>>(id));
-            for (auto &id: time_input_ids) time_ptrs.emplace_back(std::make_unique<io::BufferInput<realtime_t>>(id));
+            for (auto &id: coordinate_input_ids) {
+                coord_ptrs.emplace_back(std::make_unique<io::BufferInput<Coordinate>>(id));
+            }
+            for (auto &id: time_input_ids){
+                time_ptrs.emplace_back(std::make_unique<io::BufferInput<realtime_t>>(id));
+            }
 
             auto coords_it = coord_ptrs.begin();
             auto time_it = time_ptrs.begin();
@@ -218,10 +220,6 @@ namespace sim{
         std::cerr << "Image written to " << fname << "\n";
     }
 
-    //-------------------------------------------------------------------//
-    bool Imager::in_value_mode(){
-        return value_mode;
-    }
 
 
 }

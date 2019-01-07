@@ -31,11 +31,7 @@ int main(int argc, char *argv[]) {
             threads.emplace_back(io::file2buffer_thread<Coordinate>(*it));
         }
         for (auto it=time_inputs.begin(); it!=time_inputs.end(); ++it){
-            if (img.in_value_mode()){
-                threads.emplace_back(io::file2buffer_thread<TimedValue>(*it));
-            } else{
-                threads.emplace_back(io::file2buffer_thread<realtime_t>(*it));
-            }
+            threads.emplace_back(io::file2buffer_thread<realtime_t>(*it));
         }
 
         std::thread img_thr = comp::run_component<comp::Imager>(img, true);

@@ -39,11 +39,8 @@ namespace sim{
                 void set_time_input_ids(std::vector<std::string> ids);
                 void set_coordinate_input_ids(std::vector<std::string> ids);
                 void set_output_file(std::string fn);
-                void set_value_mode(bool v);
                 //-----------------------------------------------------------//
 
-                bool in_value_mode();
-               
 
             private:
 
@@ -83,8 +80,6 @@ namespace sim{
                 std::vector<std::string> time_input_ids = {"__timetags__"};
                 std::vector<std::string> coordinate_input_ids = {"__coordinates__"};
                 
-                bool value_mode = false;
-
                 GridSpec grid_spec {
                     {-1e-6, 1e-6, 101},
                     {-1e-6, 1e-6, 101},
