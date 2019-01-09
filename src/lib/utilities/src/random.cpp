@@ -10,12 +10,15 @@ using namespace std::chrono;
 namespace sim{
     namespace random{
 
+        static unsigned count = 0;
+
         unsigned get_new_seed(){
             milliseconds ms = duration_cast< milliseconds >(
                         system_clock::now().time_since_epoch()
                     );
             pid_t pid = ::getpid();
-            return ms.count()*pid;
+
+            return ms.count()*pid+(count++);
         }
 
         Exponential::Exponential(double lambda, unsigned seed){
