@@ -54,6 +54,13 @@ namespace sim{
         //-------------------------------------------------------------------//
         bool action_type_compare(std::string lhs, std::string rhs);
 
+        //-------------------------------------------------------------------//
+        template <class T, typename... Targs>
+        std::unique_ptr<Action> make_action_uptr(Targs... Fargs){
+            T *action_ptr = new T(Fargs...);
+            return std::unique_ptr<Action>(action_ptr);
+        }
+
     }
 }
 

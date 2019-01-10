@@ -68,6 +68,14 @@ namespace sim{
                 // via a unique_ptr and manages its lifetime from hereon.
                 //-----------------------------------------------------------//
                 void add_action(std::unique_ptr<Action> &action_uptr);
+                // Convenience variadic action adding
+                template <class T, typename... Targs>
+                void add_action(Targs... Fargs){
+                    T *action_ptr = new T(Fargs...);
+                    auto uptr = std::unique_ptr<Action>(action_ptr);
+                    add_action(uptr);
+                }
+
                 std::vector<std::unique_ptr<Action>> const & get_actions() const;
                 Action * get_action_ptr(std::string const name);
                 Action * get_default_action_ptr();
