@@ -47,7 +47,12 @@ namespace sim{
             json j{};
 
             if (isatty(fileno(stdin))){
-                std::cerr << "No parameters specified, using defaults only\n";
+                std::cerr << "Using defaults only.\n";
+                return json::object();
+            }
+
+            if (std::cin.peek() == EOF){
+                std::cerr << "Empty parameter input.\n";
                 return json::object();
             }
 
