@@ -41,3 +41,14 @@ target_link_libraries(sim_img sim_component)
 
 add_executable(simfs_img src/imager/simfs_img.cpp)
 target_link_libraries(simfs_img sim_img)
+
+###############################################################################
+# t3r writer Component
+###############################################################################
+
+add_library(sim_t3r src/t3r_writer/component.cpp)
+target_include_directories(sim_t3r PUBLIC ./include)
+target_link_libraries(sim_t3r sim_component)
+
+add_executable(simfs_t3r src/t3r_writer/simfs_t3r.cpp)
+target_link_libraries(simfs_t3r sim_t3r)
