@@ -13,7 +13,9 @@ namespace sim{
         }
         void Mixer::set_photon_output_id(std::string id){
             photon_output_id = id;
-
+        }
+        void Mixer::set_routed(bool r){
+            routed = r;
         }
         void Mixer::set_photon_input_ids(std::vector<std::string> ids){
             photon_input_ids = ids;
@@ -27,6 +29,7 @@ namespace sim{
             params.merge_patch(j);
 
             set_heartbeat(params.at("heartbeat"));
+            set_routed(params.at("routed"));
             set_photon_output_id(params.at("output"));
             set_photon_input_ids(params.at("inputs"));
 
@@ -38,6 +41,7 @@ namespace sim{
             json j;
 
             j["heartbeat"] = heartbeat;
+            j["routed"] = routed;
             j["output"] = photon_output_id;
             j["inputs"] = photon_input_ids;
 
@@ -48,10 +52,17 @@ namespace sim{
 
         //-------------------------------------------------------------------//
         void Mixer::init() {
-            photon_output_ptr = std::make_unique<io::BufferOutput<realtime_t>>(photon_output_id);
+            if (routed) {
+                routed_photon_output_ptr = 
+                    std::make_unique<io::BufferOutput<RoutedTime>>(photon_output_id);
+            } else {
+                single_channel_photon_output_ptr = 
+                    std::make_unique<io::BufferOutput<realtime_t>>(photon_output_id);
+            }
             photon_input_ptrs.clear();
-            for (auto id: photon_input_ids){
-                auto input = std::make_unique<io::BufferInput<realtime_t>>(id);
+            for (short unsigned i = 0; i<photon_input_ids.size(); ++i){
+                std::string id = photon_input_ids[i];
+                RoutedInput input {i, std::make_unique<io::BufferInput<realtime_t>>(id)};
                 photon_input_ptrs.push_back(std::move(input));
             }
         }
@@ -65,8 +76,11 @@ namespace sim{
             auto second = first+1;
 
             while(photon_input_ptrs.size() > 1){
-                while (fabs(first->get()->peek()) <= fabs(second->get()->peek())){
-                    if(!first->get()->get(current)){
+
+                current.route = first->route;
+
+                while (fabs(first->input_ptr->peek()) <= fabs(second->input_ptr->peek())){
+                    if(!first->input_ptr->get(current.time)){
                         std::swap(
                                 *photon_input_ptrs.begin(),
                                 *(photon_input_ptrs.end()-1)
@@ -75,17 +89,29 @@ namespace sim{
                         break;
                     }
                     // heartbeat handling
-                    if (!heartbeat && std::signbit(current)) continue;
-                    photon_output_ptr->put(current);
+                    if (!heartbeat && std::signbit(current.time)) continue;
+                    put_timetag(current);
                 }
+
                 sort_inputs();
-            }
-            while(first->get()->get(current)){
-                // heartbeat handling
-                if (!heartbeat && std::signbit(current)) continue;
-                photon_output_ptr->put(current);
+
             }
 
+            while(first->input_ptr->get(current.time)){
+                // heartbeat handling
+                if (!heartbeat && std::signbit(current.time)) continue;
+                put_timetag(current);
+            }
+
+        }
+
+        //-------------------------------------------------------------------//
+        void Mixer::put_timetag(RoutedTime t){
+            if (routed){
+                routed_photon_output_ptr->put(current);
+            } else {
+                single_channel_photon_output_ptr->put(current.time);
+            }
         }
 
         //-------------------------------------------------------------------//
@@ -94,10 +120,10 @@ namespace sim{
                 photon_input_ptrs.begin(),
                 photon_input_ptrs.end(),
                 [](
-                    std::unique_ptr<io::BufferInput<realtime_t>> &lhs, 
-                    std::unique_ptr<io::BufferInput<realtime_t>> &rhs
+                    RoutedInput &lhs, 
+                    RoutedInput &rhs
                   ) {
-                    return fabs(lhs->peek()) < fabs(rhs->peek()); // fabs for heartbeat
+                    return fabs(lhs.input_ptr->peek()) < fabs(rhs.input_ptr->peek()); // fabs for heartbeat
                 }
             );
         }

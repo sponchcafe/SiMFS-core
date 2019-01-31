@@ -35,11 +35,20 @@ namespace sim{
                 // Parameter setters
                 //-----------------------------------------------------------//
                 void set_heartbeat(bool hb);
+                void set_routed(bool r);
                 void set_photon_output_id(std::string id);
                 void set_photon_input_ids(std::vector<std::string> ids);
                 //-----------------------------------------------------------//
 
             private:
+
+                typedef struct {
+                    unsigned short route;
+                    std::unique_ptr<io::BufferInput<realtime_t>> input_ptr;
+                } RoutedInput;
+
+                //-----------------------------------------------------------//
+                void put_timetag(RoutedTime tag);
 
                 //-----------------------------------------------------------//
                 void sort_inputs();
@@ -48,15 +57,18 @@ namespace sim{
                 // Simulation parameters + defaults
                 //-----------------------------------------------------------//
                 bool heartbeat = false;
+                bool routed = false;
                 std::string photon_output_id = "__mixed__";
                 std::vector<std::string> photon_input_ids{"__tags1__"};
 
                 //-----------------------------------------------------------//
-                realtime_t current{0.0}; 
+                RoutedTime current{0.0, 0}; 
 
                 //-----------------------------------------------------------//
-                std::unique_ptr<io::BufferOutput<realtime_t>> photon_output_ptr;
-                std::vector<std::unique_ptr<io::BufferInput<realtime_t>>> photon_input_ptrs;
+                std::unique_ptr<io::BufferOutput<realtime_t>> single_channel_photon_output_ptr;
+                std::unique_ptr<io::BufferOutput<RoutedTime>> routed_photon_output_ptr;
+
+                std::vector<RoutedInput> photon_input_ptrs;
 
         };
 
