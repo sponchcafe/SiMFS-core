@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
     //-Run-------------------------------------------------------------------//
     if (!cli::check_list(opts)){
 
-        auto in_thread = io::file2buffer_thread<realtime_t>(log["input"]);
+        auto in_thread = io::file2buffer_thread<RoutedTime>(log["input"]);
         auto t3r_thread = comp::run_component<comp::T3rWriter>(t3r, true);
         
         in_thread.join();

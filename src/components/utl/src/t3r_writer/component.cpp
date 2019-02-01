@@ -2,6 +2,7 @@
 #include "io/buffer.hpp"
 #include <iterator>
 #include <fstream>
+#include <numeric> // fmod
 
 namespace sim{
     namespace comp{
@@ -50,7 +51,7 @@ namespace sim{
 
         //-------------------------------------------------------------------//
         void T3rWriter::init() {
-            input_ptr = std::make_unique<io::BufferInput<realtime_t>> (input_id);
+            input_ptr = std::make_unique<io::BufferInput<RoutedTime>> (input_id);
             ofs = std::ofstream{output_fn, std::ios::binary};
         }
 
@@ -164,13 +165,17 @@ namespace sim{
         //-------------------------------------------------------------------//
         void T3rWriter::run(){
 
-            realtime_t tag;
+            RoutedTime tag;
             uint64_t ticks;
+            uint16_t channel;
             uint32_t ovfls = 0;
             uint32_t ovfls_written = 0;
             uint16_t t3r_tag = 0;
+            double sync_time = 1 / (double) sync_rate;
+            
+            resolution = sync_time/number_of_channels;
 
-            int count = 0;
+            int tags_written = 0;
 
             if(ofs.is_open()){
 
@@ -178,21 +183,34 @@ namespace sim{
 
                 while(input_ptr->get(tag)){
 
-                    ticks   = (uint64_t)  (tag * sync_rate);
+                    ticks   = (uint64_t) (tag.time * sync_rate);
                     ovfls   = (uint32_t) ((ticks & 0xffffffff0000) >> 16);
-                    t3r_tag = (uint16_t)  (ticks & 0x0000ffff);
+                    t3r_tag = (uint16_t) (ticks & 0x0000ffff);
+                    channel = (uint16_t) (
+                          std::fmod(tag.time, sync_time) 
+                        / sync_time * (number_of_channels-1)
+                    );
 
                     while(ovfls_written < ovfls){
                         write_record(pack_record(false, false, 0u, 2048u, 0u));
                         ovfls_written++;
                     }
 
-                    write_record(pack_record(false, true, 0u, 0u, t3r_tag));
-                    count++;
+                    write_record(pack_record(false, true, tag.route % 4, channel, t3r_tag));
+                    tags_written++;
                 
                 }
 
             }
+
+            number_of_records = tags_written + ovfls_written;
+
+            // write header data
+            ofs.seekp(T3R_OFFSET_NUMBER_OF_RECORDS);
+            ofs.write(
+                reinterpret_cast<char *>(&number_of_records), 
+                sizeof(number_of_records)
+            );
 
         }
 
