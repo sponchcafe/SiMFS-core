@@ -59,12 +59,14 @@ namespace sim{
                 single_channel_photon_output_ptr = 
                     std::make_unique<io::BufferOutput<realtime_t>>(photon_output_id);
             }
+
             photon_input_ptrs.clear();
             for (short unsigned i = 0; i<photon_input_ids.size(); ++i){
                 std::string id = photon_input_ids[i];
                 RoutedInput input {i, std::make_unique<io::BufferInput<realtime_t>>(id)};
                 photon_input_ptrs.push_back(std::move(input));
             }
+
         }
 
         //-------------------------------------------------------------------//
@@ -97,6 +99,8 @@ namespace sim{
 
             }
 
+            current.route = first->route;
+
             while(first->input_ptr->get(current.time)){
                 // heartbeat handling
                 if (!heartbeat && std::signbit(current.time)) continue;
@@ -127,7 +131,6 @@ namespace sim{
                 }
             );
         }
-
 
     }
 }
