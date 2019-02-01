@@ -16,6 +16,12 @@ namespace sim{
         realtime_t time;
     } TimedValue;
 
+    //-Routed-timetag----------------------------------------------------//
+    typedef struct{
+        realtime_t time;
+        unsigned short route;
+    } RoutedTime;
+
     //-SI-Coordinate-----------------------------------------------------//
     typedef struct{
         coordinate_t x;
