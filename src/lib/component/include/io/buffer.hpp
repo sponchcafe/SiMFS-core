@@ -8,38 +8,38 @@
 namespace sim{
     namespace io{
 
-        //-----------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         // Template for lock-free queue based input.
-        //-----------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         template <typename T> class BufferInput { 
 
             public:
 
-                //---------------------------------------------------------------//
+                //-----------------------------------------------------------//
                 BufferInput<T>(std::string id) : 
                     buffer_id(id),
                     queue_handle(open<std::vector<T>>(id)) {
                         get_next_chunk();
                     }
 
-                //-Copy-ctor:-DELETED--------------------------------------------//
+                //-Copy-ctor:-DELETED----------------------------------------//
                 BufferInput<T> (BufferInput<T> &other) = delete;
 
-                //-Copy-assgin:-DELETED------------------------------------------//
+                //-Copy-assgin:-DELETED--------------------------------------//
                 BufferInput<T> &operator=(BufferInput<T> &other) = delete;
 
-                //-Move-ctor:-DEFAULT--------------------------------------------//
+                //-Move-ctor:-DEFAULT----------------------------------------//
                 BufferInput<T>(BufferInput<T> &&other) = default;
 
-                //-Move-assign:-DEFAULT------------------------------------------//
+                //-Move-assign:-DEFAULT--------------------------------------//
                 BufferInput<T> &operator=(BufferInput<T> &&other) = default;
 
-                //---------------------------------------------------------------//
+                //-----------------------------------------------------------//
                 ~BufferInput<T>() {
                     io::close<std::vector<T>>(buffer_id);
                 }
 
-                //---------------------------------------------------------------//
+                //-----------------------------------------------------------//
                 bool get(T &target) {
                     if (done) return false;
                     target = *current++;
@@ -48,7 +48,7 @@ namespace sim{
                 }
         
 
-                //---------------------------------------------------------------//
+                //-----------------------------------------------------------//
                 bool get_chunk(std::vector<T> &target){
                     if (done) return false;
                     target = std::move(current_chunk);
@@ -56,13 +56,13 @@ namespace sim{
                     return true; // true if a new (valid) chunk is provided
                 }
 
-                //---------------------------------------------------------------//
+                //-----------------------------------------------------------//
                 T peek() const {
                     if (done) return T{};
                     return *current;
                 }
 
-                //-Compare-input-order-by-current-value--------------------------//
+                //-Compare-input-order-by-current-value----------------------//
                 bool operator< (BufferInput<T> const &rhs) const {
                     return peek() < rhs.peek();
                 }
@@ -71,16 +71,16 @@ namespace sim{
                     return queue_handle.queue->size_approx();
                 }
 
-                //---------------------------------------------------------------//
+                //-----------------------------------------------------------//
                 bool is_done(){
                     return done;
                 }
 
             private:
 
-                //---------------------------------------------------------------//
+                //-----------------------------------------------------------//
                 // Get the next chunk to the current member
-                //---------------------------------------------------------------//
+                //-----------------------------------------------------------//
                 void get_next_chunk(){
                     queue_handle.queue->wait_dequeue(current_chunk);
                     if (current_chunk.size() == 0){
@@ -91,7 +91,7 @@ namespace sim{
                     }
                 }
 
-                //---------------------------------------------------------------//
+                //-----------------------------------------------------------//
                 std::string const buffer_id;
                 queue_handle_t<std::vector<T>> &queue_handle;
                 std::vector<T> current_chunk{};
@@ -100,51 +100,51 @@ namespace sim{
 
         };
 
-        //-----------------------------------------------------------------------//
-        //-----------------------------------------------------------------------//
-        //-----------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         
-        //-----------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         // Control parameters for buffer delays
-        //-----------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         
         extern bool SIMFS_BUFFER_CONTROL;
         extern unsigned long int SIMFS_DELAY_NS;
         extern unsigned long int SIMFS_CHUNK_SIZE_BYTES;
         extern unsigned long int SIMFS_BUFFER_SIZE_BYTES;
 
-        //-----------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         // Template for lock-free queue based output.
-        //-----------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         template <typename T> class BufferOutput { 
 
             public:
 
-                //---------------------------------------------------------------//
+                //-----------------------------------------------------------//
                 BufferOutput<T>(std::string id) :
                     queue_handle(open<std::vector<T>>(id)) { 
                         make_new_chunk(chunk_size_n);
                     }
 
-                //---------------------------------------------------------------//
+                //-----------------------------------------------------------//
                 ~BufferOutput<T>(){
                     push_chunk();
                     push_empty_end_chunk(); // end of stream
                 }
 
-                //-Copy-ctor:-DELETED--------------------------------------------//
+                //-Copy-ctor:-DELETED----------------------------------------//
                 BufferOutput<T>(BufferOutput<T> &source) = delete;
 
-                //-Copy-assgin:-DELETED------------------------------------------//
+                //-Copy-assgin:-DELETED--------------------------------------//
                 BufferOutput<T> &operator=(BufferOutput<T> &other) = delete;
 
-                //-Move-ctor:-DEFAULT--------------------------------------------//
+                //-Move-ctor:-DEFAULT----------------------------------------//
                 BufferOutput<T>(BufferOutput<T> &&other)  = default;
 
-                //-Move-assign:-DEFAULT------------------------------------------//
+                //-Move-assign:-DEFAULT--------------------------------------//
                 BufferOutput<T> &operator=(BufferOutput<T> &&other) = default;
 
-                //---------------------------------------------------------------//
+                //-----------------------------------------------------------//
                 void put(T &item) {
                     chunk.push_back(item);
                     if (queue_handle.queue->size_approx() == 0 || chunk.size() >= chunk_size_n){
@@ -153,7 +153,7 @@ namespace sim{
                     }
                 }
 
-                //---------------------------------------------------------------//
+                //-----------------------------------------------------------//
                 void put_chunk(std::vector<T> &c){
                     push_chunk(); // commit current chunk
                     chunk = std::move(c);
@@ -162,30 +162,12 @@ namespace sim{
 
             private:
 
-                //---------------------------------------------------------------//
+                //-----------------------------------------------------------//
                 void apply_delay(){
-
                     size_t s = queue_handle.queue->size_approx();
-
-                    if (s < max_chunks_n/2) {
-                        // std::cerr << " -- no delay\n";
-                        return;
-                    }
-
-
+                    if (s < max_chunks_n/2) return;
                     unsigned long int delay = calc_delay_ns(s);
-
-                    /*
-                    std::cerr << "log2(D): " << log2_delay_ns << '\n';
-                    std::cerr << "d: " << delay << '\n';
-                    std::cerr << "D: " << delay_ns << '\n';
-                    std::cerr << "s: " << s << '\n';
-                    std::cerr << "M: " << max_chunks_n << '\n';
-                    std::cerr << "f: " << fill_ratio << '\n';
-                    */
-
                     std::this_thread::sleep_for(std::chrono::nanoseconds(delay));
-
                 }
 
                 unsigned long int calc_delay_ns(size_t chunk_count){
@@ -211,11 +193,11 @@ namespace sim{
                 }
 
                 
-                //---------------------------------------------------------------//
+                //-----------------------------------------------------------//
                 queue_handle_t<std::vector<T>> &queue_handle;
                 std::vector<T> chunk;
 
-                //-Buffer-control------------------------------------------------//
+                //-Buffer-control--------------------------------------------//
                 size_t chunk_size_n = SIMFS_CHUNK_SIZE_BYTES / sizeof(T);
                 size_t max_chunks_n = SIMFS_BUFFER_SIZE_BYTES / SIMFS_CHUNK_SIZE_BYTES;
                 unsigned long int delay_ns = SIMFS_DELAY_NS;
@@ -223,7 +205,7 @@ namespace sim{
 
         };
 
-        //-----------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         template <typename T> void buffer2file(
                 std::string buffer_id, 
                 std::string filename = "")
@@ -248,9 +230,9 @@ namespace sim{
 
         }
 
-        //-----------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         // Capture by copy (=) essential for safe thread initialization
-        //-----------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         template <typename T> std::thread buffer2file_thread(
                 std::string buffer_id, 
                 std::string filename = ""){
@@ -262,7 +244,7 @@ namespace sim{
             };
         }
 
-        //-----------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         template <typename T> void file2buffer(std::string filename, std::string buffer_id = ""){
 
             if (buffer_id == "") buffer_id = filename;
@@ -286,9 +268,9 @@ namespace sim{
 
         }
 
-        //-----------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         // Capture by copy (=) essential for safe thread initialization
-        //-----------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         template <typename T> std::thread file2buffer_thread(
                 std::string filename, 
                 std::string buffer_id = "")
@@ -300,6 +282,50 @@ namespace sim{
             };
         }
 
+        //-------------------------------------------------------------------//
+        // Buffer reader writer utilities
+        //-------------------------------------------------------------------//
+        template <typename T> void vector2buffer(
+                std::vector<T> &data, 
+                std::string buffer_id)
+        {
+            BufferOutput<T> buffer{buffer_id};
+            for (T d: data) buffer.put(d);
+        }
+
+        //-------------------------------------------------------------------//
+        template <typename T> std::thread vector2buffer_thread(
+                std::vector<T> &data, 
+                std::string buffer_id)
+        {
+            return std::thread{ 
+                [=, &data] () { 
+                    vector2buffer<T>(data, buffer_id); 
+                }
+            };
+        }
+
+        //-------------------------------------------------------------------//
+        template <typename T> void buffer2vector(
+                std::string buffer_id, 
+                std::vector<T> &data)
+        {
+            BufferInput<T> buffer{buffer_id};
+            T d{};
+            while(buffer.get(d)) data.push_back(d);
+        }
+
+        //-------------------------------------------------------------------//
+        template <typename T> std::thread buffer2vector_thread(
+                std::string buffer_id, 
+                std::vector<T> &data){
+            return std::thread
+            {
+                [=, &data] () { 
+                    buffer2vector<T>(buffer_id, data); 
+                }
+            };
+        }
 
     }
 }

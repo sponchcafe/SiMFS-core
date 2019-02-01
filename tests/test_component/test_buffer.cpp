@@ -388,11 +388,45 @@ TEST_CASE("Data can be read from filesystem to an input", "[file]"){
 
 }
 
+
+TEST_CASE("Read and write utilities", "[helpers]"){
+
+    GIVEN("A data vector, a result vector and a buffer id"){
+
+        std::vector<double> data{1,2,3,4};
+        std::vector<double> result{};
+        std::string buffer_id{"buf"};
+
+        WHEN("A reader and writer thread are created"){
+
+            auto out_thr = vector2buffer_thread<double>(data, buffer_id);
+            auto in_thr = buffer2vector_thread<double>(buffer_id, result);
+
+            AND_WHEN("Both threads complete"){
+
+                out_thr.join();
+                in_thr.join();
+
+                THEN("Data is copied to the result vector"){
+                    REQUIRE(data.size() == result.size());
+                }
+
+            }
+
+
+
+        }
+
+    }
+
+}
+
 /*--------------------------------------------------------------------------*/
 TEST_CASE("Inputs can be read in non blocking mode", "[.TODO][input]"){
 
     REQUIRE(false);
 
 }
+
 
 
