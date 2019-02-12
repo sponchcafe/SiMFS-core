@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include "function/alpha.hpp"
+#include "shape/XYGaussZExp.hpp"
 #include "utils.hpp"
 #include <cmath>
 
@@ -10,7 +10,7 @@ TEST_CASE("Waist parameters of the alpha focus function can be set", "[alpha][pa
 
     GIVEN("An alpha focus function"){
 
-        Alpha alpha{};
+        XYGaussZExp alpha{};
 
         THEN("Defaults are returned by get_json as json"){
 
@@ -57,7 +57,7 @@ TEST_CASE("The alpha focus function is normalized", "[alpha][normalization]"){
 
     GIVEN("An alpha focus function with some waist parameters"){
 
-        Alpha alpha{};
+        XYGaussZExp alpha{};
         alpha.set_waists(100e-9, 300e-9);
 
         WHEN("The efficiency prefactor is used"){
@@ -132,7 +132,7 @@ TEST_CASE("The alpha focus function is normalized, even far away from z=0", "[al
 
     GIVEN("An alpha focus function with some waist parameters"){
 
-        Alpha alpha{};
+        XYGaussZExp alpha{};
         alpha.set_waists(100e-9, 300e-9);
 
         WHEN("The efficiency prefactor is used"){

@@ -1,17 +1,17 @@
 #pragma once
 
-#include "function/base.hpp"
+#include "shape/base.hpp"
 
 namespace sim{
     namespace focus{
 
     //-------------------------------------------------------------------//
-        class Gbeam : public Focus{
+        class GaussBeam : public FocusShape{
 
             public:
 
                 //-----------------------------------------------------------//
-                Gbeam();
+                GaussBeam();
 
                 //-----------------------------------------------------------//
                 void set_waist (double w_xy);

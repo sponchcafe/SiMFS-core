@@ -12,12 +12,12 @@ namespace sim{
     namespace focus{
 
         //-------------------------------------------------------------------//
-        class Focus{
+        class FocusShape{
 
             public:  
 
                 //-----------------------------------------------------------//
-                virtual ~Focus(){};
+                virtual ~FocusShape(){};
 
                 //-----------------------------------------------------------//
                 virtual double evaluate(double x, double y, double z) const = 0;
@@ -29,12 +29,10 @@ namespace sim{
                 //-----------------------------------------------------------//
                 virtual double get_flux_density_prefactor() const = 0;
                 virtual double get_efficiency_prefactor() const = 0;
-                void set_prefactor(double p) {
-                    std::cerr << "set prefactor to " << p << '\n';
-                    prefactor = p;}
+
+                void set_prefactor(double p) { prefactor = p; }
 
             protected:
-
 
                 double prefactor = 1.0;
 

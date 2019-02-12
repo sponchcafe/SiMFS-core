@@ -1,20 +1,20 @@
 #pragma once
 
-#include "function/base.hpp"
+#include "shape/base.hpp"
 
 namespace sim{
     namespace focus{
 
-    //-------------------------------------------------------------------//
-        class Alpha : public Focus{
+        //-------------------------------------------------------------------//
+        class XYZGauss : public FocusShape{
 
             public:
 
                 //-----------------------------------------------------------//
-                Alpha();
+                XYZGauss();
 
                 //-----------------------------------------------------------//
-                void set_waists (double w_xy, double w_z);
+                void set_waists (double w_x, double w_y, double w_z);
 
                 //-----------------------------------------------------------//
                 void set_json(json j) override;
@@ -27,11 +27,15 @@ namespace sim{
 
             private:
 
-                double waist_xy = 200e-9;
+                //-----------------------------------------------------------//
+                double gauss(double x, double w) const;
+
+                //-----------------------------------------------------------//
+                double waist_x = 200e-9;
+                double waist_y = 200e-9;
                 double waist_z = 800e-9;
 
         };
 
     }
 }
-

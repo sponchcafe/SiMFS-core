@@ -1,8 +1,7 @@
-#include "efield/efield.hpp"
-#include <iostream>
+#include "shape/eField.hpp"
 
 namespace sim{
-    namespace field{
+    namespace focus{
 
         //------------------------------------------------------------------//
         EField::EField(){ } 
@@ -82,6 +81,31 @@ namespace sim{
             return j;
         }
 
+        //-------------------------------------------------------------------//
+        double EField::evaluate(double x, double y, double z) const {
+
+            EFieldComponents field = evaluate_field(x, y, z);
+
+            double res = 0.0;
+
+            res += std::norm(field.x);
+            res += std::norm(field.y);
+            res += std::norm(field.z);
+
+            return res;
+
+        }
+
+        //------------------------------------------------------------------//
+        double EField::get_flux_density_prefactor() const {
+            return 1.0;
+        };
+
+        //------------------------------------------------------------------//
+        double EField::get_efficiency_prefactor() const {
+            return evaluate(0,0,0);
+        }
+
         //------------------------------------------------------------------//
         void EField::init(){
 
@@ -100,7 +124,7 @@ namespace sim{
         }
 
         //------------------------------------------------------------------//
-        EFieldComponents EField::evaluate_angle(double x, double y, double z, size_t i_phi, size_t i_theta) const {
+        EField::EFieldComponents EField::evaluate_angle(double x, double y, double z, size_t i_phi, size_t i_theta) const {
 
             double sp = sin_phi[i_phi];
             double cp = cos_phi[i_phi];
@@ -117,14 +141,13 @@ namespace sim{
             field.x = (-sp * a1 + ct * cp * a2) * a4;
             field.y = ( cp * a1 + ct * sp * a2) * a4;
             field.z = (           st      * a2) * a4;
-
             
             return field;
 
         }
 
         //------------------------------------------------------------------//
-        EFieldComponents EField::evaluate_field(double x, double y, double z) const {
+        EField::EFieldComponents EField::evaluate_field(double x, double y, double z) const {
 
             EFieldComponents field{};
 
@@ -142,22 +165,6 @@ namespace sim{
             return field;
             
         }
-
-        //------------------------------------------------------------------//
-        double EField::evaluate_intensity(double x, double y, double z) const {
-
-            EFieldComponents field = evaluate_field(x, y, z);
-
-            double res = 0.0;
-
-            res += std::norm(field.x);
-            res += std::norm(field.y);
-            res += std::norm(field.z);
-
-            return res;
-
-        }
-
 
     }
 }

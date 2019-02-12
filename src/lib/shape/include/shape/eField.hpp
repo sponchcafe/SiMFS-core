@@ -1,18 +1,12 @@
 #pragma once
 
-#include <memory>
-#include <vector>
-#include "efield/types.hpp"
-#include "definitions/constants.hpp"
-#include "json/json.hpp"
+#include "shape/base.hpp"
 
 namespace sim{
-    namespace field{
+    namespace focus{
 
-        using json = nlohmann::json;
-        
         //-------------------------------------------------------------------//
-        class EField {
+        class EField : public FocusShape{
 
             public:
 
@@ -30,16 +24,26 @@ namespace sim{
                 void set_json(json j);
                 json get_json();
 
-                //-----------------------------------------------------------//
-                EFieldComponents evaluate_angle(double x, double y, double z, size_t i_phi, size_t i_theta) const;
-                EFieldComponents evaluate_field(double x, double y, double z) const;
-                double evaluate_intensity(double x, double y, double z) const;
-
+                //-----------------------------------------------------------// 
+                double evaluate(double x, double y, double z) const override;
+                double get_flux_density_prefactor() const override;
+                double get_efficiency_prefactor() const override;
+                
                 //-----------------------------------------------------------//
                 void init();
 
             private:
 
+                //-----------------------------------------------------------//
+                struct EFieldComponents{
+                    std::complex<double> x;
+                    std::complex<double> y;
+                    std::complex<double> z;
+                };
+
+                //-----------------------------------------------------------//
+                EFieldComponents evaluate_angle(double x, double y, double z, size_t i_phi, size_t i_theta) const;
+                EFieldComponents evaluate_field(double x, double y, double z) const;
                 //-----------------------------------------------------------//
 
                 //-----------------------------------------------------------//

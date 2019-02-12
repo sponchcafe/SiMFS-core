@@ -1,19 +1,19 @@
-#include "function/alpha.hpp"
+#include "shape/XYGaussZExp.hpp"
 
 namespace sim{
     namespace focus{
 
         //------------------------------------------------------------------//
-        Alpha::Alpha(){ } 
+        XYGaussZExp::XYGaussZExp(){ } 
 
         //------------------------------------------------------------------//
-        void Alpha::set_waists (double w_xy, double w_z) {
+        void XYGaussZExp::set_waists (double w_xy, double w_z) {
             waist_xy = w_xy;
             waist_z  = w_z;
         }
 
         //------------------------------------------------------------------//
-        void Alpha::set_json(json j){
+        void XYGaussZExp::set_json(json j){
 
             json params = get_json();
             params.merge_patch(j);
@@ -26,7 +26,7 @@ namespace sim{
         }
 
         //------------------------------------------------------------------//
-        json Alpha::get_json() {
+        json XYGaussZExp::get_json() {
 
             json j;
 
@@ -38,17 +38,17 @@ namespace sim{
         }
 
         //------------------------------------------------------------------//
-        double Alpha::get_flux_density_prefactor () const {
+        double XYGaussZExp::get_flux_density_prefactor () const {
             return 1.0/(sim::CONST_PI/2 * pow(waist_xy,2));
         }
 
         //------------------------------------------------------------------//
-        double Alpha::get_efficiency_prefactor () const {
+        double XYGaussZExp::get_efficiency_prefactor () const {
             return 1.0;
         }
 
         //------------------------------------------------------------------//
-        double Alpha::evaluate(double x, double y, double z) const {
+        double XYGaussZExp::evaluate(double x, double y, double z) const {
             double x1 = pow(z,2)/pow(waist_z,2);
             double x2 = (pow(x, 2)+pow(y, 2));
             double x3 = (exp(-2*x1))/pow(waist_xy, 2);

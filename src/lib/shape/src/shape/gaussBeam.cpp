@@ -1,22 +1,22 @@
-#include "function/gbeam.hpp"
+#include "shape/gaussBeam.hpp"
 
 namespace sim{
     namespace focus{
 
         //------------------------------------------------------------------//
-        Gbeam::Gbeam(){ } 
+        GaussBeam::GaussBeam(){ } 
 
         //------------------------------------------------------------------//
-        void Gbeam::set_waist (double w_xy) {
+        void GaussBeam::set_waist (double w_xy) {
             waist_xy = w_xy;
         }
 
-        void Gbeam::set_lambda (double l) {
+        void GaussBeam::set_lambda (double l) {
             lambda = l;
         }
 
         //------------------------------------------------------------------//
-        void Gbeam::set_json(json j){
+        void GaussBeam::set_json(json j){
 
             json params = get_json();
             params.merge_patch(j);
@@ -27,7 +27,7 @@ namespace sim{
         }
 
         //------------------------------------------------------------------//
-        json Gbeam::get_json() {
+        json GaussBeam::get_json() {
 
             json j;
 
@@ -39,17 +39,17 @@ namespace sim{
         }
 
         //------------------------------------------------------------------//
-        double Gbeam::get_flux_density_prefactor () const {
+        double GaussBeam::get_flux_density_prefactor () const {
             return 1.0/(sim::CONST_PI/2 * pow(waist_xy,2));
         }
 
         //------------------------------------------------------------------//
-        double Gbeam::get_efficiency_prefactor () const {
+        double GaussBeam::get_efficiency_prefactor () const {
             return 1.0;
         }
 
         //------------------------------------------------------------------//
-        double Gbeam::evaluate(double x, double y, double z) const {
+        double GaussBeam::evaluate(double x, double y, double z) const {
 
             double zR = sim::CONST_PI * std::pow(waist_xy, 2) / lambda;
             double wz = waist_xy * std::sqrt(1+std::pow(z/zR, 2));

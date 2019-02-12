@@ -1,6 +1,6 @@
 #pragma once
 
-#include "function/base.hpp"
+#include "shape/base.hpp"
 
 
 /*--------------------------------------------------------------------------*/
@@ -8,7 +8,7 @@
  * Note the HACK: Inlined function to prevent multiple definition error when 
  * including this header into more than one file. 
  *--------------------------------------------------------------------------*/
-inline double integrate_xy(sim::focus::Focus &f, 
+inline double integrate_xy(sim::focus::FocusShape &f, 
         double z=0.0, double min=-1e-6, double max=1e-6, double dxy=1e-9){
 
     double integral = 0.0;

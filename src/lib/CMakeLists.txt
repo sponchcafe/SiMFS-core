@@ -1,4 +1,4 @@
 add_subdirectory(component)
 add_subdirectory(graph)
-add_subdirectory(focus)
+add_subdirectory(shape)
 add_subdirectory(utilities)

@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include "function/gauss.hpp"
+#include "shape/XYZGauss.hpp"
 #include "utils.hpp"
 #include <cmath>
 
@@ -10,7 +10,7 @@ TEST_CASE("Waist parameters of the gaussian focus function can be set", "[gauss]
 
     GIVEN("A gaussian focus function"){
 
-        Gauss gauss{};
+        XYZGauss gauss{};
 
         THEN("Defaults are returned by get_json as json"){
 
@@ -61,7 +61,7 @@ TEST_CASE("The gaussian focus function is normalized", "[gauss][normalization]")
 
     GIVEN("A gaussian focus function with some waist parameters"){
 
-        Gauss gauss{};
+        XYZGauss gauss{};
         gauss.set_waists(100e-9, 200e-9, 300e-9);
 
         WHEN("The efficiency prefactor is used"){

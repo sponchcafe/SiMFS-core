@@ -1,20 +1,20 @@
-#include "function/gauss.hpp"
+#include "shape/XYZGauss.hpp"
 
 namespace sim{
     namespace focus{
 
         //------------------------------------------------------------------//
-        Gauss::Gauss(){ } 
+        XYZGauss::XYZGauss(){ } 
 
         //------------------------------------------------------------------//
-        void Gauss::set_waists (double w_x, double w_y, double w_z) {
+        void XYZGauss::set_waists (double w_x, double w_y, double w_z) {
             waist_x = w_x;
             waist_y = w_y;
             waist_z = w_z;
         }
 
         //------------------------------------------------------------------//
-        void Gauss::set_json(json j){
+        void XYZGauss::set_json(json j){
 
             json params = get_json();
             params.merge_patch(j);
@@ -28,7 +28,7 @@ namespace sim{
         }
 
         //------------------------------------------------------------------//
-        json Gauss::get_json() {
+        json XYZGauss::get_json() {
 
             json j;
 
@@ -41,22 +41,22 @@ namespace sim{
         }
 
         //------------------------------------------------------------------//
-        double Gauss::get_flux_density_prefactor() const {
+        double XYZGauss::get_flux_density_prefactor() const {
             return 1.0/(CONST_PI/2*waist_x*waist_y);
         }
         
         //------------------------------------------------------------------//
-        double Gauss::get_efficiency_prefactor() const {
+        double XYZGauss::get_efficiency_prefactor() const {
             return 1.0;
         }
 
         //------------------------------------------------------------------//
-        double Gauss::evaluate(double x, double y, double z) const {
+        double XYZGauss::evaluate(double x, double y, double z) const {
             return prefactor * gauss(x, waist_x) * gauss(y, waist_y) * gauss(z, waist_z);
         }
 
         //------------------------------------------------------------------//
-        double Gauss::gauss(double x, double w) const {
+        double XYZGauss::gauss(double x, double w) const {
             return exp(-4*pow(x, 2)/(2*pow(w, 2)));
         }
 

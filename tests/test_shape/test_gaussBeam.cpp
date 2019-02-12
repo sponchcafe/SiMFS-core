@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include "function/gbeam.hpp"
+#include "shape/gaussBeam.hpp"
 #include "utils.hpp"
 #include <cmath>
 
@@ -11,7 +11,7 @@ TEST_CASE("Parameter setting", "[gbeam][parameters]"){
 
     GIVEN("A gbeam focus function"){
 
-        Gbeam gbeam{};
+        GaussBeam gbeam{};
 
         THEN("Defaults are returned by get_json as json"){
 
@@ -59,7 +59,7 @@ TEST_CASE("The gbeam focus function is normalized", "[gbeam][normalization]"){
 
     GIVEN("A gbeam focus function with some parameters"){
 
-        Gbeam gbeam{};
+        GaussBeam gbeam{};
         gbeam.set_waist(100e-9);
         gbeam.set_lambda(488e-9);
 
@@ -136,7 +136,7 @@ TEST_CASE("The gbeam focus function is normalized, even far away from z=0", "[gb
 
     GIVEN("An gbeam focus function with some waist parameters"){
 
-        Gbeam gbeam{};
+        GaussBeam gbeam{};
         gbeam.set_waist(100e-9);
 
         WHEN("The efficiency prefactor is used"){
