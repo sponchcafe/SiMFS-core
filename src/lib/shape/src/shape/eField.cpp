@@ -55,6 +55,8 @@ namespace sim{
             json phi = params.at("phi");
             set_phi(phi.at("min"), phi.at("max"), phi.at("n"));
 
+            init(); // ? general init for function interface?
+
         }
 
         //------------------------------------------------------------------//

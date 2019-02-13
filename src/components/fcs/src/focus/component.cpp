@@ -1,99 +1,83 @@
 #include "focus/component.hpp"
-#include "function/gauss.hpp"
-#include "definitions/constants.hpp"
 
 namespace sim{
     namespace comp{
 
         //-------------------------------------------------------------------//
-        FCS::FCS(FocusMode m) {
-            mode = m;
-            focus_ptr = std::make_unique<focus::Gauss>();
+        Focus::Focus() {
         }
 
         //-------------------------------------------------------------------//
-        void FCS::set_output_id(std::string id){
+        void Focus::set_shape_type(focus::ShapeType type){
+            shape_type = type;
+        }
+        void Focus::set_output_id(std::string id){
             output_id = id;
         }
-        void FCS::set_input_id(std::string id){
+        void Focus::set_input_id(std::string id){
             input_id = id;
         }
-        void FCS::set_wavelength(double w){
-            wavelength = w;
-        }
-        void FCS::set_power(double p){
-            power = p;
+        void Focus::set_focus_shape_ptr(std::unique_ptr<focus::FocusShape> &f){
+            focus_shape_ptr = std::move(f);
         }
 
         //-------------------------------------------------------------------//
-        void FCS::set_json(json j){
+        void Focus::set_json(json j){
 
             json params = get_json();
             params.merge_patch(j);
 
-            // configure focus function
-            focus_ptr->set_json(params.at("focus"));
-
-            if (mode == FocusMode::EXCITATION){
-                set_wavelength(params.at("wavelength"));
-                set_power(params.at("power"));
-            }
-
+            set_shape_type(params.at("type").get<focus::ShapeType>());
             set_input_id(params.at("input"));
             set_output_id(params.at("output"));
+
+            json shape_params = params["shape"];
+            auto shape = focus_shape_factory(shape_type, shape_params);
+            set_focus_shape_ptr(shape);
 
         }
 
         //-------------------------------------------------------------------//
-        json FCS::get_json() {
+        json Focus::get_json() {
 
             json j;
-
-            if (mode == FocusMode::EXCITATION){
-                j["wavelength"] = wavelength;
-                j["power"] = power;
-            }
 
             j["input"] = input_id;
             j["output"] = output_id;
 
+            j["type"] = shape_type;
             // get back focus config
-            j["focus"] = focus_ptr->get_json();
+            if (focus_shape_ptr) {
+                j["shape"] = focus_shape_ptr->get_json();
+            } else{
+                j["shape"] = json::object();
+            }
 
             return j;
         }
 
-        //-------------------------------------------------------------------//
-        void FCS::set_focus_ptr(std::unique_ptr<focus::Focus> &f){
-            focus_ptr = std::move(f);
-        }
 
         //-------------------------------------------------------------------//
-        void FCS::init() {
+        void Focus::init() {
 
             input_ptr = std::make_unique<io::BufferInput<Coordinate>>(input_id);
             output_ptr = std::make_unique<io::BufferOutput<TimedValue>>(output_id);
 
-            if (mode == FocusMode::EXCITATION) {
-                double quantization = power * wavelength / (CONST_H * CONST_C);
-                focus_ptr->set_prefactor(quantization * focus_ptr->get_flux_density_prefactor());
-            } else if (mode == FocusMode::DETECTION) {
-                focus_ptr->set_prefactor(focus_ptr->get_efficiency_prefactor());
-            }
-
         }
 
         //-------------------------------------------------------------------//
-        void FCS::run() {
+        void Focus::run() {
 
-            while(input_ptr->get(c)){
-                current.time = c.t;
-                current.value = focus_ptr->evaluate(c.x, c.y, c.z);
-                output_ptr->put(current);
+            Coordinate coord{0,0,0};
+            TimedValue value{0,0};
+
+            while(input_ptr->get(coord)){
+                value.time = coord.t;
+                value.value = focus_shape_ptr->evaluate(coord.x, coord.y, coord.z);
+                output_ptr->put(value);
             }
 
         }
-
 
     }
 

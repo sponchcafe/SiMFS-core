@@ -30,8 +30,4 @@ namespace sim{
         realtime_t t;
     } Coordinate;
 
-    //-Enums-------------------------------------------------------------//
-    enum class FocusMode {EXCITATION, DETECTION};
-    enum class FocusType {GAUSS, ALPHA, EFIELD};
-
 }

@@ -1,47 +1,57 @@
 #pragma once
 
 #include "component/component.hpp"
-#include "shape/main.hpp"
-#include <map>
-
+#include "function/base.hpp"
 
 namespace sim{
     namespace comp{
 
         //-------------------------------------------------------------------//
-        class Focus : public Component{
+        class FCS : public Component{
 
             public:
 
                 //-----------------------------------------------------------//
-                Focus ();
+                FCS ();
+                FCS (FocusMode m);
 
                 //-----------------------------------------------------------//
-                virtual void set_json (json j) override;
-                virtual json get_json () override;
-                virtual void init () override;
-                virtual void run () override;
+                void set_json (json j) override;
+                json get_json () override;
+                void init () override;
+                void run () override;
 
                 //-----------------------------------------------------------//
                 // Parameter setters
                 //-----------------------------------------------------------//
-                void set_shape_type(focus::ShapeType type);
                 void set_output_id(std::string id);
                 void set_input_id(std::string id);
-                void set_focus_shape_ptr(std::unique_ptr<focus::FocusShape> &f);
+                void set_power(double power);
+                void set_wavelength(double wavelength);
+                void set_focus_ptr(std::unique_ptr<focus::Focus> &f);
                 //-----------------------------------------------------------//
                  
                 
             protected:
 
                 //-----------------------------------------------------------//
-                focus::ShapeType shape_type = focus::ShapeType::XYZ_GAUSS;
-                
+                // Simulation parameters + defaults
+                //-----------------------------------------------------------//
+                double scaling;
+                double power = 1e-6;
+                double wavelength = 488e-9;
+                FocusMode mode = FocusMode::EXCITATION;
                 std::string input_id = "__coordinates__";
                 std::string output_id = "__focus__";
+                //-----------------------------------------------------------//
+                
                 
                 //-----------------------------------------------------------//
-                std::unique_ptr<focus::FocusShape> focus_shape_ptr;
+                Coordinate c{0.0,0.0,0.0,0.0};
+                TimedValue current{0.0, 0.0};
+                               
+                //-----------------------------------------------------------//
+                std::unique_ptr<focus::Focus> focus_ptr;
                 std::unique_ptr<io::BufferInput<Coordinate>> input_ptr;
                 std::unique_ptr<io::BufferOutput<TimedValue>> output_ptr;
 
