@@ -63,6 +63,8 @@ namespace sim{
             input_ptr = std::make_unique<io::BufferInput<Coordinate>>(input_id);
             output_ptr = std::make_unique<io::BufferOutput<TimedValue>>(output_id);
 
+            focus_shape_ptr->init();
+
         }
 
         //-------------------------------------------------------------------//

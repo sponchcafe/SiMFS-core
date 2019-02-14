@@ -25,6 +25,7 @@ namespace sim{
                 //-----------------------------------------------------------//
                 virtual void set_json(json j) = 0;
                 virtual json get_json() = 0;
+                virtual void init() {};
 
                 //-----------------------------------------------------------//
                 virtual double get_flux_density_prefactor() const = 0;

@@ -30,7 +30,7 @@ namespace sim{
                 double get_efficiency_prefactor() const override;
                 
                 //-----------------------------------------------------------//
-                void init();
+                void init() override;
 
             private:
 
