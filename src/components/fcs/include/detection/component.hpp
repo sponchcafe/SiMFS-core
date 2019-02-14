@@ -1,19 +1,16 @@
 #pragma once
 
-#include "component/component.hpp"
-#include "function/base.hpp"
+#include "focus/component.hpp"
 
 namespace sim{
     namespace comp{
 
         //-------------------------------------------------------------------//
-        class FCS : public Component{
+        class Detection : public Focus{
 
             public:
 
                 //-----------------------------------------------------------//
-                FCS ();
-                FCS (FocusMode m);
 
                 //-----------------------------------------------------------//
                 void set_json (json j) override;
@@ -24,11 +21,7 @@ namespace sim{
                 //-----------------------------------------------------------//
                 // Parameter setters
                 //-----------------------------------------------------------//
-                void set_output_id(std::string id);
-                void set_input_id(std::string id);
-                void set_power(double power);
-                void set_wavelength(double wavelength);
-                void set_focus_ptr(std::unique_ptr<focus::Focus> &f);
+                void set_max_efficiency(double e);
                 //-----------------------------------------------------------//
                  
                 
@@ -37,24 +30,9 @@ namespace sim{
                 //-----------------------------------------------------------//
                 // Simulation parameters + defaults
                 //-----------------------------------------------------------//
-                double scaling;
-                double power = 1e-6;
-                double wavelength = 488e-9;
-                FocusMode mode = FocusMode::EXCITATION;
-                std::string input_id = "__coordinates__";
-                std::string output_id = "__focus__";
+                double max_efficiency = 1.0;
                 //-----------------------------------------------------------//
                 
-                
-                //-----------------------------------------------------------//
-                Coordinate c{0.0,0.0,0.0,0.0};
-                TimedValue current{0.0, 0.0};
-                               
-                //-----------------------------------------------------------//
-                std::unique_ptr<focus::Focus> focus_ptr;
-                std::unique_ptr<io::BufferInput<Coordinate>> input_ptr;
-                std::unique_ptr<io::BufferOutput<TimedValue>> output_ptr;
-
         };
     }
 }
