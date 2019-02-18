@@ -15,13 +15,13 @@ namespace sim{
 
         template <typename T>
         T Grid<T>::get(Coordinate c){
-            size_t index = coordinate_to_index(c+delta*0.5);
+            size_t index = coordinate_to_index(c);
             return data[index];
         }
 
         template <typename T>
-        void Grid<T>::set_nearest(Coordinate c, T value){
-            size_t index = coordinate_to_index(c+delta*0.5);
+        void Grid<T>::set(Coordinate c, T value){
+            size_t index = coordinate_to_index(c);
             data[index] = value;
         }
 

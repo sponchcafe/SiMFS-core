@@ -1,3 +1,4 @@
+#pragma once
 #include "grid/coordinate.hpp" // Coordinate
 #include <vector>
 #include <functional>
@@ -11,11 +12,11 @@ namespace sim{
             public:
 
                 Grid(GridSpace sp);
-                T get(Coordinate c);
-                void set_nearest(Coordinate c, T value);
+                virtual T get(Coordinate c);
+                virtual void set(Coordinate c, T value);
                 void map(std::function<T(Coordinate&)> func);
 
-            private:
+            protected:
 
                 //-----------------------------------------------------------//
                 size_t coordinate_to_index(Coordinate c);
