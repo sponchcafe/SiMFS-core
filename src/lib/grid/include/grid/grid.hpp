@@ -1,5 +1,6 @@
 #pragma once
 #include "grid/coordinate.hpp" // Coordinate
+#include "grid/serializer.hpp"
 #include <vector>
 #include <functional>
 
@@ -14,6 +15,7 @@ namespace sim{
                 Grid(GridSpace sp);
                 virtual T get(Coordinate c);
                 virtual void set(Coordinate c, T value);
+                //virtual void set(Coordinate c, std::function<T(T, T)> func);
                 void map(std::function<T(Coordinate&)> func);
 
             protected:
@@ -32,6 +34,11 @@ namespace sim{
                 GridSpace grid_space;
                 Coordinate delta;
                 std::vector<T> data;
+
+            private:
+
+                template<typename>
+                friend class GridSerializer;
 
         };
 
