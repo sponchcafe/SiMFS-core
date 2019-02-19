@@ -14,6 +14,11 @@ namespace sim{
         }
 
         template <typename T>
+        T *Grid<T>::get_buffer(){
+            return data.data();
+        }
+
+        template <typename T>
         T Grid<T>::get(Coordinate c){
             size_t index = coordinate_to_index(c);
             return data[index];
@@ -23,6 +28,12 @@ namespace sim{
         void Grid<T>::set(Coordinate c, T value){
             size_t index = coordinate_to_index(c);
             data[index] = value;
+        }
+
+        template <typename T>
+        void Grid<T>::set(Coordinate c, T value, std::function<T(T, T)> func){
+            size_t index = coordinate_to_index(c);
+            data[index] = func(data[index], value);
         }
 
         template <typename T>
@@ -114,7 +125,6 @@ namespace sim{
             }
 
         }
-
 
         //-Explicit-template-instantiations----------------------------------//
         template class Grid<unsigned>;

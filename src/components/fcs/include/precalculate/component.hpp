@@ -1,22 +1,26 @@
 #include "component/component.hpp"
-#include "efield/efield.hpp"
+#include "shape/main.hpp"
+#include "grid/grid.hpp"
 
 namespace sim{
     namespace comp{
 
+        using namespace sim::focus;
+        using namespace sim::grid;
+
         //-------------------------------------------------------------------//
-        class EFieldPrecalculator : public Component{
+        class Precalculator : public Component{
 
             public:
 
                 //-----------------------------------------------------------//
-                EFieldPrecalculator ();
+                Precalculator ();
 
                 //-----------------------------------------------------------//
-                void set_gridspec_x(double x_min, double x_max, size_t n);
-                void set_gridspec_y(double y_min, double y_max, size_t n);
-                void set_gridspec_z(double z_min, double z_max, size_t n);
                 void set_filename(std::string fn);
+                void set_shape_type(focus::ShapeType type);
+                void set_focus_shape_ptr(std::unique_ptr<focus::FocusShape> &f);
+                void set_grid_space(GridSpace gspace);
 
                 //-----------------------------------------------------------//
                 // Component interface 
@@ -37,20 +41,24 @@ namespace sim{
             private:
 
                 //-----------------------------------------------------------//
-                field::EField field_function{};
-                std::string fname = "__field__.dat";
-                field::EFieldSpec spec{
-                        488e-9, 1.0, 1.0, 
-                        {-2.5e-6, 2.5e-6, 32},
-                        {-2.5e-6, 2.5e-6, 32},
-                        {-2.5e-6, 2.5e-6, 32}
+                std::string fname = "__focus__.dat";
+                focus::ShapeType shape_type = focus::ShapeType::XYZ_GAUSS;
+                std::unique_ptr<FocusShape> focus_shape_ptr;
+                GridSpace grid_space{
+                    LinSpace{-1e-6, 1e-6, 101},
+                    LinSpace{-1e-6, 1e-6, 101},
+                    LinSpace{-1e-6, 1e-6, 101}
                 };
-
-                //-----------------------------------------------------------//
-                // Simulation parameters + defaults
-                //-----------------------------------------------------------//
+                Grid<double> grid{};
 
         };
+
+        
+        void to_json(json& j, const LinSpace& l);
+        void from_json(const json& j, LinSpace& l);
+
+        void to_json(json& j, const GridSpace& g);
+        void from_json(const json& j, GridSpace& g);
 
     }
 }

@@ -29,7 +29,7 @@ namespace sim{
 
         template <typename T>
         void GridSerializer<T>::write_grid_data(){
-            write_binary(&grid.data, grid.data.size()*sizeof(T));
+            write_binary(grid.get_buffer(), grid.data.size()*sizeof(T));
         }
 
         template <typename T>
@@ -39,7 +39,7 @@ namespace sim{
 
         template <typename T>
         void GridSerializer<T>::read_grid_data(){
-            read_binary(&grid.data, grid.data.size()*sizeof(T));
+            read_binary(grid.get_buffer(), grid.data.size()*sizeof(T));
         }
 
         template class GridSerializer<unsigned>;

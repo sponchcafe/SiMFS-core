@@ -1,4 +1,5 @@
 #pragma once
+
 #include "grid/coordinate.hpp" // Coordinate
 #include "grid/serializer.hpp"
 #include <vector>
@@ -12,11 +13,13 @@ namespace sim{
 
             public:
 
+                Grid(){};
                 Grid(GridSpace sp);
                 virtual T get(Coordinate c);
                 virtual void set(Coordinate c, T value);
-                //virtual void set(Coordinate c, std::function<T(T, T)> func);
+                virtual void set(Coordinate c, T value, std::function<T(T, T)> func);
                 void map(std::function<T(Coordinate&)> func);
+                T* get_buffer();
 
             protected:
 

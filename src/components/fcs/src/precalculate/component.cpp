@@ -1,89 +1,113 @@
-#include "efield/component.hpp"
-#include "efield/storage.hpp"
+#include "precalculate/component.hpp"
 
 namespace sim{
     namespace comp{
 
         //-------------------------------------------------------------------//
-        EFieldPrecalculator::EFieldPrecalculator() {
-        }
+        Precalculator::Precalculator() {}
 
         //-------------------------------------------------------------------//
-        void EFieldPrecalculator::set_filename(std::string fn){
+        void Precalculator::set_filename(std::string fn){
             fname = fn;
         }
-        void EFieldPrecalculator::set_gridspec_x(double x_min, double x_max, size_t n){
-            spec.x.min = x_min;
-            spec.x.max = x_max;
-            spec.x.n = n;
+        void Precalculator::set_shape_type(focus::ShapeType type){
+            shape_type = type;
         }
-        void EFieldPrecalculator::set_gridspec_y(double y_min, double y_max, size_t n){
-            spec.y.min = y_min;
-            spec.y.max = y_max;
-            spec.y.n = n;
+        void Precalculator::set_focus_shape_ptr(std::unique_ptr<focus::FocusShape> &f){
+            focus_shape_ptr = std::move(f);
         }
-        void EFieldPrecalculator::set_gridspec_z(double z_min, double z_max, size_t n){
-            spec.z.min = z_min;
-            spec.z.max = z_max;
-            spec.z.n = n;
+        void Precalculator::set_grid_space(GridSpace gspace){
+            grid_space = gspace;
         }
 
         //-------------------------------------------------------------------//
-        void EFieldPrecalculator::set_json(json j){
+        void Precalculator::set_json(json j){
 
             json params = get_json();
             params.merge_patch(j);
 
+            set_shape_type(params.at("type").get<focus::ShapeType>());
             set_filename(params.at("filename"));
-            json grid = params.at("grid");
-            json x = grid.at("x");
-            json y = grid.at("y");
-            json z = grid.at("z");
-            set_gridspec_x(x.at("min"), x.at("max"), x.at("n"));
-            set_gridspec_y(y.at("min"), y.at("max"), y.at("n"));
-            set_gridspec_z(z.at("min"), z.at("max"), z.at("n"));
-            json field_spec = params.at("field");
-            field_function.set_json(field_spec);
-            spec.wavelength = field_function.get_json().at("wavelength");
+
+            GridSpace gs;
+            from_json(params.at("grid"), gs);
+            set_grid_space(gs);
+
+            json shape_params = params["shape"];
+            auto shape = focus_shape_factory(shape_type, shape_params);
+            set_focus_shape_ptr(shape);
+
 
         }
 
         //-------------------------------------------------------------------//
-        json EFieldPrecalculator::get_json(){
+        json Precalculator::get_json(){
 
             json j;
 
             j["filename"] = fname;
-            j["grid"] = json {
-                {"x", {{"min", spec.x.min}, {"max", spec.x.max}, {"n", spec.x.n}}},
-                {"y", {{"min", spec.y.min}, {"max", spec.y.max}, {"n", spec.y.n}}},
-                {"z", {{"min", spec.z.min}, {"max", spec.z.max}, {"n", spec.z.n}}}
-            };
-            j["field"] = field_function.get_json();
+            j["type"] = shape_type;
+
+            to_json(j["grid"], grid_space);
+
+            if (focus_shape_ptr) {
+                j["shape"] = focus_shape_ptr->get_json();
+            } else{
+                j["shape"] = json::object();
+            }
+            
             return j;
 
         }
 
         //-------------------------------------------------------------------//
-        void EFieldPrecalculator::init() {
-            field_function.init();
+        void Precalculator::init() {
+            focus_shape_ptr->init();
+            grid = Grid<double>(grid_space);
         }
             
 
         //-------------------------------------------------------------------//
-        void EFieldPrecalculator::run(){
-            std::vector<field::EFieldCoordinate> c{};
-            std::vector<field::EFieldComponents> f{};
-            if (field::check_file_exists(fname)) {
-                std::cerr << "File " << fname << " exists, aborting.\n";
-                return;
+        void Precalculator::run(){
+            grid.map([=] (Coordinate &c) -> double{
+                    return focus_shape_ptr->evaluate(c.x, c.y, c.z);
+                    });
+
+            std::fstream fs(fname, std::fstream::out | std::iostream::binary);
+            if (!fs.good()){
+                std::cerr << "Error opening file\n";
+                std::exit(1);
             }
-            field::evaluate_prefactors(field_function, spec);
-            field::make_grid_coordinates(spec, c);
-            field::evaluate_efield_grid(field_function, c, f);
-            field::save_field_file(fname, spec, f);
+
+            auto serializer = GridSerializer<double>(fs, grid);
+            serializer.serialize();
+            fs.close();
+
         }
 
+        //-------------------------------------------------------------------//
+        void to_json(json& j, const LinSpace& l){
+            j = json{{"min", l.min}, {"max", l.max}, {"n", l.n}};
+        }
+        
+        void from_json(const json& j, LinSpace& l){
+            j.at("min").get_to(l.min);
+            j.at("max").get_to(l.max);
+            j.at("n").get_to(l.n);
+        }
+
+        void to_json(json& j, const GridSpace& g){
+                to_json(j["x"], g.x);
+                to_json(j["y"], g.y);
+                to_json(j["z"], g.z);
+        }
+
+        void from_json(const json& j, GridSpace& g){
+            from_json(j["x"], g.x);
+            from_json(j["y"], g.y);
+            from_json(j["z"], g.z);
+        }
+        //-------------------------------------------------------------------//
 
 
     }
