@@ -27,6 +27,19 @@ add_executable(simfs_det src/detection/simfs_det.cpp)
 target_link_libraries(simfs_det sim_det)
 
 ###############################################################################
+# Precalculate Component
+###############################################################################
+
+add_library(sim_pre
+    src/precalculate/component.cpp
+    )
+target_include_directories(sim_pre PUBLIC ./include)
+target_link_libraries(sim_pre sim_shape sim_grid sim_component)
+
+add_executable(simfs_pre src/precalculate/simfs_pre.cpp)
+target_link_libraries(simfs_pre sim_pre)
+
+###############################################################################
 # Pulse Component
 ###############################################################################
 
