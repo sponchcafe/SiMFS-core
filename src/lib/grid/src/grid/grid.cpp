@@ -1,7 +1,7 @@
 #include "grid/grid.hpp"
 #include <complex>
-#include <thread>
 #include <iostream>
+#include <iomanip>
 
 namespace sim{
     namespace grid{
@@ -36,14 +36,17 @@ namespace sim{
             data[index] = func(data[index], value);
         }
 
+
         template <typename T>
         void Grid<T>::map(std::function<T(Coordinate&)> func){
 
             unsigned n_hardware_threads = std::thread::hardware_concurrency();
             if (n_hardware_threads < 1) n_hardware_threads = 1;
+            std::cerr << "Precalculating (" << n_hardware_threads << " threads):";
             size_t section_size = data.size()/n_hardware_threads;
 
-            std::vector<std::thread> mapping_threads;
+            std::atomic<size_t> progress{0};
+            std::vector<std::thread> threads;
 
             for (unsigned i=0; i<n_hardware_threads; ++i){
 
@@ -51,18 +54,33 @@ namespace sim{
                 size_t end = (i+1)*section_size;
 
                 // last section until end of grid
-                if (end > (n_hardware_threads-1)*section_size){
-                    end = data.size();
-                }
+                if (end > (n_hardware_threads-1)*section_size) end = data.size();
 
-                mapping_threads.emplace_back([=](){ 
-                        map_grid_section(start, end, func); 
+                threads.emplace_back([=, &progress] () { 
+                        map_grid_section(start, end, func, std::ref(progress));
                 });
 
             }
 
-            for (auto &it: mapping_threads) it.join();
+            // progress display
+            threads.emplace_back([=, &progress] () { 
+                    print_progress(data.size(), std::ref(progress));
+                    });
 
+            for (auto &it: threads) it.join();
+
+        }
+
+
+        template <typename T>
+        void Grid<T>::print_progress(size_t n, std::atomic<size_t> &prg){
+            size_t p = 0;
+            while (p < n){
+                std::cerr << std::setw(4) << p*100/n << " %\b\b\b\b\b\b";
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+                p = prg.load();
+            }
+            std::cerr << std::setw(4) << p*100/n << '\n';
         }
 
         template <typename T>
@@ -117,11 +135,12 @@ namespace sim{
 
         template <typename T>
         void Grid<T>::map_grid_section(size_t start, size_t end, 
-            std::function<T(Coordinate &c)> func){
+            std::function<T(Coordinate &c)> func, std::atomic<size_t> &prog){
 
             for (size_t i=start; i<end; ++i){
                 Coordinate c = index_to_coordinate(i);
                 data[i] = func(c); 
+                ++prog;
             }
 
         }

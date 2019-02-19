@@ -4,6 +4,8 @@
 #include "grid/serializer.hpp"
 #include <vector>
 #include <functional>
+#include <atomic>
+#include <thread>
 
 namespace sim{
     namespace grid{
@@ -32,7 +34,9 @@ namespace sim{
                 Coordinate get_delta(GridSpace spec);
 
                 void map_grid_section(size_t start, size_t end, 
-                        std::function<T(Coordinate&)> func);
+                        std::function<T(Coordinate&)> func, std::atomic<size_t> &prog);
+
+                void print_progress(size_t n, std::atomic<size_t> &prg);
 
                 GridSpace grid_space;
                 Coordinate delta;
