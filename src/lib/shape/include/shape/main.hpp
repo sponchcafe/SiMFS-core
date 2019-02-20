@@ -48,6 +48,10 @@ namespace sim{
             {NONE, "__none__"}
         })
 
+        typedef struct {
+            double det;
+            double exi;
+        } ShapeNorm;
 
         //-----------------------------------------------------------//
         inline static std::unique_ptr<FocusShape> focus_shape_factory(

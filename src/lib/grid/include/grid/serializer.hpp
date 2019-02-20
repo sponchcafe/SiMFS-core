@@ -14,10 +14,10 @@ namespace sim{
             public:
 
                 GridSerializer(std::iostream &ios, Grid<T> &g);
-                void serialize();
-                void deserialize();
+                virtual void serialize();
+                virtual void deserialize();
 
-            private:
+            protected:
 
                 void write_grid_space();
                 void write_grid_data();

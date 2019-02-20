@@ -32,6 +32,7 @@ target_link_libraries(simfs_det sim_det)
 
 add_library(sim_pre
     src/precalculate/component.cpp
+    src/precalculate/shape_serializer.cpp
     )
 target_include_directories(sim_pre PUBLIC ./include)
 target_link_libraries(sim_pre sim_shape sim_grid sim_component)

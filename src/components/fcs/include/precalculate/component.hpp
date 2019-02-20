@@ -1,3 +1,5 @@
+#pragma once
+
 #include "component/component.hpp"
 #include "shape/main.hpp"
 #include "grid/grid.hpp"
@@ -49,6 +51,7 @@ namespace sim{
                     LinSpace{-1e-6, 1e-6, 101},
                     LinSpace{-1e-6, 1e-6, 101}
                 };
+                focus::ShapeNorm norm{};
                 Grid<double> grid{};
 
         };

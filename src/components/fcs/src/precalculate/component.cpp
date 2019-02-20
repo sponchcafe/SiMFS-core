@@ -1,4 +1,6 @@
 #include "precalculate/component.hpp"
+#include "precalculate/shape_serializer.hpp"
+#include "shape/main.hpp"
 
 namespace sim{
     namespace comp{
@@ -64,6 +66,8 @@ namespace sim{
         void Precalculator::init() {
             focus_shape_ptr->init();
             grid = Grid<double>(grid_space);
+            norm.det = focus_shape_ptr->get_efficiency_prefactor();
+            norm.exi = focus_shape_ptr->get_flux_density_prefactor();
         }
             
 
@@ -79,7 +83,7 @@ namespace sim{
                 std::exit(1);
             }
 
-            auto serializer = GridSerializer<double>(fs, grid);
+            auto serializer = ShapeGridSerializer<double>(fs, grid, norm);
             serializer.serialize();
             fs.close();
 
