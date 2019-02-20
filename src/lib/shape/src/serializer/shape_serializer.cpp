@@ -1,4 +1,4 @@
-#include "precalculate/shape_serializer.hpp"
+#include "serializer/shape_serializer.hpp"
 
 namespace sim{
     namespace grid{

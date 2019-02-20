@@ -1,6 +1,6 @@
 #include "component/cli.hpp"
 #include "precalculate/component.hpp"
-#include "shape/main.hpp"
+#include "shape.hpp"
 
 using namespace sim;
 
@@ -22,6 +22,5 @@ int main(int argc, char *argv[]) {
         pre.init();
         pre.run();
     }
-
 
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "component/component.hpp"
-#include "shape/main.hpp"
+#include "shape.hpp"
 #include "grid/grid.hpp"
 
 namespace sim{

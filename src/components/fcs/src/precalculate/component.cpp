@@ -1,6 +1,5 @@
 #include "precalculate/component.hpp"
-#include "precalculate/shape_serializer.hpp"
-#include "shape/main.hpp"
+#include "serializer/shape_serializer.hpp"
 
 namespace sim{
     namespace comp{

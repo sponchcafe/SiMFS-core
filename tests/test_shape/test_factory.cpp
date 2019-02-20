@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include "shape/main.hpp"
+#include "shape.hpp"
 #include <string>
 #include "json/json.hpp"
 

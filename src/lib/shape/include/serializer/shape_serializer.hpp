@@ -1,7 +1,7 @@
 #pragma once
 
 #include "grid/grid.hpp"
-#include "shape/main.hpp"
+#include "shape.hpp"
 
 namespace sim{
     namespace grid{
@@ -22,7 +22,7 @@ namespace sim{
 
             private:
 
-                focus::ShapeNorm norm;
+                sim::focus::ShapeNorm norm;
 
         };
     }

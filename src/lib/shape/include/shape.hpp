@@ -7,8 +7,9 @@
 #include "shape/XYZGauss.hpp"
 #include "shape/XYGaussZExp.hpp"
 #include "shape/gaussBeam.hpp"
-//#include "shape/grid.hpp"
+//#include "shape/genericGrid.hpp"
 #include "shape/eField.hpp"
+
 
 namespace sim{
     namespace focus{
@@ -16,7 +17,7 @@ namespace sim{
         using json = nlohmann::json;
 
         //-Enums-----------------------------------------------------//
-        enum FocusMode 
+        enum class FocusMode 
         {
             EXCITATION, 
             DETECTION, 
@@ -29,7 +30,7 @@ namespace sim{
             {"generic", FocusMode::GENERIC}
         };
 
-        enum ShapeType 
+        enum class ShapeType 
         {
             XYZ_GAUSS, 
             XY_GAUSS_Z_EXP, 
@@ -40,12 +41,12 @@ namespace sim{
         };
 
         NLOHMANN_JSON_SERIALIZE_ENUM( ShapeType, {
-            {XYZ_GAUSS, "3dGauss"},
-            {XY_GAUSS_Z_EXP, "XYGaussZExp"},
-            {GAUSS_BEAM, "gaussBeam"},
-            {E_FIELD, "eField"},
-            {GENERIC_GRID, "grid"},
-            {NONE, "__none__"}
+            {ShapeType::XYZ_GAUSS, "3dGauss"},
+            {ShapeType::XY_GAUSS_Z_EXP, "XYGaussZExp"},
+            {ShapeType::GAUSS_BEAM, "gaussBeam"},
+            {ShapeType::E_FIELD, "eField"},
+            {ShapeType::GENERIC_GRID, "grid"},
+            {ShapeType::NONE, "__none__"}
         })
 
         typedef struct {
@@ -73,10 +74,10 @@ namespace sim{
                     shape_ptr = std::make_unique<EField>(); 
                     break;
                 case ShapeType::GENERIC_GRID:
-                    //shape_ptr = std::make_unique<Grid>(); 
+                    //shape_ptr = std::make_unique<GenericGrid>(); 
                     break;
                 default:
-                    std::cerr << "No such focus shape: " << type << '\n';
+                    //std::cerr << "No such focus shape: " << type << '\n';
                     shape_ptr = std::make_unique<XYZGauss>();
                     break;
 
