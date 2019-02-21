@@ -1,4 +1,5 @@
 #include "grid/trilinear_grid.hpp"
+#include <complex>
 
 namespace sim{
     namespace grid{

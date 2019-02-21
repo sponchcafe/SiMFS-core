@@ -70,7 +70,7 @@ namespace sim{
         //-------------------------------------------------------------------//
         void Focus::run() {
 
-            Coordinate coord{0,0,0};
+            Coordinate coord{0,0,0,0};
             TimedValue value{0,0};
 
             while(input_ptr->get(coord)){

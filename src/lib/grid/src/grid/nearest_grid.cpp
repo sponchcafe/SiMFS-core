@@ -1,4 +1,5 @@
 #include "grid/nearest_grid.hpp"
+#include <complex>
 
 namespace sim{
     namespace grid{

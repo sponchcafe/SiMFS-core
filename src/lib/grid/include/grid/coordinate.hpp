@@ -1,8 +1,15 @@
 #pragma once
-#include "definitions/types.hpp"
+#include <cstddef>
+#include <iostream>
 
 namespace sim{
     namespace grid{
+
+        typedef struct {
+            double x;
+            double y;
+            double z;
+        } Coordinate;
 
         //-------------------------------------------------------------------//
         typedef struct {

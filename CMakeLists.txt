@@ -2,6 +2,7 @@
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 project(FCS VERSION 1.0 LANGUAGES CXX)
 
+add_compile_options(-Wall -Wextra -pedantic -Werror)
 set(CMAKE_CXX_FLAGS "-std=gnu++14 -Wall -O3 -march=native -pthread")
 
 enable_testing()

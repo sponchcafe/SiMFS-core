@@ -72,7 +72,7 @@ namespace sim{
 
         //-------------------------------------------------------------------//
         void Precalculator::run(){
-            grid.map([=] (Coordinate &c) -> double{
+            grid.map([=] (sim::grid::Coordinate &c) -> double{
                     return focus_shape_ptr->evaluate(c.x, c.y, c.z);
                     });
 

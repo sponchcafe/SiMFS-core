@@ -48,7 +48,7 @@ namespace sim{
                 } RoutedInput;
 
                 //-----------------------------------------------------------//
-                void put_timetag(RoutedTime tag);
+                void put_timetag();
 
                 //-----------------------------------------------------------//
                 void sort_inputs();

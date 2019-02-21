@@ -99,7 +99,7 @@ namespace sim{
         //------------------------------------------------------------------//
         double EField::get_flux_density_prefactor() const {
             return 1.0;
-        };
+        }
 
         //------------------------------------------------------------------//
         double EField::get_efficiency_prefactor() const {

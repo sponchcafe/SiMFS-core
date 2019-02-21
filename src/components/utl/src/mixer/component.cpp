@@ -92,7 +92,7 @@ namespace sim{
                     }
                     // heartbeat handling
                     if (!heartbeat && std::signbit(current.time)) continue;
-                    put_timetag(current);
+                    put_timetag();
                 }
 
                 sort_inputs();
@@ -104,13 +104,13 @@ namespace sim{
             while(first->input_ptr->get(current.time)){
                 // heartbeat handling
                 if (!heartbeat && std::signbit(current.time)) continue;
-                put_timetag(current);
+                put_timetag();
             }
 
         }
 
         //-------------------------------------------------------------------//
-        void Mixer::put_timetag(RoutedTime t){
+        void Mixer::put_timetag(){
             if (routed){
                 routed_photon_output_ptr->put(current);
             } else {

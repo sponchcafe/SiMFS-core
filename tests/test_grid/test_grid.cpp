@@ -7,8 +7,16 @@
 #include <complex>
 #include <cmath>
 
-using namespace sim;
 using namespace sim::grid;
+
+// Make 3d and 4d coordinates comparable
+bool operator==(sim::grid::Coordinate const &lhs, sim::Coordinate const &rhs){
+    return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
+}
+bool operator==(sim::Coordinate const &lhs, sim::grid::Coordinate const &rhs){
+    return rhs == lhs;
+}
+
 
 TEMPLATE_TEST_CASE ("The grid stores and returns values at coordinates", 
         "[grid][access]", unsigned, int, double, std::complex<double>) {
@@ -101,7 +109,8 @@ TEMPLATE_TEST_CASE ("Grid can be populated by mapping a function",
 
         WHEN ("a constant function is mapped to the grid"){
 
-            std::function<TestType(Coordinate &c)> constant = [](Coordinate &c) { 
+            auto constant = [](sim::grid::Coordinate &c) { 
+                c = {0,0,0}; // have to use c (-pendantic)
                 return TestType{42.0};
             };
 
@@ -119,7 +128,7 @@ TEMPLATE_TEST_CASE ("Grid can be populated by mapping a function",
 
             Coordinate target{0,0,0};
 
-            std::function<TestType(Coordinate &c)> delta = [=](Coordinate &c) { 
+            auto delta = [=](sim::grid::Coordinate &c) { 
                 return (c == target) ? 42.0 : 0;
             };
 
@@ -136,7 +145,7 @@ TEMPLATE_TEST_CASE ("Grid can be populated by mapping a function",
 
         WHEN ("a radial distance function is mapped to the grid"){
 
-            std::function<TestType(Coordinate &c)> radius = [](Coordinate &c) { 
+            auto radius = [](sim::grid::Coordinate &c) { 
                 return sqrt(pow(c.x,2)+pow(c.y,2)+pow(c.z,2));
             };
 
