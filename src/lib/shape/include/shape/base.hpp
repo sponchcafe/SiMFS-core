@@ -11,6 +11,11 @@ using json = nlohmann::json;
 namespace sim{
     namespace focus{
 
+        typedef struct {
+            double det;
+            double exi;
+        } ShapeNorm;
+
         //-------------------------------------------------------------------//
         class FocusShape{
 

@@ -25,6 +25,8 @@ namespace sim{
 
             protected:
 
+                void resize();
+
                 //-----------------------------------------------------------//
                 size_t coordinate_to_index(Coordinate c);
                 size_t discretize_single_coord(LinSpace d, double c);

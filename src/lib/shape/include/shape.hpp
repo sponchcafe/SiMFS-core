@@ -7,7 +7,7 @@
 #include "shape/XYZGauss.hpp"
 #include "shape/XYGaussZExp.hpp"
 #include "shape/gaussBeam.hpp"
-//#include "shape/genericGrid.hpp"
+#include "shape/genericGrid.hpp"
 #include "shape/eField.hpp"
 
 
@@ -49,10 +49,6 @@ namespace sim{
             {ShapeType::NONE, "__none__"}
         })
 
-        typedef struct {
-            double det;
-            double exi;
-        } ShapeNorm;
 
         //-----------------------------------------------------------//
         inline static std::unique_ptr<FocusShape> focus_shape_factory(
@@ -74,7 +70,7 @@ namespace sim{
                     shape_ptr = std::make_unique<EField>(); 
                     break;
                 case ShapeType::GENERIC_GRID:
-                    //shape_ptr = std::make_unique<GenericGrid>(); 
+                    shape_ptr = std::make_unique<GenericGrid>(); 
                     break;
                 default:
                     //std::cerr << "No such focus shape: " << type << '\n';

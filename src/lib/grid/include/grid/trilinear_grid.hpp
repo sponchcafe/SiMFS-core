@@ -9,6 +9,7 @@ namespace sim{
 
             public:
 
+                TrilinearGrid(){};
                 TrilinearGrid(GridSpace sp);
                 T get(Coordinate c) override;
 

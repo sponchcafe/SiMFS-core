@@ -35,6 +35,7 @@ namespace sim{
         template <typename T>
         void GridSerializer<T>::read_grid_space(){
             read_binary(&grid.grid_space, sizeof(grid.grid_space));
+            grid.resize();
         }
 
         template <typename T>

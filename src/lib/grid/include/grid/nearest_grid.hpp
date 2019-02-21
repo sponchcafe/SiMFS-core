@@ -9,6 +9,7 @@ namespace sim{
 
             public:
 
+                NearestGrid() {};
                 NearestGrid(GridSpace sp);
                 T get(Coordinate c) override;
                 void set(Coordinate c, T value) override;
