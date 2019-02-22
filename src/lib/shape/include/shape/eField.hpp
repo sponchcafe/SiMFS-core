@@ -1,6 +1,7 @@
 #pragma once
 
 #include "shape/base.hpp"
+#include <functional>
 
 namespace sim{
     namespace focus{
@@ -42,8 +43,12 @@ namespace sim{
                 };
 
                 //-----------------------------------------------------------//
-                EFieldComponents evaluate_angle(double x, double y, double z, size_t i_phi, size_t i_theta) const;
-                EFieldComponents evaluate_field(double x, double y, double z) const;
+                EFieldComponents evaluate_angle(
+                        double x, double y, double z, 
+                        size_t i_phi, size_t i_theta) const;
+                EFieldComponents evaluate_field(
+                        double x, double y, double z) const;
+                double find_waist(std::function<double(double)> f) const;
                 //-----------------------------------------------------------//
 
                 //-----------------------------------------------------------//

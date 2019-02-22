@@ -3,27 +3,27 @@
 namespace sim{
     namespace focus{
 
-        //------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         EField::EField(){ } 
 
-        //------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         void EField::set_lambda(double l){ 
             k = 2*CONST_PI/l;
         }
 
-        //------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         void EField::set_pol(bool px, bool py){ 
             pol_x = px;
             pol_y = py;
         }
 
-        //------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         void EField::set_amplitude(double e0){ 
             e_zero = e0;
         }
 
 
-        //------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         void EField::set_theta(double min, double max, size_t n){ 
             theta_min_deg = min;
             theta_max_deg = max;
@@ -32,7 +32,7 @@ namespace sim{
             theta_n = n;
         }
 
-        //------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         void EField::set_phi(double min, double max, size_t n){ 
             phi_min_deg = min;
             phi_max_deg = max;
@@ -41,7 +41,7 @@ namespace sim{
             phi_n = n;
         }
 
-        //------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         void EField::set_json(json j){
 
             json params = get_json();
@@ -57,7 +57,7 @@ namespace sim{
 
         }
 
-        //------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         json EField::get_json(){
 
             json j;
@@ -96,17 +96,51 @@ namespace sim{
 
         }
 
-        //------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
+        double EField::find_waist(std::function<double(double)> f) const {
+
+            // Binary search for the 1/e2 waist
+            // Here are some hard coded defaults like epsilon and the max
+            // search region...
+
+            double target = f(0)/pow(exp(1),2);
+            constexpr double epsilon = 1e-6;
+
+            std::function<double(double, double)> bisect = 
+                [=, &bisect](double begin, double end){
+
+                double mid = (begin+end)/2;
+                double current = f(mid);
+
+                if (fabs(current-target) < epsilon) return mid;
+                if (current < target) return bisect(begin, mid);
+                if (current > target) return bisect(mid, end);
+
+                return mid;
+            };
+
+            return bisect(0, 1); // search up to 1m out
+
+        }
+
+        //-------------------------------------------------------------------//
         double EField::get_flux_density_prefactor() const {
-            return 1.0;
+
+            // Find the x and y 1/e2 waists and calculate the prefactor
+            // as 1/((pi/2)*wx*wz)
+
+            auto wx = find_waist([=](double x){return evaluate(x,0,0);});
+            auto wy = find_waist([=](double y){return evaluate(0,y,0);});
+
+            return  1/((CONST_PI/2)*wx*wy);
         }
 
-        //------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         double EField::get_efficiency_prefactor() const {
-            return evaluate(0,0,0);
+            return 1/evaluate(0,0,0);
         }
 
-        //------------------------------------------------------------------//
+        //-------------------------------------------------------------------//
         void EField::init(){
 
             d_theta = (theta_max-theta_min) / theta_n;
@@ -123,8 +157,10 @@ namespace sim{
 
         }
 
-        //------------------------------------------------------------------//
-        EField::EFieldComponents EField::evaluate_angle(double x, double y, double z, size_t i_phi, size_t i_theta) const {
+        //-------------------------------------------------------------------//
+        EField::EFieldComponents EField::evaluate_angle(
+                double x, double y, double z, size_t i_phi, size_t i_theta
+            ) const {
 
             double sp = sin_phi[i_phi];
             double cp = cos_phi[i_phi];
@@ -136,7 +172,9 @@ namespace sim{
             double a1 = -sp * pol_x + cp * pol_y;
             double a2 =  cp * pol_x + sp * pol_y;
             double a3 = k * (-st * cp * x - st * sp * y + ct * z);
-            std::complex<double> a4 = st * sqrt(ct) * e_zero * ( cos(a3) + imag_unit * sin(a3));
+
+            std::complex<double> a4 = 
+                st * sqrt(ct) * e_zero * ( cos(a3) + imag_unit * sin(a3));
 
             field.x = (-sp * a1 + ct * cp * a2) * a4;
             field.y = ( cp * a1 + ct * sp * a2) * a4;
@@ -146,8 +184,10 @@ namespace sim{
 
         }
 
-        //------------------------------------------------------------------//
-        EField::EFieldComponents EField::evaluate_field(double x, double y, double z) const {
+        //-------------------------------------------------------------------//
+        EField::EFieldComponents EField::evaluate_field(
+                double x, double y, double z
+            ) const {
 
             EFieldComponents field{};
 
