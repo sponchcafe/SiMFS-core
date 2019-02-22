@@ -132,7 +132,7 @@ namespace sim{
             auto wx = find_waist([=](double x){return evaluate(x,0,0);});
             auto wy = find_waist([=](double y){return evaluate(0,y,0);});
 
-            return  1/((CONST_PI/2)*wx*wy);
+            return  get_efficiency_prefactor()/((CONST_PI/2)*wx*wy);
         }
 
         //-------------------------------------------------------------------//
