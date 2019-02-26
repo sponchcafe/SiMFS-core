@@ -62,5 +62,30 @@ namespace sim{
             return os;
         }
 
+        //-------------------------------------------------------------------//
+        void to_json(json& j, const LinSpace& l){
+            j = json{{"min", l.min}, {"max", l.max}, {"n", l.n}};
+        }
+        
+        void from_json(const json& j, LinSpace& l){
+            j.at("min").get_to(l.min);
+            j.at("max").get_to(l.max);
+            j.at("n").get_to(l.n);
+        }
+
+        void to_json(json& j, const GridSpace& g){
+                to_json(j["x"], g.x);
+                to_json(j["y"], g.y);
+                to_json(j["z"], g.z);
+        }
+
+        void from_json(const json& j, GridSpace& g){
+            from_json(j["x"], g.x);
+            from_json(j["y"], g.y);
+            from_json(j["z"], g.z);
+        }
+        //-------------------------------------------------------------------//
+
+
     }
 }

@@ -1,6 +1,9 @@
 #pragma once
 #include <cstddef>
 #include <iostream>
+#include "json/json.hpp"
+
+using json = nlohmann::json;
 
 namespace sim{
     namespace grid{
@@ -39,6 +42,12 @@ namespace sim{
 
         //-------------------------------------------------------------------//
         std::ostream &operator<<(std::ostream &os, Coordinate const &coord);
+
+        void to_json(json& j, const LinSpace& l);
+        void from_json(const json& j, LinSpace& l);
+
+        void to_json(json& j, const GridSpace& g);
+        void from_json(const json& j, GridSpace& g);
 
     }
 }
