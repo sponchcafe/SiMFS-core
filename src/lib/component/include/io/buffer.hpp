@@ -47,7 +47,6 @@ namespace sim{
                     return true;
                 }
         
-
                 //-----------------------------------------------------------//
                 bool get_chunk(std::vector<T> &target){
                     if (done) return false;
@@ -67,8 +66,12 @@ namespace sim{
                     return peek() < rhs.peek();
                 }
 
-                size_t get_size_approx() const {
-                    return queue_handle.queue->size_approx();
+                //-----------------------------------------------------------//
+                size_t get_size() const {
+                    /* Returns the number of elements available in the buffer */
+                    /*     ELEMENTS IN BUFFER        +  ELEMENTS IN CURRENT WORKING CHUNK */
+                    if (done) return 0;
+                    return queue_handle.size->load() + (current_chunk.end()-current);
                 }
 
                 //-----------------------------------------------------------//
@@ -82,11 +85,14 @@ namespace sim{
                 // Get the next chunk to the current member
                 //-----------------------------------------------------------//
                 void get_next_chunk(){
+                    current_chunk.resize(0);
                     queue_handle.queue->wait_dequeue(current_chunk);
-                    if (current_chunk.size() == 0){
+                    auto chunk_size = current_chunk.size();
+                    if (chunk_size == 0){
                         done = true;
                     }
                     else{
+                        queue_handle.size->fetch_sub(chunk_size); // subtract size
                         current = current_chunk.begin();
                     }
                 }
@@ -160,6 +166,7 @@ namespace sim{
                 }
 
 
+
             private:
 
                 //-----------------------------------------------------------//
@@ -182,8 +189,10 @@ namespace sim{
 
                 void push_chunk(){
                     if (SIMFS_BUFFER_CONTROL) apply_delay();
-                    if (chunk.size() > 0) {
+                    auto chunk_size = chunk.size();
+                    if (chunk_size > 0) {
                         queue_handle.queue->enqueue(std::move(chunk));
+                        queue_handle.size->fetch_add(chunk_size); // add size
                     }
                 }
 

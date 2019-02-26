@@ -24,17 +24,12 @@ namespace sim{
         //-----------------------------------------------------------------------//
         using key_t = std::string;
         template <typename T> using queue_t = BlockingReaderWriterQueue<T>;
-        template <typename T> using queue_ptr_t = std::unique_ptr<queue_t<T>>;
-        using atomic_ptr_t = std::unique_ptr<std::atomic<bool>>;
 
-        //-----------------------------------------------------------------------//
-        // The atomic eof bool indicates the completion of the producer thread's
-        // task. The writer end is considered closed if eof==true;
         //-----------------------------------------------------------------------//
         template <typename T> 
             struct queue_handle_t{ 
-                queue_ptr_t<T> queue; 
-                atomic_ptr_t eof;
+                std::unique_ptr<queue_t<T>> queue;
+                std::unique_ptr<std::atomic<size_t>> size;
             };
 
         //-----------------------------------------------------------------------//
@@ -66,7 +61,7 @@ namespace sim{
             q_file.first = id;
             auto insert = fs<T>.insert(std::move(q_file)).first;
             insert->second.queue.reset(new queue_t<T>());
-            insert->second.eof.reset(new std::atomic<bool>(false));
+            insert->second.size.reset(new std::atomic<size_t>(0));
         }
 
         //-----------------------------------------------------------------------//
@@ -84,7 +79,6 @@ namespace sim{
                 create_new<T>(id);
             }
             queue_handle_t<T> &queue = fs<T>.at(id);
-            //queue.eof->store(false);
                     
             //-------------------------------------------------------------------//
             mtx<T>.unlock(); // Critical section end ----------------------------//

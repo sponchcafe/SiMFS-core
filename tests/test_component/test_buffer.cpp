@@ -422,11 +422,54 @@ TEST_CASE("Read and write utilities", "[helpers]"){
 }
 
 /*--------------------------------------------------------------------------*/
-TEST_CASE("Inputs can be read in non blocking mode", "[.TODO][input]"){
+TEST_CASE("Buffer queue size tracking", "[size][input]"){
 
-    REQUIRE(false);
+    GIVEN("A buffer handle pair"){
 
+        {
+            auto out1 = BufferOutput<int>("buf1");
+            for (int i=0; i<250; i++){
+                out1.put(i);
+            }
+        }
+
+        auto in1 = BufferInput<int>("buf1");
+
+        WHEN("Data is written to the buffer"){
+            
+            THEN("The size is available from get_size()"){
+                
+                REQUIRE(in1.get_size() == 250);
+
+            }
+
+        }
+
+        WHEN("Partial data is read from the buffer"){
+
+            int dat; 
+            for(int i=0; i<100; i++) in1.get(dat);
+
+            THEN("get_size() returns the remaining number of elements"){
+
+                REQUIRE(in1.get_size() == 150);
+
+            }
+
+        }
+
+        WHEN("All data is read from the buffer"){
+
+            int dat; 
+            while(in1.get(dat));
+
+            THEN("get_size() returns 0"){
+
+                REQUIRE(in1.get_size() == 0);
+
+            }
+
+        }
+
+    }
 }
-
-
-
