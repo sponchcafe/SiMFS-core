@@ -37,7 +37,7 @@ target_link_libraries(simfs_spl sim_spl)
 
 add_library(sim_img src/imager/component.cpp)
 target_include_directories(sim_img PUBLIC ./include)
-target_link_libraries(sim_img sim_component)
+target_link_libraries(sim_img sim_component sim_grid)
 
 add_executable(simfs_img src/imager/simfs_img.cpp)
 target_link_libraries(simfs_img sim_img)

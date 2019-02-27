@@ -7,3 +7,4 @@ add_subdirectory(./test_graph/)
 add_subdirectory(./test_grid/)
 
 add_subdirectory(./test_mix/)
+add_subdirectory(./test_img/)

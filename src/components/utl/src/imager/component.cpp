@@ -1,9 +1,9 @@
-
 #include "imager/component.hpp"
 #include "io/buffer.hpp"
 #include <algorithm>
 #include <iterator>
 #include <cmath>
+#include <fstream>
 
 namespace sim{
     namespace comp{
@@ -21,20 +21,8 @@ namespace sim{
         void Imager::set_output_file(std::string fn){
             fname = fn;
         }
-        void Imager::set_gridspec_x(double min, double max, size_t n){
-            grid_spec.x.min = min;
-            grid_spec.x.max = max;
-            grid_spec.x.n = n;
-        }
-        void Imager::set_gridspec_y(double min, double max, size_t n){
-            grid_spec.y.min = min;
-            grid_spec.y.max = max;
-            grid_spec.y.n = n;
-        }
-        void Imager::set_gridspec_z(double min, double max, size_t n){
-            grid_spec.z.min = min;
-            grid_spec.z.max = max;
-            grid_spec.z.n = n;
+        void Imager::set_grid_space(sim::grid::GridSpace gspace){
+            grid_space = gspace;
         }
         //-------------------------------------------------------------------//
         
@@ -49,13 +37,9 @@ namespace sim{
             set_coordinate_input_ids(params.at("coordinate_inputs"));
             set_output_file(params.at("output_file"));
 
-            json gridx = params.at("grid").at("x");
-            json gridy = params.at("grid").at("y");
-            json gridz = params.at("grid").at("z");
-
-            set_gridspec_x(gridx.at("min"), gridx.at("max"), gridx.at("n"));
-            set_gridspec_y(gridy.at("min"), gridy.at("max"), gridy.at("n"));
-            set_gridspec_z(gridz.at("min"), gridz.at("max"), gridz.at("n"));
+            sim::grid::GridSpace gs;
+            from_json(params.at("grid"), gs);
+            set_grid_space(gs);
 
         }
 
@@ -67,9 +51,8 @@ namespace sim{
             j["time_inputs"] = time_input_ids;
             j["coordinate_inputs"] = coordinate_input_ids;
             j["output_file"] = fname;
-            j["grid"]["x"] = {{"min", grid_spec.x.min}, {"max", grid_spec.x.max}, {"n", grid_spec.x.n}};
-            j["grid"]["y"] = {{"min", grid_spec.y.min}, {"max", grid_spec.y.max}, {"n", grid_spec.y.n}};
-            j["grid"]["z"] = {{"min", grid_spec.z.min}, {"max", grid_spec.z.max}, {"n", grid_spec.z.n}};
+
+            to_json(j["grid"], grid_space);
 
             return j;
 
@@ -79,148 +62,152 @@ namespace sim{
         //-------------------------------------------------------------------//
         void Imager::init() {
 
-            grid.resize(grid_spec.x.n*grid_spec.y.n*grid_spec.z.n);
-            std::cerr << "Grid size is: " << grid.capacity()*sizeof(double) << " bytes\n";
-            x_step = (grid_spec.x.n > 0) ? (grid_spec.x.max-grid_spec.x.min)/grid_spec.x.n : 0;
-            y_step = (grid_spec.y.n > 0) ? (grid_spec.y.max-grid_spec.y.min)/grid_spec.y.n : 0;
-            z_step = (grid_spec.z.n > 0) ? (grid_spec.z.max-grid_spec.z.min)/grid_spec.z.n : 0;
+            for (size_t i=0; i<time_input_ids.size(); i++) {
+
+                auto time_id = time_input_ids[i];
+                auto coord_id = coordinate_input_ids[i];
+
+                inputs.emplace_back(
+                    InputPair{
+                        std::make_unique<io::BufferInput<Coordinate>>(coord_id),
+                        std::make_unique<io::BufferInput<realtime_t>>(time_id)
+                    }
+                );
+            }
+
+            grid = sim::grid::Grid<unsigned int>(grid_space);
+
+            std::cerr << "Inputs: " << inputs.size() << '\n';
 
         }
+
+        //-------------------------------------------------------------------//
+        void Imager::remove_input_pair(){
+            Coordinate c;
+            realtime_t t;
+            while(inputs.begin()->coord_ptr->get(c)); // safety drain
+            while(inputs.begin()->time_ptr->get(t)){ // safety drain
+                std::cerr << "DISCARDING t=" << t <<'\n';
+            }
+            std::swap(*inputs.begin(), *(inputs.end()-1));
+            inputs.pop_back();
+        }
+
+        //-------------------------------------------------------------------//
+        void Imager::find_next_input_pair(){
+
+            /* Linear search for the input with the max amount of timetags.
+             * The max input is swapped to the beginning of the input vector.
+             **/
+
+            size_t max_size = 0;
+            auto max = inputs.begin();
+            auto cur = inputs.begin();
+
+            while(cur != inputs.end()){
+                auto size = cur->time_ptr->get_size();
+                if(size >= max_size){
+                    max_size = size;
+                    max = cur;
+                }
+                ++cur;
+            }
+
+            std::swap(*inputs.begin(), *max);
+            std::cerr << "Found next\n";
+
+        }
+
+        //-------------------------------------------------------------------//
+        void Imager::add_to_grid(sim::Coordinate c, unsigned int count){
+            sim::grid::Coordinate gc{c.x, c.y, c.z};
+            grid.set(gc, count, [=](unsigned int c0, unsigned int c1){
+                    return c0+c1;
+                    });
+        }
+
+        //-------------------------------------------------------------------//
+        void Imager::image_n_timetags(size_t n){
+
+            // Always work with the current first input pair
+            auto &times = inputs.begin()->time_ptr;
+            auto &coords= inputs.begin()->coord_ptr;
+            std::cerr << "Imaging " << n << '\n';
+            std::cerr << times.get() << " - " << coords.get() << '\n';
+            n = (n == 0) ? 1 : n; // When n is 0, read the last photon
+            while(n > 0){
+
+                Coordinate c{};
+                realtime_t t{};
+                unsigned int count = 0;
+
+                // FFwd to coordinate
+                std::cerr << "Starting work\n";
+                while( fabs(times->peek()) >= coords->peek().t) {
+                    if(!coords->get(c)) {
+                        // no more coorindates -> count the remaining tags, 
+                        // add to the grid and return
+                        while(times->get(t) && !std::signbit(t)) count++;
+                        std::cerr << "Adding stuff\n";
+                        add_to_grid(c, count);
+                        remove_input_pair();
+                        std::cerr << "END OF STREAM\n";
+                        return;
+                    }
+                }
+
+                // accumulate tags for current coordinate
+                while( !times->is_done() && fabs(times->peek()) < coords->peek().t) {
+                    if (!std::signbit(times->peek())) {
+                        ++count;
+                    }
+                    times->get(t);
+                    if(--n <= 0) break;
+                }
+
+                // add to grid
+                add_to_grid(c, count);
+
+            }
+
+        }
+
+
+        //-------------------------------------------------------------------//
+        void Imager::write_grid_to_file(){
+
+            std::fstream fs(fname, std::fstream::out | std::iostream::binary);
+
+            if (!fs.good()){
+                std::cerr << "Error opening file\n";
+                std::exit(0);
+            }
+            sim::grid::GridSerializer<unsigned int> gs(fs, grid);
+
+            gs.serialize();
+        }
+        
 
         //-------------------------------------------------------------------//
         void Imager::run(){
 
-            std::vector<std::unique_ptr<io::BufferInput<Coordinate>>> coord_ptrs;
-            std::vector<std::unique_ptr<io::BufferInput<realtime_t>>> time_ptrs;
+            while(inputs.size() > 0){
 
-            for (auto &id: coordinate_input_ids) {
-                coord_ptrs.emplace_back(std::make_unique<io::BufferInput<Coordinate>>(id));
-            }
-            for (auto &id: time_input_ids){
-                time_ptrs.emplace_back(std::make_unique<io::BufferInput<realtime_t>>(id));
-            }
+                std::cerr << "Working\n";
+                // get in_it point to the next input to work on
+                find_next_input_pair();
 
-            auto coords_it = coord_ptrs.begin();
-            auto time_it = time_ptrs.begin();
-            
-            while(time_ptrs.size() > 0){
-
-                if (!image_chunk(**coords_it, **time_it)){
-                    // finished coord, tag pair -> remove
-                    std::swap(*coords_it, *(coord_ptrs.end()-1));
-                    std::swap(*time_it, *(time_ptrs.end()-1));
-                    Coordinate c;
-                    realtime_t t;
-                    while((*(coord_ptrs.end()-1))->get(c)); // safety drain
-                    while((*(time_ptrs.end()-1))->get(t)){ // safety drain
-                        std::cerr << "DISCARDING t=" << t <<'\n';
-                    }
-                    coord_ptrs.pop_back();
-                    time_ptrs.pop_back();
-                }
-
-                ++coords_it;
-                ++time_it;
-                if (coords_it >= coord_ptrs.end()) coords_it = coord_ptrs.begin();
-                if (time_it >= time_ptrs.end()) time_it = time_ptrs.begin();
+                // image all but the last photon to avoid blocking
+                image_n_timetags(inputs.begin()->time_ptr->get_size()-1);
 
             }
 
-            // write result
-            write_file();
+            // write results to file
+            write_grid_to_file();
 
         }
 
-        //-------------------------------------------------------------------//
-        bool Imager::image_chunk(
-                io::BufferInput<Coordinate> &coords, 
-                io::BufferInput<realtime_t> &tags){
-
-            Coordinate c{0.0,0.0,0.0,0.0};
-            realtime_t tag{0.0};
-
-            unsigned int count = 0;
-
-            while( fabs(tags.peek()) >= coords.peek().t) {
-                if(!coords.get(c)) {
-                    add_to_grid(c, (double) count);
-                    return false;
-                }
-            }
-
-
-            while( !tags.is_done() && fabs(tags.peek()) < coords.peek().t) {
-                if (!std::signbit(tags.peek())) count++;
-                tags.get(tag);
-            }
-            
-            add_to_grid(c, (double) count);
-            return !tags.is_done();
-
     }
-
-
-
-
-    //-------------------------------------------------------------------//
-    Imager::GridValue Imager::coordinate_to_grid(Coordinate c){
-
-        int ix = (int) ((c.x-grid_spec.x.min) / x_step);
-        int iy = (int) ((c.y-grid_spec.y.min) / y_step);
-        int iz = (int) ((c.z-grid_spec.z.min) / z_step);
-
-        return GridValue{ix, iy, iz, 1.0};
-    }
-
-    //-------------------------------------------------------------------//
-    void Imager::add_to_grid(Coordinate c, double value){
-        if (value <= 0) return; 
-        Imager::GridValue gridv = coordinate_to_grid(c);
-        gridv.v = value;
-        add_to_grid(gridv);
-    }
-
-
-    //-------------------------------------------------------------------//
-    void Imager::add_to_grid(Imager::GridValue gridv){
-
-        int index = 
-            gridv.x*grid_spec.y.n*grid_spec.z.n + 
-            gridv.y*grid_spec.z.n+ 
-            gridv.z;
-
-        if (index < 0 || index > (int) grid.size()) return;
-
-        grid[index] += gridv.v;
-
-    }
-
-    //-------------------------------------------------------------------//
-    void Imager::write_file(){
-
-        auto ifs = std::ifstream(fname, std::ifstream::binary);
-        if (ifs.good()){
-            std::cerr << "Image file " << fname << " already exists.\n";
-            ifs.close();
-            return;
-        } 
-
-        auto fs = std::ofstream(fname, std::ofstream::binary);
-        if (!fs.good()){
-            fs.close();
-            std::cerr << "Failed to open image file: " << fname << "\n";
-            return;
-        }
-
-        fs.write(reinterpret_cast<char *>(&grid_spec), sizeof(GridSpec));
-        fs.write(reinterpret_cast<char *>(grid.data()), grid.size()*sizeof(double));
-
-        fs.close();
-
-        std::cerr << "Image written to " << fname << "\n";
-    }
-
-
-
 }
-}
+
+

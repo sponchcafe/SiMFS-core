@@ -1,7 +1,7 @@
 #pragma once
 
 #include "component/component.hpp"
-#include <thread>
+#include "grid/grid.hpp"
 #include <vector>
 
 namespace sim{
@@ -33,9 +33,8 @@ namespace sim{
                 //-----------------------------------------------------------//
                 // Parameter setters
                 //-----------------------------------------------------------//
-                void set_gridspec_x(double min, double max, size_t n);
-                void set_gridspec_y(double min, double max, size_t n);
-                void set_gridspec_z(double min, double max, size_t n);
+                void set_grid_space(sim::grid::GridSpace gspace);
+
                 void set_time_input_ids(std::vector<std::string> ids);
                 void set_coordinate_input_ids(std::vector<std::string> ids);
                 void set_output_file(std::string fn);
@@ -44,62 +43,40 @@ namespace sim{
 
             private:
 
-
-                //-----------------------------------------------------------//
-                struct GridValue{
-                    int x;
-                    int y;
-                    int z;
-                    double v;
-                };
-
-                //-----------------------------------------------------------//
-                struct GridDimension{
-                    double min;
-                    double max;
-                    unsigned long long n;
-                };
-
-                //-----------------------------------------------------------//
-                struct GridSpec{
-                    GridDimension x;
-                    GridDimension y;
-                    GridDimension z;
-                };
-
-                //-----------------------------------------------------------//
-                double x_step;
-                double y_step;
-                double z_step;
-
                 //-----------------------------------------------------------//
                 // Simulation parameters + defaults
                 //-----------------------------------------------------------//
-
                 std::string fname = "__image__";
                 std::vector<std::string> time_input_ids = {"__timetags__"};
                 std::vector<std::string> coordinate_input_ids = {"__coordinates__"};
-                
-                GridSpec grid_spec {
-                    {-1e-6, 1e-6, 101},
-                    {-1e-6, 1e-6, 101},
-                    {-1e-6, 1e-6, 101}
-                };
 
-                std::vector<double> grid;
+                sim::grid::GridSpace grid_space{
+                    sim::grid::LinSpace{-1e-6, 1e-6, 101},
+                    sim::grid::LinSpace{-1e-6, 1e-6, 101},
+                    sim::grid::LinSpace{-1e-6, 1e-6, 101}
+                };
+                sim::grid::Grid<unsigned int> grid{};
+
+                typedef struct {
+                    std::unique_ptr<io::BufferInput<sim::Coordinate>> coord_ptr;
+                    std::unique_ptr<io::BufferInput<sim::realtime_t>> time_ptr;
+                } InputPair;
+
+                std::vector<InputPair> inputs;
 
                 //-----------------------------------------------------------//
                 // private functions
                 //-----------------------------------------------------------//
-                GridValue coordinate_to_grid(Coordinate c);
-                bool image_chunk(
-                        io::BufferInput<Coordinate> &coords, 
-                        io::BufferInput<realtime_t> &tags);
-                void add_to_grid(GridValue gridv);
-                void add_to_grid(Coordinate c, double value);
-                void write_file();
+                //
+                // These functions operate on inputs.begin()
+                void find_next_input_pair();
+                void image_n_timetags(size_t n);
+                void remove_input_pair();
 
-                const static unsigned int CHUNK_SIZE = 1;
+                void add_to_grid(sim::Coordinate, unsigned int count);
+                void write_grid_to_file();
+
+
                 
         };
 
