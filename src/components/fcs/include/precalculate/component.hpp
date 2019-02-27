@@ -56,12 +56,5 @@ namespace sim{
 
         };
 
-        
-        void to_json(json& j, const LinSpace& l);
-        void from_json(const json& j, LinSpace& l);
-
-        void to_json(json& j, const GridSpace& g);
-        void from_json(const json& j, GridSpace& g);
-
     }
 }
