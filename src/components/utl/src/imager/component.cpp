@@ -77,8 +77,6 @@ namespace sim{
 
             grid = sim::grid::Grid<unsigned int>(grid_space);
 
-            std::cerr << "Inputs: " << inputs.size() << '\n';
-
         }
 
         //-------------------------------------------------------------------//
@@ -127,45 +125,57 @@ namespace sim{
         }
 
         //-------------------------------------------------------------------//
-        void Imager::image_n_timetags(size_t n){
+        void Imager::image_available_timetags(){
 
             // Always work with the current first input pair
             auto &times = inputs.begin()->time_ptr;
             auto &coords= inputs.begin()->coord_ptr;
-            std::cerr << "Imaging " << n << '\n';
-            std::cerr << times.get() << " - " << coords.get() << '\n';
-            n = (n == 0) ? 1 : n; // When n is 0, read the last photon
-            while(n > 0){
+
+            size_t n_available = times->get_size();
+            std::cerr << "N available: " << n_available << '\n';
+
+            if (n_available == 0){
+                n_available = 1;
+            }
+            
+            while(n_available > 0){
 
                 Coordinate c{};
                 realtime_t t{};
                 unsigned int count = 0;
 
                 // FFwd to coordinate
-                std::cerr << "Starting work\n";
                 while( fabs(times->peek()) >= coords->peek().t) {
                     if(!coords->get(c)) {
+                        std::cerr << "Coordinates empty, final loop\n";
                         // no more coorindates -> count the remaining tags, 
                         // add to the grid and return
                         while(times->get(t) && !std::signbit(t)) count++;
-                        std::cerr << "Adding stuff\n";
                         add_to_grid(c, count);
                         remove_input_pair();
-                        std::cerr << "END OF STREAM\n";
                         return;
                     }
                 }
 
                 // accumulate tags for current coordinate
-                while( !times->is_done() && fabs(times->peek()) < coords->peek().t) {
-                    if (!std::signbit(times->peek())) {
-                        ++count;
+                while( fabs(times->peek()) < coords->peek().t) {
+
+                    if (times->is_done()){
+                        std::cerr << "Times empty, final loop\n";
+                        add_to_grid(c, count);
+                        remove_input_pair();
+                        return;
                     }
+
+
                     times->get(t);
-                    if(--n <= 0) break;
+                    if (!std::signbit(t)) ++count;
+                    --n_available;
+
+                    if(n_available == 1) break;
+
                 }
 
-                // add to grid
                 add_to_grid(c, count);
 
             }
@@ -193,12 +203,11 @@ namespace sim{
 
             while(inputs.size() > 0){
 
-                std::cerr << "Working\n";
                 // get in_it point to the next input to work on
                 find_next_input_pair();
 
                 // image all but the last photon to avoid blocking
-                image_n_timetags(inputs.begin()->time_ptr->get_size()-1);
+                image_available_timetags();
 
             }
 

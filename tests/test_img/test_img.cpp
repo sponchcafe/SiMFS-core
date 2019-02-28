@@ -14,10 +14,11 @@ TEST_CASE("Imaging test", "[img][sanity]"){
 
     GIVEN("A vector of photons and a vector of coordinates"){
 
-        std::vector<realtime_t> tags{0.1, 0.2, 0.3, 0.4, 0.5, 1.1, 1.2};
+        std::vector<realtime_t> tags{0.1, 0.2, 0.3, 0.4, 0.5, 1.1, 1.2, 2.5};
         std::vector<Coordinate> coords{
-        Coordinate{0.0,0.0,0.0,0.0},
-        Coordinate{1e-7,0.0,0.0,1.0}
+        Coordinate{-1e-7,0.0,0.0,0.0},
+        Coordinate{0.0,0.0,0.0,1.0},
+        Coordinate{1e-7,0.0,0.0,2.0}
         };
 
         WHEN("It is passed as single input to a mixer instance"){

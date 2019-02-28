@@ -70,7 +70,7 @@ namespace sim{
                 //
                 // These functions operate on inputs.begin()
                 void find_next_input_pair();
-                void image_n_timetags(size_t n);
+                void image_available_timetags();
                 void remove_input_pair();
 
                 void add_to_grid(sim::Coordinate, unsigned int count);

@@ -4,9 +4,10 @@
 #include <vector>
 #include <thread>
 #include <fstream>
-
+#include <chrono>
 
 using namespace sim::io;
+using namespace std::chrono_literals;
 
 /*--------------------------------------------------------------------------*/
 TEMPLATE_TEST_CASE("Output accepts data without blocking", "[output][types]",
@@ -473,3 +474,40 @@ TEST_CASE("Buffer queue size tracking", "[size][input]"){
 
     }
 }
+
+TEST_CASE("Delayed io", "[input][timeout]"){
+
+    GIVEN("A slow output buffer and an input buffer thread"){
+
+        auto bufname = "buf1";
+
+        auto out_thread = std::thread([=]() {
+            auto out1 = BufferOutput<int>(bufname);
+            std::this_thread::sleep_for(1s);
+            int d = 42;
+            out1.put(d);
+        });
+
+        int i=0;
+        auto in_thread = std::thread([&i, bufname]() {
+            auto in1 = BufferInput<int>(bufname);
+            while (in1.get(i));
+        });
+
+        WHEN("Both threads are done"){
+
+        out_thread.join();
+        in_thread.join();
+        
+            THEN("The data is transferred"){
+
+                REQUIRE(i == 42);
+
+            }
+
+        }
+    }
+}
+
+    
+
