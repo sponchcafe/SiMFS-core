@@ -10,12 +10,12 @@ namespace sim{
         Grid<T>::Grid(GridSpace sp){
             grid_space = sp;
             resize();
-            delta = get_delta(grid_space);
         }
 
         template <typename T>
         void Grid<T>::resize(){
             data.resize(grid_space.x.n * grid_space.y.n * grid_space.z.n);
+            delta = get_delta(grid_space);
         }
 
         template <typename T>

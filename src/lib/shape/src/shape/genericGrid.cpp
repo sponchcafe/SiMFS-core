@@ -86,7 +86,7 @@ namespace sim{
         //------------------------------------------------------------------//
         double GenericGrid::evaluate(double x, double y, double z) const {
             sim::grid::Coordinate c{x,y,z};
-            return grid->get(c);
+            return prefactor * grid->get(c);
         }
 
     }

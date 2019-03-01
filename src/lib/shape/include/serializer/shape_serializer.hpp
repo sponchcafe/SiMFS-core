@@ -22,7 +22,7 @@ namespace sim{
 
             private:
 
-                sim::focus::ShapeNorm norm;
+                sim::focus::ShapeNorm &norm;
 
         };
     }
