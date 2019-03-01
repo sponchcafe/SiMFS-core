@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
 
         std::thread out_thread{};
         if (log["routed"]) out_thread = io::buffer2file_thread<RoutedTime>(log["output"]);
-        else out_thread = io::buffer2file_thread<RoutedTime>(log["output"]);
+        else out_thread = io::buffer2file_thread<realtime_t>(log["output"]);
 
         std::vector<std::string> inputs = log["inputs"];
         std::vector<std::thread> in_threads{};
