@@ -31,9 +31,9 @@ namespace sim{
                 double gauss(double x, double w) const;
 
                 //-----------------------------------------------------------//
-                double waist_x = 200e-9;
-                double waist_y = 200e-9;
-                double waist_z = 800e-9;
+                double waist_x = 249e-9;
+                double waist_y = 249e-9;
+                double waist_z = 637e-9;
 
         };
 

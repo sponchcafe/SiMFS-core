@@ -62,7 +62,7 @@ namespace sim{
 
                 double e_zero = 1;
                 bool pol_x = 1;
-                bool pol_y = 0;
+                bool pol_y = 1;
 
                 double theta_min = 0;
                 double theta_min_deg = 0;

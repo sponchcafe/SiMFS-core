@@ -28,7 +28,7 @@ namespace sim{
 
             private:
 
-                double waist_xy = 200e-9;
+                double waist_xy = 249e-9;
                 double lambda = 488e-9;
 
         };
