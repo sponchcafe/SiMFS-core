@@ -43,12 +43,12 @@ namespace sim{
                 target_ptr->set_lambda(*scaling * current.value);
             }
 
-            graph.push_event(Event(this, input_ptr->peek().time));
-
             if (!input_ptr->get(current)){
                 graph.set_done(true);
                 return;
             }
+
+            graph.push_event(Event(this, input_ptr->peek().time));
 
         }
 

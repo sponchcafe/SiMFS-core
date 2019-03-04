@@ -239,7 +239,7 @@ namespace sim{
                      )
                 {
                     execute_next_event();
-                    if (done) return;
+                    if (done) break;
                     next_path = current->get_next(); // new try for lifetime
                 }
 
@@ -248,6 +248,10 @@ namespace sim{
                 next_path->traverse();
                 current = next_path->get_target_node_ptr();
 
+            }
+
+            while(!events.empty()){
+                execute_next_event();
             }
                 
         }
