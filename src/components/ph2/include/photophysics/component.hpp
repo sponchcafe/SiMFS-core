@@ -43,12 +43,11 @@ namespace sim{
                 //-----------------------------------------------------------//
                 unsigned seed = 0;
                 json jablonsky = {
-                    {"exi",         {{"from", "S0"}, {"to", "S1"}, {"rate", 1e+7}, {"trigger", {{"input", "__fret__"}, {"output", "__rejected__"}, {"efficiency", 1.0}}}}},
-                    {"emi",         {{"from", "S1"}, {"to", "S0"}, {"rate", 1e+9}, {"output", "__emission__"}}},
-                    {"isc",         {{"from", "S1"}, {"to", "T1"}, {"rate", 1e+7}}},
-                    {"risc",        {{"from", "T1"}, {"to", "S0"}, {"rate", 1e+7}}},
-                    {"bleach",      {{"from", "T1"}, {"to", "X0"}, {"rate", 1e+5}}},
-                    {"unbleach",    {{"from", "X0"}, {"to", "S0"}, {"trigger", {{"input", "__collisions__"}, {"output", "/dev/null"}, {"efficiency", 1.0}}}}}
+                    {"exi", {{"from", "S0"}, {"to", "S1"}, {"rate", 1e+7}}},
+                    {"emi", {{"from", "S1"}, {"to", "S0"}, {"rate", 1e+8}, {"output", "__emission__"}}},
+                    {"isc", {{"from", "S1"}, {"to", "T1"}, {"rate", 1e+5}}},
+                    {"risc", {{"from", "T1"}, {"to", "S0"}, {"rate", 1e+5}}},
+                    {"bleach", {{"from", "T1"}, {"to", "X"}, {"rate", 1e+2}}}
                 };
 
                 std::string initial_state_id = "S0";
