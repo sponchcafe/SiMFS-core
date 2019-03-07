@@ -15,8 +15,8 @@ TEST_CASE("Waist parameters of the alpha focus function can be set", "[alpha][pa
         THEN("Defaults are returned by get_json as json"){
 
             json params = alpha.get_json();
-            REQUIRE(params.at("waist_xy") == 200e-9);
-            REQUIRE(params.at("waist_z") == 800e-9);
+            REQUIRE(params.at("waist_xy") == 249e-9);
+            REQUIRE(params.at("waist_z") == 637e-9);
 
         }
 

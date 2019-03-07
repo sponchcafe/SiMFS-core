@@ -15,9 +15,9 @@ TEST_CASE("Waist parameters of the gaussian focus function can be set", "[gauss]
         THEN("Defaults are returned by get_json as json"){
 
             json params = gauss.get_json();
-            REQUIRE(params.at("waist_x") == 200e-9);
-            REQUIRE(params.at("waist_y") == 200e-9);
-            REQUIRE(params.at("waist_z") == 800e-9);
+            REQUIRE(params.at("waist_x") == 249e-9);
+            REQUIRE(params.at("waist_y") == 249e-9);
+            REQUIRE(params.at("waist_z") == 637e-9);
 
         }
 

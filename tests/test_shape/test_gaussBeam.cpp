@@ -16,7 +16,7 @@ TEST_CASE("Parameter setting", "[gbeam][parameters]"){
         THEN("Defaults are returned by get_json as json"){
 
             json params = gbeam.get_json();
-            REQUIRE(params.at("waist_xy") == 200e-9);
+            REQUIRE(params.at("waist_xy") == 249e-9);
             REQUIRE(params.at("wavelength") == 488e-9);
 
         }
