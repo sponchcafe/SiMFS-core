@@ -65,6 +65,9 @@ namespace sim{
             if (input_ptr->get(current)){
                 graph.push_event(Event(this, current)); 
             }
+            else{
+                graph.set_done(true);
+            }
 
         }
 
