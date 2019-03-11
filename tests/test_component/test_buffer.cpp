@@ -174,7 +174,7 @@ TEST_CASE("Thread can write and read an output-input-pair in parallel", "[input]
         };
 
         std::thread in_thr{
-            [size, &result] () -> void {
+            [&result] () -> void {
                 BufferInput<double> in{"buf1"};
                 double data = 0.0;
                 while(in.get(data)){

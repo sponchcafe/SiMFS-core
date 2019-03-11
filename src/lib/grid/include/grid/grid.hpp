@@ -16,6 +16,7 @@ namespace sim{
             public:
 
                 Grid(){};
+                virtual ~Grid(){};
                 Grid(GridSpace sp);
                 virtual T get(Coordinate c);
                 virtual void set(Coordinate c, T value);

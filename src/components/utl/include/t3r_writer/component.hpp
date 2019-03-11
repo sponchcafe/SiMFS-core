@@ -144,7 +144,8 @@ namespace sim{
                 
 
                 // Byte offsets 
-                const size_t T3R_OFFSET_IDENT = 0;
+                /*
+                const size_t  T3R_OFFSET_IDENT = 0;
                 const size_t T3R_OFFSET_FORMAT_VERSION = 16;
                 const size_t T3R_OFFSET_CREATOR_NAME = 22;
                 const size_t T3R_OFFSET_CREATOR_VERSION = 40;
@@ -225,8 +226,11 @@ namespace sim{
                 const size_t T3R_OFFSET_AVERAGE_CFD_RATE = 608;
                 const size_t T3R_OFFSET_STOP_AFTER = 612;
                 const size_t T3R_OFFSET_STOP_REASON = 616;
+                */
                 const size_t T3R_OFFSET_NUMBER_OF_RECORDS = 620;
+                /*
                 const size_t T3R_OFFSET_SPEC_HEADER_LENGTH = 624;
+                */
 
         };
 

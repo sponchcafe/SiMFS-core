@@ -22,8 +22,8 @@ namespace sim{
                 void set_phi(double min, double max, size_t n);
                 
                 //-----------------------------------------------------------//
-                void set_json(json j);
-                json get_json();
+                void set_json(json j) override;
+                json get_json() override;
 
                 //-----------------------------------------------------------// 
                 double evaluate(double x, double y, double z) const override;

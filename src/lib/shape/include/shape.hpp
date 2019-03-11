@@ -80,7 +80,7 @@ namespace sim{
             }
 
             shape_ptr->set_json(params);
-            return std::move(shape_ptr);
+            return shape_ptr;
 
         }
 
