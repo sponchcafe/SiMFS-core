@@ -76,6 +76,12 @@ namespace sim{
 
         }
 
+        template <typename T>
+        bool Grid<T>::check_inside(Coordinate c){
+            return c.x < grid_space.x.min || c.x > grid_space.x.max 
+                || c.y < grid_space.y.min || c.y > grid_space.y.max 
+                || c.z < grid_space.z.min || c.z > grid_space.z.max;
+        }
 
         template <typename T>
         void Grid<T>::print_progress(size_t n, std::atomic<size_t> &prg){

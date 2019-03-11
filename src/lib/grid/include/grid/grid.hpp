@@ -22,6 +22,7 @@ namespace sim{
                 virtual void set(Coordinate c, T value);
                 virtual void set(Coordinate c, T value, std::function<T(T, T)> func);
                 void map(std::function<T(Coordinate&)> func);
+                bool check_inside(Coordinate c);
                 T* get_buffer();
 
             protected:

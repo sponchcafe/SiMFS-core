@@ -112,13 +112,13 @@ namespace sim{
             }
 
             std::swap(*inputs.begin(), *max);
-            std::cerr << "Found next\n";
 
         }
 
         //-------------------------------------------------------------------//
         void Imager::add_to_grid(sim::Coordinate c, unsigned int count){
             sim::grid::Coordinate gc{c.x, c.y, c.z};
+            if (!grid.check_inside(gc)) return;
             grid.set(gc, count, [=](unsigned int c0, unsigned int c1){
                     return c0+c1;
                     });
@@ -147,7 +147,6 @@ namespace sim{
                 // FFwd to coordinate
                 while( fabs(times->peek()) >= coords->peek().t) {
                     if(!coords->get(c)) {
-                        std::cerr << "Coordinates empty, final loop\n";
                         // no more coorindates -> count the remaining tags, 
                         // add to the grid and return
                         while(times->get(t) && !std::signbit(t)) count++;
@@ -161,7 +160,6 @@ namespace sim{
                 while( fabs(times->peek()) < coords->peek().t) {
 
                     if (times->is_done()){
-                        std::cerr << "Times empty, final loop\n";
                         add_to_grid(c, count);
                         remove_input_pair();
                         return;
