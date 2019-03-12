@@ -3,8 +3,14 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include <unistd.h>
 #include "json/json.hpp"
+#include "platform.hpp"
+
+#ifdef WINDOWS
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
 
 
 using json = nlohmann::json;
@@ -46,7 +52,7 @@ namespace sim{
             std::string s;
             json j{};
 
-            if (isatty(fileno(stdin))){
+            if (_isatty(fileno(stdin))){
                 std::cerr << "Using defaults only.\n";
                 return json::object();
             }
