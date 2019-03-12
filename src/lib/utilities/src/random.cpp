@@ -3,7 +3,14 @@
 #include <cmath>
 #include <limits>
 #include <chrono>
+#include "platform.hpp"
+
+#ifdef WINDOWS
+#include <windows.h>
+#else
 #include <unistd.h>
+#endif
+
 
 using namespace std::chrono;
 
@@ -16,7 +23,12 @@ namespace sim{
             milliseconds ms = duration_cast< milliseconds >(
                         system_clock::now().time_since_epoch()
                     );
-            pid_t pid = ::getpid();
+
+            #ifdef WINDOWS
+            auto pid = GetCurrentProcessId();
+            #else
+            auto pid = ::getpid();
+            #endif
 
             return ms.count()*pid+(count++);
         }

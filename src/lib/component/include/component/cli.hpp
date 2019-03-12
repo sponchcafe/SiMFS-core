@@ -3,8 +3,14 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include <unistd.h>
 #include "json/json.hpp"
+#include "platform.hpp"
+
+#ifdef WINDOWS
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
 
 
 using json = nlohmann::json;
