@@ -52,7 +52,7 @@ namespace sim{
             std::string s;
             json j{};
 
-            if (_isatty(fileno(stdin))){
+            if (isatty(fileno(stdin))){
                 std::cerr << "Using defaults only.\n";
                 return json::object();
             }
