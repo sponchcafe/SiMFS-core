@@ -1,5 +1,5 @@
 # At LEAST 2.8 but newer is better
-cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 project(SiMFS-Tk VERSION 1.0 LANGUAGES CXX)
 
 if(MSVC)
@@ -13,8 +13,15 @@ else()
     endif()
 endif()
 
-
 enable_testing()
+include(CTest)
+if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
+    message("Coverage build")
+    set(COVERAGE_OPTIONS "-fprofile-arcs" "-ftest-coverage")
+    add_compile_options(${COVERAGE_OPTIONS})
+    add_link_options(${COVERAGE_OPTIONS})
+endif()
+
 # RANDOM LIB defined in this library folder CMakeLists.txt
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/lib/)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/components/)
