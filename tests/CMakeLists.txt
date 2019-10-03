@@ -22,3 +22,15 @@ target_link_libraries(unittests
 )
 
 add_test(NAME unittests COMMAND unittests -r compact -s)
+
+add_custom_target(gcov
+    COMMAND ${CMAKE_MAKE_PROGRAM} test
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+
+add_custom_command(TARGET gcov
+    COMMAND ${CMAKE_CURRENT_LIST_DIR}/gcov.sh ${CMAKE_BINARY_DIR}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+
+add_dependencies(gcov unittests)
