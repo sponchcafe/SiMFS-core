@@ -9,15 +9,6 @@
 
 using namespace sim::grid;
 
-// Make 3d and 4d coordinates comparable
-bool operator==(sim::grid::Coordinate const &lhs, sim::Coordinate const &rhs){
-    return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
-}
-bool operator==(sim::Coordinate const &lhs, sim::grid::Coordinate const &rhs){
-    return rhs == lhs;
-}
-
-
 TEMPLATE_TEST_CASE ("The grid stores and returns values at coordinates", 
         "[grid][access]", unsigned, int, double, std::complex<double>) {
 

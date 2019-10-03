@@ -10,7 +10,7 @@ namespace sim{
         template <typename T>
         T TrilinearGrid<T>::get(Coordinate c){
 
-            /* Trilinest inerpolation according to 
+            /* Trilinear inerpolation according to
              * https://en.wikipedia.org/wiki/Trilinear_interpolation
              *
              */
