@@ -2,7 +2,11 @@
 # Diffusion Component
 ###############################################################################
 
-add_library(sim_dif src/diffusion/component.cpp)
+add_library(sim_dif 
+    src/diffusion/component.cpp 
+    src/diffusion/capi.cpp
+)
+
 target_include_directories(sim_dif PUBLIC ./include)
 target_link_libraries(sim_dif sim_util sim_component)
 

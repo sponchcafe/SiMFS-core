@@ -1,6 +1,6 @@
 # At LEAST 2.8 but newer is better
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
-project(SiMFS-Tk VERSION 1.0 LANGUAGES CXX)
+project(SiMFS-Tk VERSION 1.0 LANGUAGES CXX C)
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "/W4 /arch:AVX2 /O2")
